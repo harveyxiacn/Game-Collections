@@ -1,0 +1,13 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="AppTheme.Base">
+        <!-- Customize your theme here. -->
+        <item name="android:colorPrimary">@color/ColorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/ColorPrimaryDark</item>
+        <item name="android:colorAccent">@color/ColorAccent</item>
+        <item name="android:navigationBarColor">@color/ColorNavigationBar</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+</resources>
