@@ -17,5 +17,20 @@
     <string name="barcode_sacn_result_hint">Barcode Scan Result</string>
     <string name="default_mTitle">Games Collection</string>
     <string name="barcode_scan_result_activity_title">Barcode Scan Result</string>
+    <string name="title_activity_database">DatabaseActivity</string>
+    <string name="btn_create_db_text">Create Database</string>
+    <string name="btn_add_game">Add a Game</string>
+    <string name="btn_delete_game_text">Delete a Game</string>
+    <string name="btn_get_games_text">Get Games</string>
+    <string name="btn_delete_db_text">Delete DB</string>
+    <string name="game_title_hint">Game title</string>
+    <string name="game_platform_hint">Game Platform</string>
+    <string name="id_to_delete_or_get_hint">ID to delete or get</string>
+    <string name="btn_get_game_text">Get game by id</string>
+    <string name="btn_delete_table_text">Delete Table</string>
+    <string name="result_editText_hint">Result will be here.</string>
+    <string name="buttons_database_hint">Database</string>
+    <string name="button_table_hint">table</string>
+    <string name="button_games_game_hint">games/game</string>
 
 </resources>

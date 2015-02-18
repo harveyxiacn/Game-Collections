@@ -1,0 +1,154 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.itgarage.harvey.gamecollections.activities.DatabaseActivity">
+
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/tool_bar" />
+
+    <GridLayout
+        android:id="@+id/buttons_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tool_bar"
+        android:columnCount="5"
+        android:rowCount="3">
+
+        <ImageButton
+            android:id="@+id/btnCreateDB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_row="0"
+            android:onClick="onCreateDB"
+            android:src="@drawable/ic_add_db"
+            android:text="@string/btn_create_db_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_gravity="center"
+            android:layout_row="0"
+            android:text="@string/buttons_database_hint" />
+
+        <ImageButton
+            android:id="@+id/btnAddGame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_row="1"
+            android:clickable="false"
+            android:onClick="onAddGame"
+            android:src="@drawable/ic_add_db" />
+
+        <ImageButton
+            android:id="@+id/btnDeleteGame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_row="1"
+            android:clickable="false"
+            android:onClick="onDeleteGame"
+            android:src="@drawable/ic_delete_db" />
+
+        <ImageButton
+            android:id="@+id/btnGetGames"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_row="1"
+            android:clickable="false"
+            android:onClick="onGetGames"
+            android:src="@drawable/ic_search_database" />
+
+        <ImageButton
+            android:id="@+id/btnGetGame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_row="1"
+            android:clickable="false"
+            android:onClick="onGetGame"
+            android:src="@drawable/ic_search_database" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_games_game_hint"
+            android:layout_gravity="center"
+            android:layout_column="4"
+            android:layout_row="1" />
+
+        <ImageButton
+            android:id="@+id/btnCreateTable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_row="2"
+            android:clickable="false"
+            android:onClick="onCreateTable"
+            android:src="@drawable/ic_add_db" />
+
+        <ImageButton
+            android:id="@+id/btnDeleteTable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_row="2"
+            android:clickable="false"
+            android:onClick="onDeleteTable"
+            android:src="@drawable/ic_delete_db" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_table_hint"
+            android:layout_gravity="center"
+            android:layout_column="2"
+            android:layout_row="2" />
+    </GridLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttons_layout"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/game_title_editText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/game_title_hint" />
+
+        <EditText
+            android:id="@+id/game_platform_editText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/game_platform_hint" />
+
+        <EditText
+            android:id="@+id/game_id_editText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/id_to_delete_or_get_hint" />
+
+        <EditText
+            android:id="@+id/resultEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/result_editText_hint"
+            android:inputType="textMultiLine"
+            android:lines="8" />
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -1,4 +1,4 @@
-package com.itgarage.harvey.gamecollections;
+package com.itgarage.harvey.gamecollections.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +19,13 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.itgarage.harvey.gamecollections.adapters.DrawerListAdapter;
+import com.itgarage.harvey.gamecollections.models.DrawerListItems;
+import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
+import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
+import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
+import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
 
 
 public class NaviDrawerActivity extends ActionBarActivity {
@@ -175,6 +182,12 @@ public class NaviDrawerActivity extends ActionBarActivity {
         if(id == R.id.action_camera){
             IntentIntegrator integrator = new IntentIntegrator(NaviDrawerActivity.this);
             integrator.initiateScan();
+        }
+        // Search button to start search view
+        // for db testing
+        if (id == R.id.action_search) {
+            Intent intent = new Intent(this, DatabaseActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);

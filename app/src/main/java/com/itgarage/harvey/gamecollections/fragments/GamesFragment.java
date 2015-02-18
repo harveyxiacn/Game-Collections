@@ -1,4 +1,4 @@
-package com.itgarage.harvey.gamecollections;
+package com.itgarage.harvey.gamecollections.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -6,6 +6,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 
 /**
  * Created by harvey on 2015/2/16.

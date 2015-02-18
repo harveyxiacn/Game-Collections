@@ -1,12 +1,14 @@
-package com.itgarage.harvey.gamecollections;
+package com.itgarage.harvey.gamecollections.models;
+
+import com.itgarage.harvey.gamecollections.R;
 
 public class DrawerListItems {
     public static final String[] ITEM_NAMES =
             {
-              "Home",
-              "Games",
-              "Search",
-              "Settings"
+                    "Home",
+                    "Games",
+                    "Search",
+                    "Settings"
             };
     public static final int[] ITEM_ICONS =
             {

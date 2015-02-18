@@ -1,4 +1,4 @@
-package com.itgarage.harvey.gamecollections;
+package com.itgarage.harvey.gamecollections.adapters;
 
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
@@ -9,6 +9,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
+import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
+import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
+import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
+import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 
 /**
  * Created by harvey on 2015/2/16.
@@ -83,8 +90,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     }
 
 
-
-    DrawerListAdapter(String Titles[], int Icons[], String Name, String Email, int Profile, Context passedContext, NaviDrawerActivity activity){ // DrawerListAdapter Constructor with titles and icons parameter
+    public DrawerListAdapter(String Titles[], int Icons[], String Name, String Email, int Profile, Context passedContext, NaviDrawerActivity activity) { // DrawerListAdapter Constructor with titles and icons parameter
         // titles, icons, name, email, profile pic are passed from the main activity as we
         mNavTitles = Titles;                //have seen earlier
         mIcons = Icons;

@@ -6,5 +6,6 @@
     <dimen name="navi_list_header_margin_top">24dp</dimen>
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="button_margin_left">10dp</dimen>
 
 </resources>
