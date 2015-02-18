@@ -12,16 +12,17 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
-import com.itgarage.harvey.gamecollections.db.MyDBHandler;
+import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
 
 import java.util.ArrayList;
 
 
 public class DatabaseActivity extends ActionBarActivity {
-    private ImageButton createDBButton, addGameButton, deleteGameButton, getAllGamesButton, getGameButton, updateGameButton, dropTableButton, createTableButton;
+    private ImageButton addGameButton, deleteGameButton, getAllGamesButton, getGameButton, updateGameButton, dropTableButton, createTableButton;
     private EditText gameTitleEditText, gamePlatformEditText, gameIdEditText, resultEditText;
     private Toolbar toolbar;
+    private GamesDataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +34,6 @@ public class DatabaseActivity extends ActionBarActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        createDBButton = (ImageButton) findViewById(R.id.btnCreateDB);
         addGameButton = (ImageButton) findViewById(R.id.btnAddGame);
         deleteGameButton = (ImageButton) findViewById(R.id.btnDeleteGame);
         getAllGamesButton = (ImageButton) findViewById(R.id.btnGetGames);
@@ -46,6 +46,8 @@ public class DatabaseActivity extends ActionBarActivity {
         gamePlatformEditText = (EditText) findViewById(R.id.game_platform_editText);
         gameIdEditText = (EditText) findViewById(R.id.game_id_editText);
         resultEditText = (EditText) findViewById(R.id.resultEditText);
+
+        onCreateDB();
     }
 
 
@@ -71,42 +73,43 @@ public class DatabaseActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void onCreateDB(View view) {
+    public void onCreateDB() {
         try {
-            MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+            dataSource = new GamesDataSource(this);
+            dataSource.open();
         } catch (Exception e) {
             Log.e("GAMES ERROR", "Error Creating Database");
         } finally {
-            addGameButton.setClickable(true);
-            deleteGameButton.setClickable(true);
-            getGameButton.setClickable(true);
-            getAllGamesButton.setClickable(true);
-            //updateGameButton.setClickable(true);
-            dropTableButton.setClickable(true);
-            createTableButton.setClickable(true);
+            Log.i("DB operation", "DB opened.");
         }
     }
 
     public void onAddGame(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
-        Game game;
-        String title = gameTitleEditText.getText().toString();
-        String platform = gamePlatformEditText.getText().toString();
         if (gameTitleEditText.getText().length() == 0) {
             Toast.makeText(this, "please enter title.", Toast.LENGTH_SHORT).show();
-            return;
+        } else {
+            String title = gameTitleEditText.getText().toString();
+            Log.i("Add Game", "title: " + title);
+            if (gamePlatformEditText.getText().length() == 0) {
+                Toast.makeText(this, "please enter platform.", Toast.LENGTH_SHORT).show();
+            } else {
+                String platform = gamePlatformEditText.getText().toString();
+                Log.i("Add Game", "platform: " + platform);
+                Game game = new Game();
+                Log.i("Add Game", "game id: " + game.getId());
+                game.setTitle(title);
+                Log.i("Add Game", "game title: " + game.getTitle());
+                game.setPlatform(platform);
+                Log.i("Add Game", "game platform: " + game.getPlatform());
+                dataSource.addGame(game);
+                onGetGames(view);
+            }
         }
-        game = new Game();
-        game.setTitle(title);
-        game.setPlatform(platform);
-        dbHandler.addGame(game);
-        onGetGames(view);
     }
 
     public void onDeleteGame(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
         int id = Integer.parseInt(gameIdEditText.getText().toString());
-        Boolean result = dbHandler.deleteGame(id);
+        Boolean result = dataSource.deleteGame(id);
         if (result) {
             resultEditText.setText("Delete Successfully.");
         } else {
@@ -115,8 +118,7 @@ public class DatabaseActivity extends ActionBarActivity {
     }
 
     public void onGetGames(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
-        ArrayList<Game> gamesList = dbHandler.getAllGames();
+        ArrayList<Game> gamesList = dataSource.getAllGames();
         String result = "";
         if (gamesList != null) {
             for (Game game : gamesList) {
@@ -129,21 +131,24 @@ public class DatabaseActivity extends ActionBarActivity {
     }
 
     public void onGetGame(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
         int id = Integer.parseInt(gameIdEditText.getText().toString());
-        Game game = dbHandler.getGame(id);
+        Game game = dataSource.getGame(id);
         resultEditText.setText(game.toString());
     }
 
     public void onDeleteTable(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
-        dbHandler.dropTable();
+        dataSource.dropTable();
         resultEditText.setText("Table Dropped");
     }
 
     public void onCreateTable(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
-        dbHandler.createTable();
+
         resultEditText.setText("Table Created");
+    }
+
+    @Override
+    protected void onDestroy() {
+        dataSource.close();
+        super.onDestroy();
     }
 }

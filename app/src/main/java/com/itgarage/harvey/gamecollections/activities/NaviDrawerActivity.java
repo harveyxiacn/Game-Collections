@@ -19,13 +19,14 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.adapters.DrawerListAdapter;
-import com.itgarage.harvey.gamecollections.models.DrawerListItems;
+import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
-import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
 import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
+import com.itgarage.harvey.gamecollections.models.DrawerListItems;
 
 
 public class NaviDrawerActivity extends ActionBarActivity {
@@ -44,6 +45,8 @@ public class NaviDrawerActivity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private FragmentManager fragmentManager;
     private CharSequence mTitle;
+
+    private GamesDataSource dataSource;
 
     public final static String BARCODE_SCAN_RESULT = "Barcode Scan Result";
     public final static String TOOL_BAR_TITLE_SAVED_TAG = "Tool Bar Title Saved";
@@ -79,6 +82,7 @@ public class NaviDrawerActivity extends ActionBarActivity {
         mRecyclerView.setHasFixedSize(true);
         mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, NAME, EMAIL, PROFILE, NaviDrawerActivity.this, NaviDrawerActivity.this);
         mRecyclerView.setAdapter(mAdapter);
+
         // create a GestureDetector object to detect SingleTapUp touch
         // can be later called to verify if the touch event is a SingleTapUp type of touch or some other type of touch (swipe touch, long touch)
         final GestureDetector mGestureDetector = new GestureDetector(NaviDrawerActivity.this, new GestureDetector.SimpleOnGestureListener() {
@@ -152,6 +156,8 @@ public class NaviDrawerActivity extends ActionBarActivity {
         };
         mDrawer.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+
+        onCreateDB();
     }
 
     @Override
@@ -226,4 +232,20 @@ public class NaviDrawerActivity extends ActionBarActivity {
         }
     }
 
+    public void onCreateDB() {
+        try {
+            dataSource = new GamesDataSource(this);
+            dataSource.open();
+        } catch (Exception e) {
+            Log.e("GAMES ERROR", "Error Creating Database");
+        } finally {
+            Log.i("DB operation", "DB opened.");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        dataSource.close();
+        super.onDestroy();
+    }
 }

@@ -17,9 +17,6 @@ import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
 import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 
-/**
- * Created by harvey on 2015/2/16.
- */
 public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;  // Declaring Variable to Understand which View is being worked on
@@ -38,7 +35,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     // Creating a ViewHolder which extends the RecyclerView View Holder
     // ViewHolder are used to to store the inflated views in order to recycle them
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         int Holderid;
 
         TextView textView;
@@ -50,7 +47,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         NaviDrawerActivity activity;
 
 
-        public ViewHolder(View itemView,int ViewType, Context c, NaviDrawerActivity activity) {                 // Creating ViewHolder Constructor with View and viewType As a parameter
+        public ViewHolder(View itemView, int ViewType, Context c, NaviDrawerActivity activity) {                 // Creating ViewHolder Constructor with View and viewType As a parameter
             super(itemView);
             context = c;
             itemView.setClickable(true);
@@ -58,31 +55,31 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
             this.activity = activity;
             // Here we set the appropriate view in accordance with the the view type as passed when the holder object is created
 
-            if(ViewType == TYPE_ITEM) {
+            if (ViewType == TYPE_ITEM) {
                 textView = (TextView) itemView.findViewById(R.id.drawer_listItem_text); // Creating TextView object with the id of textView from item_row.xml
                 imageView = (ImageView) itemView.findViewById(R.id.drawer_listItem_icon);// Creating ImageView object with the id of ImageView from item_row.xml
                 Holderid = 1;                                               // setting holder id as 1 as the object being populated are of type item row
-            }
-            else{
+            } else {
                 Name = (TextView) itemView.findViewById(R.id.username_text);         // Creating Text View object from header.xml for name
                 email = (TextView) itemView.findViewById(R.id.user_email_text);       // Creating Text View object from header.xml for email
                 profile = (ImageView) itemView.findViewById(R.id.user_image);// Creating Image view object from header.xml for profile pic
                 Holderid = 0;                                                // Setting holder id = 0 as the object being populated are of type header view
             }
         }
+
         @Override
         public void onClick(View v) {
 
             Toast.makeText(context, "The Item Clicked is: " + getPosition(), Toast.LENGTH_SHORT).show();
             int position = getPosition();
             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            if(position==1){
+            if (position == 1) {
                 fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
-            }else if(position==2){
+            } else if (position == 2) {
                 fragmentManager.beginTransaction().replace(R.id.fragment_container, GamesFragment.newInstance()).commit();
-            }else if(position==3){
+            } else if (position == 3) {
                 fragmentManager.beginTransaction().replace(R.id.fragment_container, SearchFragment.newInstance()).commit();
-            }else if(position==4){
+            } else if (position == 4) {
                 fragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment.newInstance()).commit();
             }
 
@@ -110,7 +107,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     public DrawerListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         if (viewType == TYPE_ITEM) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.drawer_list_item_row,parent,false); //Inflating the layout
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.drawer_list_item_row, parent, false); //Inflating the layout
 
             ViewHolder vhItem = new ViewHolder(v, viewType, context, activity); //Creating ViewHolder and passing the object of type view
 
@@ -120,7 +117,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
 
         } else if (viewType == TYPE_HEADER) {
 
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.header,parent,false); //Inflating the layout
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.header, parent, false); //Inflating the layout
 
             ViewHolder vhHeader = new ViewHolder(v, viewType, context, activity); //Creating ViewHolder and passing the object of type view
 
@@ -137,12 +134,11 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     // which view type is being created 1 for item row
     @Override
     public void onBindViewHolder(DrawerListAdapter.ViewHolder holder, int position) {
-        if(holder.Holderid ==1) {                              // as the list view is going to be called after the header view so we decrement the
+        if (holder.Holderid == 1) {                              // as the list view is going to be called after the header view so we decrement the
             // position by 1 and pass it to the holder while setting the text and image
             holder.textView.setText(mNavTitles[position - 1]); // Setting the Text with the array of our Titles
-            holder.imageView.setImageResource(mIcons[position -1]);// Settimg the image with array of our icons
-        }
-        else{
+            holder.imageView.setImageResource(mIcons[position - 1]);// Settimg the image with array of our icons
+        } else {
 
             holder.profile.setImageResource(profile);           // Similarly we set the resources for header view
             holder.Name.setText(name);
@@ -153,7 +149,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     // This method returns the number of items present in the list
     @Override
     public int getItemCount() {
-        return mNavTitles.length+1; // the number of items in the list will be +1 the titles including the header view.
+        return mNavTitles.length + 1; // the number of items in the list will be +1 the titles including the header view.
     }
 
 
