@@ -20,15 +20,14 @@
         android:columnCount="5"
         android:rowCount="3">
 
-        <!--<ImageButton
-            android:id="@+id/btnCreateDB"
+        <ImageButton
+            android:id="@+id/btnUpdateGame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:layout_row="0"
-            android:onClick="onCreateDB"
-            android:src="@drawable/ic_add_db"
-            android:text="@string/btn_create_db_text" />
+            android:onClick="onUpdateGame"
+            android:src="@drawable/ic_add_db" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -36,7 +35,7 @@
             android:layout_column="1"
             android:layout_row="0"
             android:layout_gravity="center"
-            android:text="@string/buttons_database_hint" />-->
+            android:text="@string/button_update_game_hint" />
 
         <ImageButton
             android:id="@+id/btnAddGame"
@@ -44,7 +43,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:layout_row="1"
-            android:clickable="false"
             android:onClick="onAddGame"
             android:src="@drawable/ic_add_db" />
 
@@ -54,7 +52,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_row="1"
-            android:clickable="false"
             android:onClick="onDeleteGame"
             android:src="@drawable/ic_delete_db" />
 
@@ -64,7 +61,6 @@
             android:layout_height="wrap_content"
             android:layout_column="2"
             android:layout_row="1"
-            android:clickable="false"
             android:onClick="onGetGames"
             android:src="@drawable/ic_search_database" />
 
@@ -74,7 +70,6 @@
             android:layout_height="wrap_content"
             android:layout_column="3"
             android:layout_row="1"
-            android:clickable="false"
             android:onClick="onGetGame"
             android:src="@drawable/ic_search_database" />
 
@@ -92,7 +87,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:layout_row="2"
-            android:clickable="false"
             android:onClick="onCreateTable"
             android:src="@drawable/ic_add_db" />
 
@@ -102,7 +96,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_row="2"
-            android:clickable="false"
             android:onClick="onDeleteTable"
             android:src="@drawable/ic_delete_db" />
 

@@ -162,9 +162,54 @@ public class GamesDataSource {
         return result;
     }
 
-    public boolean updateGame(int id) {
+    public boolean updateGame(Game game) {
         boolean result = false;
+        ContentValues values = new ContentValues();
 
+        if (game.getTitle() != null) {
+            values.put(MyDBHandler.COLUMN_GAMETITLE, game.getTitle());
+        }
+        if (game.getGenre() != null) {
+            values.put(MyDBHandler.COLUMN_GAMEGENRE, game.getGenre());
+        }
+        if (game.getPlatform() != null) {
+            values.put(MyDBHandler.COLUMN_GAMEPLATFORM, game.getPlatform());
+        }
+        if (game.getHardwarePlatform() != null) {
+            values.put(MyDBHandler.COLUMN_GAMEHARDWAREPLATFORM, game.getHardwarePlatform());
+        }
+        if (game.getManufacturer() != null) {
+            values.put(MyDBHandler.COLUMN_GAMEMANUFACTURER, game.getManufacturer());
+        }
+        if (game.getFeature() != null) {
+            values.put(MyDBHandler.COLUMN_GAMEFEATURE, game.getFeature());
+        }
+        if (game.getSmallImage() != null) {
+            values.put(MyDBHandler.COLUMN_GAMESMALLIMAGE, game.getSmallImage());
+        }
+        if (game.getMediumImage() != null) {
+            values.put(MyDBHandler.COLUMN_GAMEMEDIUMIMAGE, game.getMediumImage());
+        }
+        if (game.getLargeImage() != null) {
+            values.put(MyDBHandler.COLUMN_GAMELARGEIMAGE, game.getLargeImage());
+        }
+
+        String selection = MyDBHandler.COLUMN_ID + " LIKE ?";
+        String[] selectionArgs = {String.valueOf(game.getId())};
+        String query = "SELECT * FROM " + MyDBHandler.TABLE_GAMES + " WHERE " + MyDBHandler.COLUMN_ID + " = \"" + game.getId() + "\"";
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.getCount() > 0) {
+            int count = db.update(
+                    MyDBHandler.TABLE_GAMES,
+                    values,
+                    selection,
+                    selectionArgs
+            );
+            if (count > 0)
+                result = true;
+            else
+                result = false;
+        }
         return result;
     }
 

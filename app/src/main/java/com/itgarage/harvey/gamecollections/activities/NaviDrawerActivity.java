@@ -248,4 +248,16 @@ public class NaviDrawerActivity extends ActionBarActivity {
         dataSource.close();
         super.onDestroy();
     }
+
+    @Override
+    protected void onResume() {
+        dataSource.open();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        dataSource.close();
+        super.onPause();
+    }
 }

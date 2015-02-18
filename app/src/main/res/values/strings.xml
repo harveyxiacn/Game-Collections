@@ -29,7 +29,7 @@
     <string name="btn_get_game_text">Get game by id</string>
     <string name="btn_delete_table_text">Delete Table</string>
     <string name="result_editText_hint">Result will be here.</string>
-    <string name="buttons_database_hint">Database</string>
+    <string name="button_update_game_hint">UpdateGame</string>
     <string name="button_table_hint">table</string>
     <string name="button_games_game_hint">games/game</string>
 

@@ -1,5 +1,6 @@
 package com.itgarage.harvey.gamecollections.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -85,22 +87,18 @@ public class DatabaseActivity extends ActionBarActivity {
     }
 
     public void onAddGame(View view) {
+        hideKeyboard();
         if (gameTitleEditText.getText().length() == 0) {
             Toast.makeText(this, "please enter title.", Toast.LENGTH_SHORT).show();
         } else {
             String title = gameTitleEditText.getText().toString();
-            Log.i("Add Game", "title: " + title);
             if (gamePlatformEditText.getText().length() == 0) {
                 Toast.makeText(this, "please enter platform.", Toast.LENGTH_SHORT).show();
             } else {
                 String platform = gamePlatformEditText.getText().toString();
-                Log.i("Add Game", "platform: " + platform);
                 Game game = new Game();
-                Log.i("Add Game", "game id: " + game.getId());
                 game.setTitle(title);
-                Log.i("Add Game", "game title: " + game.getTitle());
                 game.setPlatform(platform);
-                Log.i("Add Game", "game platform: " + game.getPlatform());
                 dataSource.addGame(game);
                 onGetGames(view);
             }
@@ -108,16 +106,21 @@ public class DatabaseActivity extends ActionBarActivity {
     }
 
     public void onDeleteGame(View view) {
+        hideKeyboard();
         int id = Integer.parseInt(gameIdEditText.getText().toString());
         Boolean result = dataSource.deleteGame(id);
         if (result) {
-            resultEditText.setText("Delete Successfully.");
+            onGetGames(view);
+            String results = resultEditText.getText().toString();
+            results = results + "Delete Successfully.";
+            resultEditText.setText(results);
         } else {
             resultEditText.setText("Delete Failed.");
         }
     }
 
     public void onGetGames(View view) {
+        hideKeyboard();
         ArrayList<Game> gamesList = dataSource.getAllGames();
         String result = "";
         if (gamesList != null) {
@@ -131,9 +134,38 @@ public class DatabaseActivity extends ActionBarActivity {
     }
 
     public void onGetGame(View view) {
+        hideKeyboard();
         int id = Integer.parseInt(gameIdEditText.getText().toString());
         Game game = dataSource.getGame(id);
         resultEditText.setText(game.toString());
+    }
+
+    public void onUpdateGame(View view) {
+        hideKeyboard();
+        String title = null;
+        String platform = null;
+        int id = -1;
+        if (gameTitleEditText.getText().length() != 0) {
+            title = gameTitleEditText.getText().toString();
+        }
+        if (gamePlatformEditText.getText().length() != 0) {
+            platform = gamePlatformEditText.getText().toString();
+        }
+        if (gameIdEditText.getText().length() != 0) {
+            id = Integer.parseInt(gameIdEditText.getText().toString());
+        }
+        Game game = new Game();
+        game.setId(id);
+        game.setTitle(title);
+        game.setPlatform(platform);
+        if (dataSource.updateGame(game)) {
+            onGetGames(view);
+            String results = resultEditText.getText().toString();
+            results = results + "Update Successfully.";
+            resultEditText.setText(results);
+        } else {
+            resultEditText.setText("Update failed.");
+        }
     }
 
     public void onDeleteTable(View view) {
@@ -150,5 +182,10 @@ public class DatabaseActivity extends ActionBarActivity {
     protected void onDestroy() {
         dataSource.close();
         super.onDestroy();
+    }
+
+    public void hideKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) DatabaseActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(DatabaseActivity.this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 }
