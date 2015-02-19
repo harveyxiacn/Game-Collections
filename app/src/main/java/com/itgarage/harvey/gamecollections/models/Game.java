@@ -2,17 +2,28 @@ package com.itgarage.harvey.gamecollections.models;
 
 public class Game {
     private int id;
-    private String title, platform, genre, hardwarePlatform,
-            manufacturer, feature, smallImage, mediumImage, largeImage;
+    private String title;
+    private String platform;
+    private String genre;
+    private String hardwarePlatform;
+    private String edition;
+    private String publicationDate;
+    private String releaseDate;
+    private String manufacturer;
+    private String smallImage;
+    private String mediumImage;
+    private String largeImage;
 
-    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String manufacturer, String feature, String smallImage, String mediumImage, String largeImage) {
+    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String edition, String publicationDate, String releaseDate, String manufacturer, String smallImage, String mediumImage, String largeImage) {
         this.id = id;
         this.title = title;
         this.platform = platform;
         this.genre = genre;
         this.hardwarePlatform = hardwarePlatform;
+        this.edition = edition;
+        this.publicationDate = publicationDate;
+        this.releaseDate = releaseDate;
         this.manufacturer = manufacturer;
-        this.feature = feature;
         this.smallImage = smallImage;
         this.mediumImage = mediumImage;
         this.largeImage = largeImage;
@@ -25,10 +36,12 @@ public class Game {
         genre = null;
         hardwarePlatform = null;
         manufacturer = null;
-        feature = null;
         smallImage = null;
         manufacturer = null;
         largeImage = null;
+        edition = null;
+        publicationDate = null;
+        releaseDate = null;
     }
 
     public int getId() {
@@ -79,14 +92,6 @@ public class Game {
         this.manufacturer = manufacturer;
     }
 
-    public String getFeature() {
-        return feature;
-    }
-
-    public void setFeature(String feature) {
-        this.feature = feature;
-    }
-
     public String getSmallImage() {
         return smallImage;
     }
@@ -109,6 +114,30 @@ public class Game {
 
     public void setLargeImage(String largeImage) {
         this.largeImage = largeImage;
+    }
+
+    public String getEdition() {
+        return edition;
+    }
+
+    public void setEdition(String edition) {
+        this.edition = edition;
+    }
+
+    public String getPublicationDate() {
+        return publicationDate;
+    }
+
+    public void setPublicationDate(String publicationDate) {
+        this.publicationDate = publicationDate;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
     @Override

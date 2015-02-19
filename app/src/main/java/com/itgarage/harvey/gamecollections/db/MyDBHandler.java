@@ -12,27 +12,31 @@ public class MyDBHandler extends SQLiteOpenHelper {
     public static final String TABLE_GAMES = "games";
 
     public static final String COLUMN_ID = "id";
-    public static final String COLUMN_GAMETITLE = "title";
-    public static final String COLUMN_GAMEPLATFORM = "platform";
-    public static final String COLUMN_GAMEGENRE = "genre";
-    public static final String COLUMN_GAMEHARDWAREPLATFORM = "hardwarePlatform";
-    public static final String COLUMN_GAMEMANUFACTURER = "manufacturer";
-    public static final String COLUMN_GAMEFEATURE = "feature";
-    public static final String COLUMN_GAMESMALLIMAGE = "smallImage";
-    public static final String COLUMN_GAMEMEDIUMIMAGE = "mediumImage";
-    public static final String COLUMN_GAMELARGEIMAGE = "largeImage";
+    public static final String COLUMN_GAME_TITLE = "title";
+    public static final String COLUMN_GAME_PLATFORM = "platform";
+    public static final String COLUMN_GAME_GENRE = "genre";
+    public static final String COLUMN_GAME_HARDWARE_PLATFORM = "hardwarePlatform";
+    public static final String COLUMN_GAME_EDITION = "edition";
+    public static final String COLUMN_GAME_PUBLICATION_DATE = "publicationDate";
+    public static final String COLUMN_GAME_RELEASE_DATE = "releaseDate";
+    public static final String COLUMN_GAME_MANUFACTURER = "manufacturer";
+    public static final String COLUMN_GAME_SMALL_IMAGE = "smallImage";
+    public static final String COLUMN_GAME_MEDIUM_IMAGE = "mediumImage";
+    public static final String COLUMN_GAME_LARGE_IMAGE = "largeImage";
 
     public static final String CREATE_GAMES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_GAMES + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + COLUMN_GAMETITLE + " TEXT NOT NULL,"
-            + COLUMN_GAMEPLATFORM + " TEXT,"
-            + COLUMN_GAMEGENRE + " TEXT,"
-            + COLUMN_GAMEHARDWAREPLATFORM + " TEXT,"
-            + COLUMN_GAMEMANUFACTURER + " TEXT,"
-            + COLUMN_GAMEFEATURE + " TEXT,"
-            + COLUMN_GAMESMALLIMAGE + " TEXT,"
-            + COLUMN_GAMEMEDIUMIMAGE + " TEXT,"
-            + COLUMN_GAMELARGEIMAGE + " TEXT);";
+            + COLUMN_GAME_TITLE + " TEXT NOT NULL,"
+            + COLUMN_GAME_PLATFORM + " TEXT,"
+            + COLUMN_GAME_GENRE + " TEXT,"
+            + COLUMN_GAME_HARDWARE_PLATFORM + " TEXT,"
+            + COLUMN_GAME_MANUFACTURER + " TEXT,"
+            + COLUMN_GAME_EDITION + " TEXT,"
+            + COLUMN_GAME_PUBLICATION_DATE + " TEXT,"
+            + COLUMN_GAME_RELEASE_DATE + " TEXT,"
+            + COLUMN_GAME_SMALL_IMAGE + " TEXT,"
+            + COLUMN_GAME_MEDIUM_IMAGE + " TEXT,"
+            + COLUMN_GAME_LARGE_IMAGE + " TEXT);";
 
     public MyDBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
