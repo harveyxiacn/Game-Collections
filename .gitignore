@@ -4,3 +4,4 @@
 /.idea/libraries
 .DS_Store
 /build
+/src/main/java/com/itgarage/harvey/gamecollections/amazon_product_advertising_api/Keys_Tag.java
