@@ -1,5 +1,6 @@
 package com.itgarage.harvey.gamecollections.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -113,6 +114,8 @@ public class NaviDrawerActivity extends ActionBarActivity {
                     }else if(position==2){
                         Log.i("On attach", "mTitle:"+mTitle);
                         toolbar.setTitle(mTitle);
+                        Bundle bundle = new Bundle();
+
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, GamesFragment.newInstance()).commit();
                     }else if(position==3){
                         Log.i("On attach", "mTitle:"+mTitle);
@@ -241,6 +244,14 @@ public class NaviDrawerActivity extends ActionBarActivity {
         } finally {
             Log.i("DB operation", "DB opened.");
         }
+    }
+
+    public GamesDataSource getDataSource() {
+        return dataSource;
+    }
+
+    public Context getContext() {
+        return this;
     }
 
     @Override

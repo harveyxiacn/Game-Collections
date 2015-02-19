@@ -4,9 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/games_list_text"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/gameCardList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>
