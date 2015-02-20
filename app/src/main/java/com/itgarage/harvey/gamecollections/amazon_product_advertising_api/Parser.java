@@ -23,20 +23,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 
-
 /**
  * Created by harvey on 2015-02-19.
  */
 public class Parser {
-    /** ---------------------  Search TAG --------------------- */
+    /**
+     * ---------------------  Search TAG ---------------------
+     */
     private static final String KEY_ROOT = "Items";
-    private static final String KEY_REQUEST_ROOT="Request";
-    private static final String KEY_REQUEST_CONTAINER="IsValid";
+    private static final String KEY_REQUEST_ROOT = "Request";
+    private static final String KEY_REQUEST_CONTAINER = "IsValid";
     private static final String KEY_ITEM = "Item";
     private static final String KEY_SAMLL_IAMGE = "SmallImage";
     private static final String KEY_MEDIUM_IMAGE = "MediumImage";
     private static final String KEY_LARGE_IMAGE = "LargeImage";
-    private static final String KEY_IMAGE_CONTAINER="URL";
+    private static final String KEY_IMAGE_CONTAINER = "URL";
     private static final String KEY_ITEM_ATTRIBUTES = "ItemAttributes";
     private static final String KEY_EDITION = "Edition";
     private static final String KEY_Genre = "Genre";
@@ -46,8 +47,9 @@ public class Parser {
     private static final String KEY_PUBLICATION_DATE = "PublicationDate";
     private static final String KEY_RELEASE_DATE = "ReleaseDate";
     private static final String KEY_TITLE = "Title";
+    private static final String KEY_ERRORS = "Errors";
 
-    private static final String VALUE_VALID_RESPONCE="True";
+    private static final String VALUE_VALID_RESPONCE = "True";
 
 
     /*  call in the app to get response list from Amazon
@@ -55,17 +57,22 @@ public class Parser {
     public NodeList getResponseNodeList(String service_url) {
         String searchResponce = this.getUrlContents(service_url);
         Log.i("url", "" + service_url);
-        Log.i("responce",""+searchResponce);
+        Log.i("responce", "" + searchResponce);
         Document doc;
         NodeList items = null;
         if (searchResponce != null) {
             try {
                 doc = this.getDomElement(searchResponce);
                 items = doc.getElementsByTagName(KEY_ROOT);
-                Element element=(Element)items.item(0);
-                if(isResponceValid(element)){
-                    items=doc.getElementsByTagName(KEY_ITEM);
+                Element element = (Element) items.item(0);
+                if (isResponceValid(element)) {
+                    //if(doc.getElementsByTagName(KEY_ITEM)!=null)
+                    Log.i("before get item","");
+                        items = doc.getElementsByTagName(KEY_ITEM);
+                    Log.i("after get item", "");
                 }
+
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -76,11 +83,11 @@ public class Parser {
     /*  Create a game object and set the attributes.
     *   Call in the app to get a game object to show.
     *   Pass a NodeList object as a param, which is returned by function getResponseNodeList*/
-    public Game getSearchObject(NodeList list,int position){
-        Game game=new Game();
-        Element e=(Element)list.item(position);
+    public Game getSearchObject(NodeList list, int position) {
+        Game game = new Game();
+        Element e = (Element) list.item(position);
 
-        game.setTitle(this.getValue((Element)(e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0))
+        game.setTitle(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0))
                 , KEY_TITLE));
         game.setGenre(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_Genre));
         game.setPlatform(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_PLATFORM));
@@ -91,34 +98,39 @@ public class Parser {
         game.setReleaseDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_RELEASE_DATE));
         game.setSmallImage(this.getValue((Element) (e.getElementsByTagName(KEY_SAMLL_IAMGE).item(0))
                 , KEY_IMAGE_CONTAINER));
-        game.setMediumImage(this.getValue((Element)(e.getElementsByTagName(KEY_MEDIUM_IMAGE).item(0))
+        game.setMediumImage(this.getValue((Element) (e.getElementsByTagName(KEY_MEDIUM_IMAGE).item(0))
                 , KEY_IMAGE_CONTAINER));
         game.setLargeImage(this.getValue((Element) (e.getElementsByTagName(KEY_LARGE_IMAGE).item(0))
                 , KEY_IMAGE_CONTAINER));
         return game;
     }
 
-    public boolean isResponceValid(Element element){
-        NodeList nList=element.getElementsByTagName(KEY_REQUEST_ROOT);
-        Element e=(Element)nList.item(0);
-        if(getValue(e, KEY_REQUEST_CONTAINER).equals(VALUE_VALID_RESPONCE)){
+    public boolean isResponceValid(Element element) {
+        NodeList nList = element.getElementsByTagName(KEY_REQUEST_ROOT);
+        //Log.i("errors", ""+element.getElementsByTagName(KEY_ERRORS));
+        Element e = (Element) nList.item(0);
+        if (getValue(e, KEY_REQUEST_CONTAINER).equals(VALUE_VALID_RESPONCE) && element.getElementsByTagName(KEY_ERRORS)==null) {
             return true;
         }
         return false;
     }
 
-    /** In app reused functions */
+    /**
+     * In app reused functions
+     */
 
     private String getUrlContents(String theUrl) {
         StringBuilder content = new StringBuilder();
         try {
             URL url = new URL(theUrl);
             URLConnection urlConnection = url.openConnection();
+            //Log.i("Doc", "urlConnection:"+urlConnection);
             BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(urlConnection.getInputStream()), 8);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 content.append(line + "");
+                //Log.i("Doc", "line: "+line);
             }
             bufferedReader.close();
         } catch (Exception e) {

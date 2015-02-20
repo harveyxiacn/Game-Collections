@@ -1,6 +1,7 @@
 package com.itgarage.harvey.gamecollections.amazon_product_advertising_api;
 
-import android.util.Base64;
+//import android.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -57,7 +58,7 @@ public class SignedRequestsHelper {
                         + endpoint + "\n"
                         + REQUEST_URI + "\n"
                         + canonicalQS;
-
+        //Log.i("url", "toSign: "+toSign);
         String hmac = hmac(toSign);
         String sig = percentEncodeRfc3986(hmac);
         String url = "http://" + endpoint + REQUEST_URI + "?" +
@@ -72,11 +73,12 @@ public class SignedRequestsHelper {
         try {
             data = stringToSign.getBytes(UTF8_CHARSET);
             rawHmac = mac.doFinal(data);
-            //Base64 encoder = new Base64();
-            signature = new String(Base64.encode(rawHmac, Base64.DEFAULT));
+            Base64 encoder = new Base64();
+            signature = new String(encoder.encode(rawHmac));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(UTF8_CHARSET + " is unsupported!", e);
         }
+        //Log.i("url", "signature:"+signature);
         return signature;
     }
 
@@ -115,10 +117,10 @@ public class SignedRequestsHelper {
     private String percentEncodeRfc3986(String s) {
         String out;
         try {
-            out = URLEncoder.encode(s, UTF8_CHARSET)
-                    .replace("+", "%20")
+            out = URLEncoder.encode(s, UTF8_CHARSET);
+                    /*.replace("+", "%20")
                     .replace("*", "%2A")
-                    .replace("%7E", "~");
+                    .replace("%7E", "~");*/
         } catch (UnsupportedEncodingException e) {
             out = s;
         }

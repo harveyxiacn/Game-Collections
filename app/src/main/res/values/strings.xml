@@ -32,5 +32,8 @@
     <string name="button_update_game_hint">UpdateGame</string>
     <string name="button_table_hint">table</string>
     <string name="button_games_game_hint">games/game</string>
+    <string name="title_activity_game_detail">GameDetailActivity</string>
+    <string name="no_result_in_database_text">No Games in database.</string>
+    <string name="no_result_from_searching_text">No result back from searching.</string>
 
 </resources>

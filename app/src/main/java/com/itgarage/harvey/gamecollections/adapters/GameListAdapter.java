@@ -1,5 +1,8 @@
 package com.itgarage.harvey.gamecollections.adapters;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,11 +13,16 @@ import android.widget.TextView;
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.models.Game;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
 public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameListViewHolder> {
 
-    private List<Game> gamesList;
+    List<Game> gamesList;
+    String mediumImage;
+    Bitmap bitmap;
+    GameListViewHolder holder;
 
     public GameListAdapter(List<Game> gamesList) {
         this.gamesList = gamesList;
@@ -22,17 +30,23 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
 
     @Override
     public int getItemCount() {
-        return gamesList.size();
+        if(gamesList != null)
+            return gamesList.size();
+        else
+            return 0;
     }
 
     @Override
     public void onBindViewHolder(GameListViewHolder holder, int position) {
         Game game = gamesList.get(position);
+        this.holder = holder;
         holder.titleTextView.setText(game.getTitle());
         String platform = game.getPlatform();
         if (platform != null) {
             holder.platformTextView.setText(platform);
         }
+        mediumImage = game.getMediumImage();
+        new ImageDownloader().execute(mediumImage);
     }
 
     @Override
@@ -52,6 +66,33 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             imageView = (ImageView) view.findViewById(R.id.imageViewGameImage);
             titleTextView = (TextView) view.findViewById(R.id.textViewGameTitle);
             platformTextView = (TextView) view.findViewById(R.id.textViewGamePlatform);
+        }
+    }
+
+    class ImageDownloader extends AsyncTask<String, String, Bitmap>{
+
+        @Override
+        protected Bitmap doInBackground(String... args) {
+
+            try {
+                bitmap = BitmapFactory.decodeStream((InputStream)new URL(args[0]).getContent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return bitmap;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap image) {
+            if(image!=null){
+                holder.imageView.setImageBitmap(image);
+            }
         }
     }
 }

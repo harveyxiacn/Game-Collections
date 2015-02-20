@@ -6,5 +6,5 @@ package com.itgarage.harvey.gamecollections.amazon_product_advertising_api;
 public class ItemLookupArgs {
     public static String SEARCH_INDEX = "VideoGames";
     public static String ITEM_ID = "";
-    public static String ID_TYPE = "EAN";
+    public static String ID_TYPE = "UPC";
 }

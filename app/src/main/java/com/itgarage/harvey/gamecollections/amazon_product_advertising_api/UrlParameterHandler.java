@@ -23,11 +23,11 @@ public class UrlParameterHandler {
         myparams.put("Service", "AWSECommerceService");
         myparams.put("Operation", "ItemSearch");
         myparams.put("Version", "2011-08-01");
-        myparams.put("ContentType", "text/xml");
+        //myparams.put("ContentType", "text/xml");
         myparams.put("SearchIndex", ItemSearchArgs.SEARCH_INDEX);//for searching video games
         myparams.put("Keywords", ItemSearchArgs.KEYWORDS);
         myparams.put("AssociateTag", Keys_Tag.ASSOCIATE_TAG);// change in Keys_Tag class
-        myparams.put("ResponseGroup", "Images, ItemAttributes");
+        myparams.put("ResponseGroup", "Images,ItemAttributes");
         return myparams;
     }
 
@@ -36,12 +36,12 @@ public class UrlParameterHandler {
         myparams.put("Service", "AWSECommerceService");
         myparams.put("Operation", "ItemLookup");
         myparams.put("Version", "2011-08-01");
-        myparams.put("ContentType", "text/xml");
+        //myparams.put("ContentType", "text/xml");
         myparams.put("SearchIndex", ItemLookupArgs.SEARCH_INDEX);//for searching video games
         myparams.put("ItemId", ItemLookupArgs.ITEM_ID);
         myparams.put("IdType", ItemLookupArgs.ID_TYPE);
         myparams.put("AssociateTag", Keys_Tag.ASSOCIATE_TAG);// change in Keys_Tag class
-        myparams.put("ResponseGroup", "Images, ItemAttributes");
+        myparams.put("ResponseGroup", "Images,ItemAttributes");
         return myparams;
     }
 
