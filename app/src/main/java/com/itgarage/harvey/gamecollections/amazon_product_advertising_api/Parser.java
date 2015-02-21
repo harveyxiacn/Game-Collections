@@ -40,7 +40,7 @@ public class Parser {
     private static final String KEY_IMAGE_CONTAINER = "URL";
     private static final String KEY_ITEM_ATTRIBUTES = "ItemAttributes";
     private static final String KEY_EDITION = "Edition";
-    private static final String KEY_Genre = "Genre";
+    private static final String KEY_GENRE = "Genre";
     private static final String KEY_MANUFACTURER = "Manufacturer";
     private static final String KEY_PLATFORM = "Platform";
     private static final String KEY_HARDWARE_PLATFORM = "HardwarePlatform";
@@ -48,6 +48,8 @@ public class Parser {
     private static final String KEY_RELEASE_DATE = "ReleaseDate";
     private static final String KEY_TITLE = "Title";
     private static final String KEY_ERRORS = "Errors";
+    private static final String KEY_ERROR = "Error";
+    private static final String KEY_CODE = "Code";
 
     private static final String VALUE_VALID_RESPONCE = "True";
 
@@ -63,16 +65,16 @@ public class Parser {
         if (searchResponce != null) {
             try {
                 doc = this.getDomElement(searchResponce);
-                items = doc.getElementsByTagName(KEY_ROOT);
-                Element element = (Element) items.item(0);
+                items = doc.getElementsByTagName(KEY_ROOT);//<Items>
+                Element element = (Element) items.item(0);// <Request>
                 if (isResponceValid(element)) {
                     //if(doc.getElementsByTagName(KEY_ITEM)!=null)
                     Log.i("before get item","");
-                        items = doc.getElementsByTagName(KEY_ITEM);
+                    items = doc.getElementsByTagName(KEY_ITEM);//<Item>
                     Log.i("after get item", "");
+                }else {
+                    return null;
                 }
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -89,7 +91,7 @@ public class Parser {
 
         game.setTitle(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0))
                 , KEY_TITLE));
-        game.setGenre(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_Genre));
+        game.setGenre(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_GENRE));
         game.setPlatform(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_PLATFORM));
         game.setHardwarePlatform(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_HARDWARE_PLATFORM));
         game.setManufacturer(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_MANUFACTURER));
@@ -107,9 +109,19 @@ public class Parser {
 
     public boolean isResponceValid(Element element) {
         NodeList nList = element.getElementsByTagName(KEY_REQUEST_ROOT);
-        //Log.i("errors", ""+element.getElementsByTagName(KEY_ERRORS));
-        Element e = (Element) nList.item(0);
-        if (getValue(e, KEY_REQUEST_CONTAINER).equals(VALUE_VALID_RESPONCE) && element.getElementsByTagName(KEY_ERRORS)==null) {
+        Element isValid = (Element) nList.item(0);//<IsValid>
+        Log.i("IsValid", ""+getValue(isValid, KEY_REQUEST_CONTAINER));
+        boolean hasErrorCode = false;
+        try{
+            NodeList errorList = element.getElementsByTagName(KEY_ERROR);
+            Element code = (Element) errorList.item(0);//<Code>
+            Log.i("Error code", ""+getValue(code, KEY_CODE));
+            hasErrorCode = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        if ((getValue(isValid, KEY_REQUEST_CONTAINER).equals(VALUE_VALID_RESPONCE)) && (!hasErrorCode)) {
             return true;
         }
         return false;

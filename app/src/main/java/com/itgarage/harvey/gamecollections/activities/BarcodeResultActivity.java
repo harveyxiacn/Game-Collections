@@ -122,11 +122,9 @@ public class BarcodeResultActivity extends ActionBarActivity {
             NodeList nodeList = parser.getResponseNodeList(signedUrl);
             if (nodeList != null) {
                 int position = 0;
-
                 Game game = parser.getSearchObject(nodeList, position);
                 Log.i("add Game", "" + game.getTitle());
                 gamesList.add(game);
-
             } else {
                 gamesList = null;
             }
