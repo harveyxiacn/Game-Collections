@@ -1,5 +1,7 @@
 package com.itgarage.harvey.gamecollections.models;
 
+import android.util.Log;
+
 public class Game {
     private int id;
     private String title;
@@ -37,7 +39,7 @@ public class Game {
         hardwarePlatform = null;
         manufacturer = null;
         smallImage = null;
-        manufacturer = null;
+        mediumImage = null;
         largeImage = null;
         edition = null;
         publicationDate = null;
@@ -57,6 +59,17 @@ public class Game {
     }
 
     public void setTitle(String title) {
+        if(title.length()>20){
+            Log.i("Title length", ""+title.length());
+            int index = 20;
+            do{
+                index--;
+            }while (title.charAt(index) != ' ');
+            String preSpaceTitle = title.substring(0, index-1);
+            String postSpaceTitle = title.substring(index+1);
+            title = preSpaceTitle + "\n" + postSpaceTitle;
+            Log.i("New title", title);
+        }
         this.title = title;
     }
 

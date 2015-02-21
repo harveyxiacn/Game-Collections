@@ -34,7 +34,7 @@ public class Parser {
     private static final String KEY_REQUEST_ROOT = "Request";
     private static final String KEY_REQUEST_CONTAINER = "IsValid";
     private static final String KEY_ITEM = "Item";
-    private static final String KEY_SAMLL_IAMGE = "SmallImage";
+    private static final String KEY_SAMLL_IMAGE = "SmallImage";
     private static final String KEY_MEDIUM_IMAGE = "MediumImage";
     private static final String KEY_LARGE_IMAGE = "LargeImage";
     private static final String KEY_IMAGE_CONTAINER = "URL";
@@ -47,7 +47,6 @@ public class Parser {
     private static final String KEY_PUBLICATION_DATE = "PublicationDate";
     private static final String KEY_RELEASE_DATE = "ReleaseDate";
     private static final String KEY_TITLE = "Title";
-    private static final String KEY_ERRORS = "Errors";
     private static final String KEY_ERROR = "Error";
     private static final String KEY_CODE = "Code";
 
@@ -57,14 +56,14 @@ public class Parser {
     /*  call in the app to get response list from Amazon
     *   Pass a String url as a param which is returned by SignedRequestsHelper's Sign function*/
     public NodeList getResponseNodeList(String service_url) {
-        String searchResponce = this.getUrlContents(service_url);
+        String searchResponse = this.getUrlContents(service_url);
         Log.i("url", "" + service_url);
-        Log.i("responce", "" + searchResponce);
+        Log.i("response", "" + searchResponse);
         Document doc;
         NodeList items = null;
-        if (searchResponce != null) {
+        if (searchResponse != null) {
             try {
-                doc = this.getDomElement(searchResponce);
+                doc = this.getDomElement(searchResponse);
                 items = doc.getElementsByTagName(KEY_ROOT);//<Items>
                 Element element = (Element) items.item(0);// <Request>
                 if (isResponceValid(element)) {
@@ -98,7 +97,7 @@ public class Parser {
         game.setEdition(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_EDITION));
         game.setPublicationDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_PUBLICATION_DATE));
         game.setReleaseDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_RELEASE_DATE));
-        game.setSmallImage(this.getValue((Element) (e.getElementsByTagName(KEY_SAMLL_IAMGE).item(0))
+        game.setSmallImage(this.getValue((Element) (e.getElementsByTagName(KEY_SAMLL_IMAGE).item(0))
                 , KEY_IMAGE_CONTAINER));
         game.setMediumImage(this.getValue((Element) (e.getElementsByTagName(KEY_MEDIUM_IMAGE).item(0))
                 , KEY_IMAGE_CONTAINER));
@@ -115,8 +114,10 @@ public class Parser {
         try{
             NodeList errorList = element.getElementsByTagName(KEY_ERROR);
             Element code = (Element) errorList.item(0);//<Code>
-            Log.i("Error code", ""+getValue(code, KEY_CODE));
-            hasErrorCode = true;
+            if(code!=null) {
+                Log.i("Error code", "" + getValue(code, KEY_CODE));
+                hasErrorCode = true;
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -136,13 +137,11 @@ public class Parser {
         try {
             URL url = new URL(theUrl);
             URLConnection urlConnection = url.openConnection();
-            //Log.i("Doc", "urlConnection:"+urlConnection);
             BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(urlConnection.getInputStream()), 8);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 content.append(line + "");
-                //Log.i("Doc", "line: "+line);
             }
             bufferedReader.close();
         } catch (Exception e) {
