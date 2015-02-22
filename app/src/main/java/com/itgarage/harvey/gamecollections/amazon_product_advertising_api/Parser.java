@@ -47,6 +47,7 @@ public class Parser {
     private static final String KEY_PUBLICATION_DATE = "PublicationDate";
     private static final String KEY_RELEASE_DATE = "ReleaseDate";
     private static final String KEY_TITLE = "Title";
+    private static final String KEY_UPC_CODE = "UPC";
     private static final String KEY_ERROR = "Error";
     private static final String KEY_CODE = "Code";
 
@@ -97,6 +98,8 @@ public class Parser {
         game.setEdition(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_EDITION));
         game.setPublicationDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_PUBLICATION_DATE));
         game.setReleaseDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_RELEASE_DATE));
+        game.setUpcCode(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_UPC_CODE));
+        Log.i("UPC", ""+game.getUpcCode());
         game.setSmallImage(this.getValue((Element) (e.getElementsByTagName(KEY_SAMLL_IMAGE).item(0))
                 , KEY_IMAGE_CONTAINER));
         game.setMediumImage(this.getValue((Element) (e.getElementsByTagName(KEY_MEDIUM_IMAGE).item(0))

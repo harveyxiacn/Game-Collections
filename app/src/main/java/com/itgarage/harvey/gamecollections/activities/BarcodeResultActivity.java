@@ -38,6 +38,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
 
     TextView resultTextView;
     String resultStr;
+    public static String UPC_CODE = null;
     public static final String BARCODE_SCAN_RESULT_SAVED_TAG = "BARCODE_SCAN_RESULT";
     Toolbar toolbar;
     RecyclerView gamesCardListView;
@@ -47,6 +48,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
     List<Game> gamesList;
     TextView noResultTextView;
     Activity passActivity;
+    public static boolean LOCAL_GAME = false;
 
     /*private static final String TAG_ADD_TO_DB = "TAG_ADD_TO_DB";
     private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
@@ -73,6 +75,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
             String barcodeScanResult = savedInstanceState.getString(BARCODE_SCAN_RESULT_SAVED_TAG);
             resultTextView.setText(barcodeScanResult);
         }
+        UPC_CODE = resultStr;
 
         ItemLookupArgs.ITEM_ID = resultStr;
 
@@ -122,9 +125,24 @@ public class BarcodeResultActivity extends ActionBarActivity{
         GamesDataSource dataSource = new GamesDataSource(this);
         dataSource.open();
         Log.i("DB operation", "DB opened.");
-        Game game = null;
+        Game game;
         game = dataSource.getGameByUPC(resultStr);
-        new SearchAmazonTask().execute();
+        if(game==null) {
+            new SearchAmazonTask().execute();
+        }else {
+            LOCAL_GAME = true;
+            gamesList.add(game);
+            gamesAdapter = new GameListAdapter(gamesList, this);
+            gamesCardListView.setAdapter(gamesAdapter);
+            Log.i("RecyclerView", "setting adapter");
+            if (gamesAdapter.getItemCount() == 0) {
+                gamesCardListView.setVisibility(View.GONE);
+                noResultTextView.setVisibility(View.VISIBLE);
+            } else {
+                gamesCardListView.setVisibility(View.VISIBLE);
+                noResultTextView.setVisibility(View.GONE);
+            }
+        }
 
     }
 

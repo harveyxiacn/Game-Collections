@@ -61,7 +61,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         holder.titleTextView.setText(game.getTitle());
 
         String platform = game.getPlatform();
-        if (!platform.equals("")) {
+        if (platform!=null) {
             holder.platformTextView.setText(platform);
         }
 
@@ -70,7 +70,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         holder.imageView.setImageFromUri(mediumImage);
 
         String genre = game.getGenre();
-        if (!genre.equals("")) {
+        if (genre!=null) {
             holder.genreTextView.setText("Genre: " + genre);
             holder.genreTextView.setVisibility(View.VISIBLE);
         } else {
@@ -79,7 +79,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         }
 
         String hardwarePlatform = game.getHardwarePlatform();
-        if (!hardwarePlatform.equals("")) {
+        if (hardwarePlatform!=null) {
             holder.hardwarePlatformTextView.setText("Hardware Platform: " + hardwarePlatform);
             holder.hardwarePlatformTextView.setVisibility(View.VISIBLE);
         } else {
@@ -88,7 +88,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         }
 
         String edition = game.getEdition();
-        if (!edition.equals("")) {
+        if (edition!=null) {
             holder.editionTextView.setText("Edition: " + edition);
             holder.editionTextView.setVisibility(View.VISIBLE);
         } else {
@@ -96,7 +96,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         }
 
         String manufacturer = game.getManufacturer();
-        if (!manufacturer.equals("")) {
+        if (manufacturer!=null) {
             holder.manufacturerTextView.setText("Manufacturer: " + manufacturer);
             holder.manufacturerTextView.setVisibility(View.VISIBLE);
         } else {
@@ -104,7 +104,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         }
 
         String publicationDate = game.getPublicationDate();
-        if (!publicationDate.equals("")) {
+        if (publicationDate!=null) {
             holder.publicationDateTextView.setText("Publication Date: " + publicationDate);
             holder.publicationDateTextView.setVisibility(View.VISIBLE);
         } else {
@@ -112,7 +112,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         }
 
         String releaseDate = game.getReleaseDate();
-        if (!releaseDate.equals("")) {
+        if (releaseDate!=null) {
             holder.releaseDateTextView.setText("Release Date: " + releaseDate);
             holder.releaseDateTextView.setVisibility(View.VISIBLE);
         } else {
@@ -153,6 +153,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         List<Game> gamesList;
         FloatingActionMenu actionMenuGameDetail;
         TextView ratingTextView;
+        FloatingActionButton actionButton;
 
         public GameListViewHolder(View view, Activity activity) {
             super(view);
@@ -214,6 +215,10 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             if (activity.getClass() == NaviDrawerActivity.class){
                 setVisibilities(false);
             }
+            if (BarcodeResultActivity.LOCAL_GAME){
+                actionButton.setVisibility(View.GONE);
+                gameRating.setIsIndicator(true);
+            }
         }
 
         @Override
@@ -228,6 +233,9 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
                 GamesDataSource dataSource = new GamesDataSource(activity);
                 dataSource.open();
                 Log.i("DB operation", "DB opened.");
+                if(BarcodeResultActivity.UPC_CODE!=null){
+                    game.setUpcCode(BarcodeResultActivity.UPC_CODE);
+                }
                 long insertId = dataSource.addGame(game);
                 if(insertId != -1){
                     Toast.makeText(activity, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
@@ -257,7 +265,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             ImageView floatingActionButtonIcon = new ImageView(activity);
             floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
             // Create a button to attach the menu:
-            FloatingActionButton actionButton = new FloatingActionButton.Builder(activity)
+            actionButton = new FloatingActionButton.Builder(activity)
                     .setContentView(floatingActionButtonIcon)
                     .setBackgroundDrawable(R.drawable.selector_button_cyan)
                     .build();
