@@ -81,9 +81,10 @@ public class DatabaseActivity extends ActionBarActivity {
             dataSource.open();
         } catch (Exception e) {
             Log.e("GAMES ERROR", "Error Creating Database");
-        } finally {
-            Log.i("DB operation", "DB opened.");
         }
+        if(dataSource!=null)
+            Log.i("DB operation", "DB opened.");
+
     }
 
     public void onAddGame(View view) {

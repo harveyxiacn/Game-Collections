@@ -15,8 +15,10 @@ public class Game {
     private String smallImage;
     private String mediumImage;
     private String largeImage;
+    private int rating;
+    private String upcCode;
 
-    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String edition, String publicationDate, String releaseDate, String manufacturer, String smallImage, String mediumImage, String largeImage) {
+    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String edition, String publicationDate, String releaseDate, String manufacturer, String smallImage, String mediumImage, String largeImage, int rating, String upcCode) {
         this.id = id;
         this.title = title;
         this.platform = platform;
@@ -29,6 +31,8 @@ public class Game {
         this.smallImage = smallImage;
         this.mediumImage = mediumImage;
         this.largeImage = largeImage;
+        this.rating = rating;
+        this.upcCode = upcCode;
     }
 
     public Game() {
@@ -44,6 +48,8 @@ public class Game {
         edition = null;
         publicationDate = null;
         releaseDate = null;
+        rating = -1;
+        upcCode = null;
     }
 
     public int getId() {
@@ -86,6 +92,7 @@ public class Game {
     }
 
     public void setGenre(String genre) {
+        genre = genre.replaceAll("_", " ");
         this.genre = genre;
     }
 
@@ -151,6 +158,22 @@ public class Game {
 
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public String getUpcCode() {
+        return upcCode;
+    }
+
+    public void setUpcCode(String upcCode) {
+        this.upcCode = upcCode;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.itgarage.harvey.gamecollections.activities;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -20,6 +21,7 @@ import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLo
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.UrlParameterHandler;
+import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
 
 import org.w3c.dom.NodeList;
@@ -32,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class BarcodeResultActivity extends ActionBarActivity {
+public class BarcodeResultActivity extends ActionBarActivity{
 
     TextView resultTextView;
     String resultStr;
@@ -44,10 +46,16 @@ public class BarcodeResultActivity extends ActionBarActivity {
 
     List<Game> gamesList;
     TextView noResultTextView;
+    Activity passActivity;
+
+    /*private static final String TAG_ADD_TO_DB = "TAG_ADD_TO_DB";
+    private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
+    private static final String TAG_ADD_RATING = "TAG_ADD_RATING";*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        passActivity = this;
         setContentView(R.layout.activity_barcode_result);
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
@@ -76,7 +84,48 @@ public class BarcodeResultActivity extends ActionBarActivity {
         noResultTextView = (TextView) findViewById(R.id.noResultSearchTextView);
         noResultTextView.setVisibility(View.GONE);
 
+        /*ImageView floatingActionButtonIcon = new ImageView(this);
+        floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
+        // Create a button to attach the menu:
+        FloatingActionButton actionButton = new FloatingActionButton.Builder(this)
+                .setContentView(floatingActionButtonIcon)
+                .setBackgroundDrawable(R.drawable.selector_button_cyan)
+                .build();
+        // Create menu items:
+        SubActionButton.Builder itemBuilder = new SubActionButton.Builder(this);
+        itemBuilder.setBackgroundDrawable(getResources().getDrawable(R.drawable.selector_button_cyan));
+        // repeat many times:
+        ImageView itemAddToDBIcon = new ImageView(this);
+        itemAddToDBIcon.setImageResource(R.drawable.ic_add_to_db);
+        SubActionButton addToDBButton = itemBuilder.setContentView(itemAddToDBIcon).build();
+        addToDBButton.setOnClickListener(this);
+        addToDBButton.setTag(TAG_ADD_TO_DB);
+
+        ImageView itemAddContactIcon = new ImageView(this);
+        itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
+        SubActionButton addContactButton = itemBuilder.setContentView(itemAddContactIcon).build();
+        addContactButton.setOnClickListener(this);
+        addContactButton.setTag(TAG_ADD_BORROWER);
+
+        ImageView itemAddRatingIcon = new ImageView(this);
+        itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
+        SubActionButton addRatingButton = itemBuilder.setContentView(itemAddRatingIcon).build();
+        addRatingButton.setOnClickListener(this);
+        addRatingButton.setTag(TAG_ADD_RATING);
+        // Create the menu with the items:
+        FloatingActionMenu actionMenu = new FloatingActionMenu.Builder(this)
+                .addSubActionView(addToDBButton)
+                .addSubActionView(addContactButton)
+                .addSubActionView(addRatingButton)
+                .attachTo(actionButton)
+                .build();*/
+        GamesDataSource dataSource = new GamesDataSource(this);
+        dataSource.open();
+        Log.i("DB operation", "DB opened.");
+        Game game = null;
+        game = dataSource.getGameByUPC(resultStr);
         new SearchAmazonTask().execute();
+
     }
 
     @Override
@@ -155,7 +204,7 @@ public class BarcodeResultActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            gamesAdapter = new GameListAdapter(gamesList);
+            gamesAdapter = new GameListAdapter(gamesList, passActivity);
             gamesCardListView.setAdapter(gamesAdapter);
             Log.i("RecyclerView", "setting adapter");
             if (gamesAdapter.getItemCount() == 0) {

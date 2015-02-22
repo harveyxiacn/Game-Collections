@@ -35,5 +35,11 @@
     <string name="title_activity_game_detail">GameDetailActivity</string>
     <string name="no_result_in_database_text">No Games in database.</string>
     <string name="no_result_from_searching_text">No result back from searching.</string>
+    <string name="rating_bar_text">Rating:</string>
+    <string name="borrower_information_text">Borrower Information</string>
+    <string name="borrower_name_hint">Name</string>
+    <string name="phone_tag_text">Phone:</string>
+    <string name="email_tag_text">Email:</string>
+    <string name="game_thumbnail_desc">gameThumbnail</string>
 
 </resources>

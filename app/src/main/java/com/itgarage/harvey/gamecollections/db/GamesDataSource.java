@@ -29,41 +29,46 @@ public class GamesDataSource {
         Log.i("DB operation", "database closed");
     }
 
-    public void addGame(Game game) {
+    public long addGame(Game game) {
         ContentValues values = new ContentValues();
         values.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
-        if (game.getGenre() != null) {
+        if (!game.getGenre().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
         }
-        if (game.getPlatform() != null) {
+        if (!game.getPlatform().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
         }
-        if (game.getHardwarePlatform() != null) {
+        if (!game.getHardwarePlatform().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
         }
-        if (game.getManufacturer() != null) {
+        if (!game.getManufacturer().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
         }
-        if (game.getEdition() != null) {
+        if (!game.getEdition().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
         }
-        if (game.getPublicationDate() != null) {
+        if (!game.getPublicationDate().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
         }
-        if (game.getReleaseDate() != null) {
+        if (!game.getReleaseDate().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
         }
-        if (game.getSmallImage() != null) {
+        if (!game.getSmallImage().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
         }
-        if (game.getMediumImage() != null) {
+        if (!game.getMediumImage().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
         }
-        if (game.getLargeImage() != null) {
+        if (!game.getLargeImage().equals("")) {
             values.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
+        }
+        values.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
+        if (!game.getUpcCode().equals("")) {
+            values.put(MyDBHandler.COLUMN_GAME_UPC_CODE, game.getUpcCode());
         }
         long insertId = db.insert(MyDBHandler.TABLE_GAMES, null, values);
         Log.i("DB operation", "inserted " + insertId);
+        return insertId;
         //Cursor cursor = db.query(MyDBHandler.TABLE_GAMES, allColumns, MyDBHandler.COLUMN_ID + " = " + insertId, null, null, null, null);
         //cursor.moveToFirst();
 //        close();
@@ -84,6 +89,8 @@ public class GamesDataSource {
         int smallImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_SMALL_IMAGE);
         int mediumImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE);
         int largeImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_LARGE_IMAGE);
+        int ratingColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RATING);
+        int upcCodeColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_UPC_CODE);
 
         cursor.moveToFirst();
 
@@ -103,7 +110,9 @@ public class GamesDataSource {
                 String smallImage = cursor.getString(smallImageColumn);
                 String mediumImage = cursor.getString(mediumImageColumn);
                 String largeImage = cursor.getString(largeImageColumn);
-                Game game = new Game(id, title, platform, genre, hardwarePlatform, edition, publicationDate, releaseDate, manufacturer, smallImage, mediumImage, largeImage);
+                int rating = cursor.getInt(ratingColumn);
+                String upcCode = cursor.getString(upcCodeColumn);
+                Game game = new Game(id, title, platform, genre, hardwarePlatform, edition, publicationDate, releaseDate, manufacturer, smallImage, mediumImage, largeImage, rating, upcCode);
                 gamesList.add(game);
             } while (cursor.moveToNext());
             cursor.close();
@@ -130,6 +139,8 @@ public class GamesDataSource {
         int smallImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_SMALL_IMAGE);
         int mediumImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE);
         int largeImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_LARGE_IMAGE);
+        int ratingColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RATING);
+        int upcCodeColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_UPC_CODE);
 
         cursor.moveToFirst();
         if ((cursor.getCount() > 0)) {
@@ -144,7 +155,54 @@ public class GamesDataSource {
             String smallImage = cursor.getString(smallImageColumn);
             String mediumImage = cursor.getString(mediumImageColumn);
             String largeImage = cursor.getString(largeImageColumn);
-            game = new Game(id, title, platform, genre, hardwarePlatform, manufacturer, edition, publicationDate, releaseDate, smallImage, mediumImage, largeImage);
+            int rating = cursor.getInt(ratingColumn);
+            String upcCode = cursor.getString(upcCodeColumn);
+
+            game = new Game(id, title, platform, genre, hardwarePlatform, manufacturer, edition, publicationDate, releaseDate, smallImage, mediumImage, largeImage, rating, upcCode);
+            cursor.close();
+        }
+
+//        close();
+        return game;
+    }
+
+    public Game getGameByUPC(String upcCodeQuery) {
+        Game game = null;
+        Cursor cursor = db.rawQuery("SELECT * FROM " + MyDBHandler.TABLE_GAMES + " WHERE " + MyDBHandler.COLUMN_GAME_UPC_CODE + " = \"" + upcCodeQuery + "\"", null);
+
+        int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
+        int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);
+        int genreColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_GENRE);
+        int platformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PLATFORM);
+        int hardwarePlatformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM);
+        int manufacturerColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MANUFACTURER);
+        int editionColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_EDITION);
+        int publicationDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE);
+        int releaseDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RELEASE_DATE);
+        int smallImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_SMALL_IMAGE);
+        int mediumImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE);
+        int largeImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_LARGE_IMAGE);
+        int ratingColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RATING);
+        int upcCodeColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_UPC_CODE);
+
+        cursor.moveToFirst();
+        if ((cursor.getCount() > 0)) {
+            int id = cursor.getInt(idColumn);
+            String title = cursor.getString(titleColumn);
+            String genre = cursor.getString(genreColumn);
+            String platform = cursor.getString(platformColumn);
+            String hardwarePlatform = cursor.getString(hardwarePlatformColumn);
+            String manufacturer = cursor.getString(manufacturerColumn);
+            String edition = cursor.getString(editionColumn);
+            String publicationDate = cursor.getString(publicationDateColumn);
+            String releaseDate = cursor.getString(releaseDateColumn);
+            String smallImage = cursor.getString(smallImageColumn);
+            String mediumImage = cursor.getString(mediumImageColumn);
+            String largeImage = cursor.getString(largeImageColumn);
+            int rating = cursor.getInt(ratingColumn);
+            String upcCode = cursor.getString(upcCodeColumn);
+
+            game = new Game(id, title, platform, genre, hardwarePlatform, manufacturer, edition, publicationDate, releaseDate, smallImage, mediumImage, largeImage, rating, upcCode);
             cursor.close();
         }
 
@@ -169,7 +227,7 @@ public class GamesDataSource {
         boolean result = false;
         ContentValues values = new ContentValues();
 
-        if (game.getTitle() != null) {
+        /*if (game.getTitle() != null) {
             values.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
         }
         if (game.getGenre() != null) {
@@ -201,7 +259,8 @@ public class GamesDataSource {
         }
         if (game.getLargeImage() != null) {
             values.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
-        }
+        }*/
+            values.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
 
         String selection = MyDBHandler.COLUMN_ID + " LIKE ?";
         String[] selectionArgs = {String.valueOf(game.getId())};
@@ -219,6 +278,7 @@ public class GamesDataSource {
             else
                 result = false;
         }
+        cursor.close();
         return result;
     }
 

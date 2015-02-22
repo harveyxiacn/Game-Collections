@@ -39,15 +39,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.NaviDrawerActivity" />
         </activity>
-        <activity
-            android:name=".activities.GameDetailActivity"
-            android:label="@string/title_activity_game_detail"
-            android:parentActivityName=".activities.BarcodeResultActivity"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.itgarage.harvey.gamecollections.activities.BarcodeResultActivity" />
-        </activity>
     </application>
 
 </manifest>

@@ -48,7 +48,7 @@ public class GamesFragment extends Fragment {
         gamesCardListView.setHasFixedSize(true);
         gamesCardListLayoutManager = new LinearLayoutManager(naviDrawerActivity.getContext());
         gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
-        gamesAdapter = new GameListAdapter(getGameList());
+        gamesAdapter = new GameListAdapter(getGameList(), naviDrawerActivity);
 
         noResultTextView = (TextView) rootView.findViewById(R.id.textViewNoResult);
         noResultTextView.setVisibility(View.GONE);
