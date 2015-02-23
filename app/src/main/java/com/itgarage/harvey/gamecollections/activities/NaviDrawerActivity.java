@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -28,6 +29,7 @@ import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
 import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
 import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
 import com.itgarage.harvey.gamecollections.models.DrawerListItems;
+import com.itgarage.harvey.gamecollections.models.Game;
 
 
 public class NaviDrawerActivity extends ActionBarActivity {
@@ -50,7 +52,10 @@ public class NaviDrawerActivity extends ActionBarActivity {
     private GamesDataSource dataSource;
 
     public final static String BARCODE_SCAN_RESULT = "Barcode Scan Result";
+    public final static String BARCODE_PASS = "pass barcode to game detail";
     public final static String TOOL_BAR_TITLE_SAVED_TAG = "Tool Bar Title Saved";
+    public final static String FRAGMENT_ID_SAVED_TAG = "Fragment id Saved";
+    public static boolean LOCAL_GAME = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,21 +113,19 @@ public class NaviDrawerActivity extends ActionBarActivity {
                     int position = recyclerView.getChildPosition(child);
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     if(position==1){
-                        Log.i("On attach", "mTitle:"+mTitle);
+                        Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
                     }else if(position==2){
-                        Log.i("On attach", "mTitle:"+mTitle);
+                        Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
-                        Bundle bundle = new Bundle();
-
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, GamesFragment.newInstance()).commit();
                     }else if(position==3){
-                        Log.i("On attach", "mTitle:"+mTitle);
+                        Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, SearchFragment.newInstance()).commit();
                     }else if(position==4){
-                        Log.i("On attach", "mTitle:"+mTitle);
+                        Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment.newInstance()).commit();
                     }
@@ -167,6 +170,14 @@ public class NaviDrawerActivity extends ActionBarActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putCharSequence(TOOL_BAR_TITLE_SAVED_TAG, mTitle);
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
+
+        //outState.putInt(FRAGMENT_ID_SAVED_TAG, );
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -206,11 +217,18 @@ public class NaviDrawerActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (scanResult != null) {
-            String re = scanResult.getContents();
-            Log.d("code", re);
-            Intent intent = new Intent(this, BarcodeResultActivity.class);
-            intent.putExtra(BARCODE_SCAN_RESULT, re);
-            startActivity(intent);
+            String resultStr = scanResult.getContents();
+            Log.d("code", resultStr);
+            Game game = dataSource.getGameByUPC(resultStr);
+            if(game==null) {
+                Intent intent = new Intent(this, BarcodeResultActivity.class);
+                intent.putExtra(BARCODE_SCAN_RESULT, resultStr);
+                startActivity(intent);
+            }else {
+                Intent intent = new Intent(this, GameDetailActivity.class);
+                intent.putExtra(BARCODE_PASS, resultStr);
+                startActivity(intent);
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -257,18 +275,19 @@ public class NaviDrawerActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         dataSource.close();
+        Log.i("Navi", "onDestroy");
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
-        dataSource.open();
+        Log.i("Navi", "onResume");
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        dataSource.close();
+        Log.i("Navi", "onPause");
         super.onPause();
     }
 }

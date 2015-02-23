@@ -49,6 +49,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
     TextView noResultTextView;
     Activity passActivity;
     public static boolean LOCAL_GAME = false;
+    GamesDataSource dataSource;
 
     /*private static final String TAG_ADD_TO_DB = "TAG_ADD_TO_DB";
     private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
@@ -87,50 +88,14 @@ public class BarcodeResultActivity extends ActionBarActivity{
         noResultTextView = (TextView) findViewById(R.id.noResultSearchTextView);
         noResultTextView.setVisibility(View.GONE);
 
-        /*ImageView floatingActionButtonIcon = new ImageView(this);
-        floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
-        // Create a button to attach the menu:
-        FloatingActionButton actionButton = new FloatingActionButton.Builder(this)
-                .setContentView(floatingActionButtonIcon)
-                .setBackgroundDrawable(R.drawable.selector_button_cyan)
-                .build();
-        // Create menu items:
-        SubActionButton.Builder itemBuilder = new SubActionButton.Builder(this);
-        itemBuilder.setBackgroundDrawable(getResources().getDrawable(R.drawable.selector_button_cyan));
-        // repeat many times:
-        ImageView itemAddToDBIcon = new ImageView(this);
-        itemAddToDBIcon.setImageResource(R.drawable.ic_add_to_db);
-        SubActionButton addToDBButton = itemBuilder.setContentView(itemAddToDBIcon).build();
-        addToDBButton.setOnClickListener(this);
-        addToDBButton.setTag(TAG_ADD_TO_DB);
-
-        ImageView itemAddContactIcon = new ImageView(this);
-        itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
-        SubActionButton addContactButton = itemBuilder.setContentView(itemAddContactIcon).build();
-        addContactButton.setOnClickListener(this);
-        addContactButton.setTag(TAG_ADD_BORROWER);
-
-        ImageView itemAddRatingIcon = new ImageView(this);
-        itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
-        SubActionButton addRatingButton = itemBuilder.setContentView(itemAddRatingIcon).build();
-        addRatingButton.setOnClickListener(this);
-        addRatingButton.setTag(TAG_ADD_RATING);
-        // Create the menu with the items:
-        FloatingActionMenu actionMenu = new FloatingActionMenu.Builder(this)
-                .addSubActionView(addToDBButton)
-                .addSubActionView(addContactButton)
-                .addSubActionView(addRatingButton)
-                .attachTo(actionButton)
-                .build();*/
-        GamesDataSource dataSource = new GamesDataSource(this);
-        dataSource.open();
-        Log.i("DB operation", "DB opened.");
-        Game game;
-        game = dataSource.getGameByUPC(resultStr);
-        if(game==null) {
-            LOCAL_GAME = false;
+        //dataSource = new GamesDataSource(this);
+        //dataSource.open();
+        //Log.i("DB operation", "DB opened.");
+        //Game game = dataSource.getGameByUPC(resultStr);
+        //if(game==null) {
+        //    LOCAL_GAME = false;
             new SearchAmazonTask().execute();
-        }else {
+        /*}else {
             LOCAL_GAME = true;
             gamesList.add(game);
             gamesAdapter = new GameListAdapter(gamesList, this);
@@ -143,7 +108,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
                 gamesCardListView.setVisibility(View.VISIBLE);
                 noResultTextView.setVisibility(View.GONE);
             }
-        }
+        }*/
 
     }
 
@@ -238,5 +203,12 @@ public class BarcodeResultActivity extends ActionBarActivity{
                 pd.dismiss();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        dataSource.close();
+        Log.i("database operation", "db close");
+        super.onDestroy();
     }
 }

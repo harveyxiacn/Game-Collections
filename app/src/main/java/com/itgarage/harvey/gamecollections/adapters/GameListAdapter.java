@@ -1,6 +1,7 @@
 package com.itgarage.harvey.gamecollections.adapters;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.activities.BarcodeResultActivity;
+import com.itgarage.harvey.gamecollections.activities.GameDetailActivity;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
@@ -150,12 +152,13 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         private static final String TAG_ADD_TO_DB = "TAG_ADD_TO_DB";
         private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
         private static final String TAG_ADD_RATING = "TAG_ADD_RATING";
+        static final String TAG_VIEW = "TAG_VIEW";
         List<Game> gamesList;
         FloatingActionMenu addGameActionMenu, updateGameActionMenu;
         TextView ratingTextView;
         FloatingActionButton addGameActionButton, updateGameActionButton;
 
-        public GameListViewHolder(View view, Activity activity) {
+        public GameListViewHolder(View view, final Activity activity) {
             super(view);
 
             this.activity = activity;
@@ -163,6 +166,9 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             DisplayOptions displayOptions = new DisplayOptions(activity);
             displayOptions.loadFailDrawable(R.drawable.no_image_medium);
             imageView.setDisplayOptions(displayOptions);
+
+            view.setOnClickListener(this);
+            view.setTag(TAG_VIEW);
 
             titleTextView = (TextView) view.findViewById(R.id.textViewGameTitle);
             platformTextView = (TextView) view.findViewById(R.id.textViewGamePlatform);
@@ -216,7 +222,8 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
                 setVisibilities(false);
             }
             if (BarcodeResultActivity.LOCAL_GAME){
-                addGameActionButton.setVisibility(View.GONE);
+                if(addGameActionButton!=null)
+                    addGameActionButton.setVisibility(View.GONE);
                 gameRating.setIsIndicator(true);
             }
         }
@@ -258,6 +265,14 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
                     gameRatingLayout.setVisibility(View.GONE);
                 }
                 addGameActionMenu.close(true);
+            }
+            if(v.getTag().equals(TAG_VIEW)) {
+                if (activity.getClass() == NaviDrawerActivity.class) {
+                    Intent intent = new Intent(activity, GameDetailActivity.class);
+                    intent.putExtra("game position", getPosition());
+                    Log.i("position", "" + getPosition());
+                    activity.startActivity(intent);
+                }
             }
 
         }

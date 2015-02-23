@@ -14,7 +14,7 @@
         <activity
             android:name=".activities.NaviDrawerActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,7 +25,7 @@
             android:name=".activities.BarcodeResultActivity"
             android:label="@string/title_activity_barcode_result"
             android:parentActivityName=".activities.NaviDrawerActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.NaviDrawerActivity" />
@@ -34,10 +34,18 @@
             android:name=".activities.DatabaseActivity"
             android:label="@string/title_activity_database"
             android:parentActivityName=".activities.NaviDrawerActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.NaviDrawerActivity" />
+        </activity>
+        <activity
+            android:name=".activities.GameDetailActivity"
+            android:label="@string/title_activity_game_detail"
+            android:parentActivityName=".activities.NaviDrawerActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity" />
         </activity>
     </application>
 
