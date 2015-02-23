@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class GamesFragment extends Fragment {
     RecyclerView gamesCardListView;
-    RecyclerView.Adapter gamesAdapter;
+    public static GameListAdapter gamesAdapter;
     RecyclerView.LayoutManager gamesCardListLayoutManager;
     NaviDrawerActivity naviDrawerActivity;
     TextView noResultTextView;
@@ -45,7 +45,7 @@ public class GamesFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_games, container,
                 false);
         gamesCardListView = (RecyclerView) rootView.findViewById(R.id.gameCardList);
-        gamesCardListView.setHasFixedSize(true);
+        //gamesCardListView.setHasFixedSize(true);
         gamesCardListLayoutManager = new LinearLayoutManager(naviDrawerActivity.getContext());
         gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
         gamesAdapter = new GameListAdapter(getGameList(), naviDrawerActivity);

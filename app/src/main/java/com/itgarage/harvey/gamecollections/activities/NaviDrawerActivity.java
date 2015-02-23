@@ -282,6 +282,7 @@ public class NaviDrawerActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         Log.i("Navi", "onResume");
+
         super.onResume();
     }
 

@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.itgarage.harvey.gamecollections.R;
-import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
+import com.itgarage.harvey.gamecollections.adapters.OnlineResultGameListAdapter;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLookupArgs;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
@@ -42,7 +42,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
     public static final String BARCODE_SCAN_RESULT_SAVED_TAG = "BARCODE_SCAN_RESULT";
     Toolbar toolbar;
     RecyclerView gamesCardListView;
-    RecyclerView.Adapter gamesAdapter;
+    OnlineResultGameListAdapter gamesAdapter;
     RecyclerView.LayoutManager gamesCardListLayoutManager;
 
     List<Game> gamesList;
@@ -81,7 +81,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
         ItemLookupArgs.ITEM_ID = resultStr;
 
         gamesCardListView = (RecyclerView) findViewById(R.id.gameCardList);
-        gamesCardListView.setHasFixedSize(true);
+        //gamesCardListView.setHasFixedSize(true);
         gamesCardListLayoutManager = new LinearLayoutManager(this);
         gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
         Log.i("RecyclerView", "setting layout manager");
@@ -188,7 +188,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            gamesAdapter = new GameListAdapter(gamesList, passActivity);
+            gamesAdapter = new OnlineResultGameListAdapter(gamesList, passActivity);
             gamesCardListView.setAdapter(gamesAdapter);
             Log.i("RecyclerView", "setting adapter");
             if (gamesAdapter.getItemCount() == 0) {
@@ -207,7 +207,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
 
     @Override
     protected void onDestroy() {
-        dataSource.close();
+        //dataSource.close();
         Log.i("database operation", "db close");
         super.onDestroy();
     }

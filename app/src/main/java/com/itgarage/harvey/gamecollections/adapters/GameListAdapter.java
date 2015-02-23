@@ -3,31 +3,19 @@ package com.itgarage.harvey.gamecollections.adapters;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
-import com.itgarage.harvey.gamecollections.activities.BarcodeResultActivity;
 import com.itgarage.harvey.gamecollections.activities.GameDetailActivity;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
-import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
-import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
-import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
-import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 import me.xiaopan.android.spear.DisplayOptions;
@@ -45,6 +33,22 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
     public GameListAdapter(List<Game> gamesList, Activity activity) {
         this.gamesList = gamesList;
         this.activity = activity;
+    }
+
+    public void updateList(List<Game> gamesList){
+        this.gamesList = gamesList;
+        notifyDataSetChanged();
+    }
+
+    public void addGame(Game game){
+        gamesList.add(game);
+        notifyDataSetChanged();
+    }
+
+    public void deleteGame(Game game){
+        int position = gamesList.indexOf(game);
+        gamesList.remove(game);
+        notifyItemRemoved(position);
     }
 
     @Override
@@ -71,62 +75,10 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         //new ImageDownloader().execute(mediumImage);
         holder.imageView.setImageFromUri(mediumImage);
 
-        String genre = game.getGenre();
-        if (genre!=null) {
-            holder.genreTextView.setText("Genre: " + genre);
-            holder.genreTextView.setVisibility(View.VISIBLE);
-        } else {
-            //holder.gameAttributesLayout.removeView(holder.genreTextView);
-            holder.genreTextView.setVisibility(View.GONE);
-        }
-
-        String hardwarePlatform = game.getHardwarePlatform();
-        if (hardwarePlatform!=null) {
-            holder.hardwarePlatformTextView.setText("Hardware Platform: " + hardwarePlatform);
-            holder.hardwarePlatformTextView.setVisibility(View.VISIBLE);
-        } else {
-            //holder.gameAttributesLayout.removeView(holder.hardwarePlatformTextView);
-            holder.hardwarePlatformTextView.setVisibility(View.GONE);
-        }
-
-        String edition = game.getEdition();
-        if (edition!=null) {
-            holder.editionTextView.setText("Edition: " + edition);
-            holder.editionTextView.setVisibility(View.VISIBLE);
-        } else {
-            holder.editionTextView.setVisibility(View.GONE);
-        }
-
-        String manufacturer = game.getManufacturer();
-        if (manufacturer!=null) {
-            holder.manufacturerTextView.setText("Manufacturer: " + manufacturer);
-            holder.manufacturerTextView.setVisibility(View.VISIBLE);
-        } else {
-            holder.manufacturerTextView.setVisibility(View.GONE);
-        }
-
-        String publicationDate = game.getPublicationDate();
-        if (publicationDate!=null) {
-            holder.publicationDateTextView.setText("Publication Date: " + publicationDate);
-            holder.publicationDateTextView.setVisibility(View.VISIBLE);
-        } else {
-            holder.publicationDateTextView.setVisibility(View.GONE);
-        }
-
-        String releaseDate = game.getReleaseDate();
-        if (releaseDate!=null) {
-            holder.releaseDateTextView.setText("Release Date: " + releaseDate);
-            holder.releaseDateTextView.setVisibility(View.VISIBLE);
-        } else {
-            holder.releaseDateTextView.setVisibility(View.GONE);
-        }
-
         int rating = game.getRating();
         if (rating != -1) {
-            holder.gameRating.setRating((float)rating);
             holder.gameRatingSmall.setRating((float)rating);
         } else {
-            holder.gameRatingLayout.setVisibility(View.GONE);
             holder.gameRatingSmall.setVisibility(View.GONE);
         }
 
@@ -144,19 +96,11 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
     public static class GameListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         protected SpearImageView imageView;
         protected TextView titleTextView, platformTextView;
-        protected LinearLayout gameAttributesLayout, gameRatingLayout, borrowerInfoLayout;
-        protected TextView genreTextView, hardwarePlatformTextView, manufacturerTextView,
-                editionTextView, publicationDateTextView, releaseDateTextView;
-        protected RatingBar gameRating, gameRatingSmall;
+        protected RatingBar gameRatingSmall;
         Activity activity;
-        private static final String TAG_ADD_TO_DB = "TAG_ADD_TO_DB";
-        private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
-        private static final String TAG_ADD_RATING = "TAG_ADD_RATING";
+
         static final String TAG_VIEW = "TAG_VIEW";
         List<Game> gamesList;
-        FloatingActionMenu addGameActionMenu, updateGameActionMenu;
-        TextView ratingTextView;
-        FloatingActionButton addGameActionButton, updateGameActionButton;
 
         public GameListViewHolder(View view, final Activity activity) {
             super(view);
@@ -172,100 +116,14 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
 
             titleTextView = (TextView) view.findViewById(R.id.textViewGameTitle);
             platformTextView = (TextView) view.findViewById(R.id.textViewGamePlatform);
-
-            gameAttributesLayout = (LinearLayout) view.findViewById(R.id.gameAttributesLayout);
-
-            genreTextView = new TextView(view.getContext());
-            genreTextView.setTextSize(20);
-            gameAttributesLayout.addView(genreTextView);
-
-            hardwarePlatformTextView = new TextView(view.getContext());
-            hardwarePlatformTextView.setTextSize(20);
-            gameAttributesLayout.addView(hardwarePlatformTextView);
-
-            editionTextView = new TextView(view.getContext());
-            editionTextView.setTextSize(20);
-            gameAttributesLayout.addView(editionTextView);
-
-            manufacturerTextView = new TextView(view.getContext());
-            manufacturerTextView.setTextSize(20);
-            gameAttributesLayout.addView(manufacturerTextView);
-
-            publicationDateTextView = new TextView(view.getContext());
-            publicationDateTextView.setTextSize(20);
-            gameAttributesLayout.addView(publicationDateTextView);
-
-            releaseDateTextView = new TextView(view.getContext());
-            releaseDateTextView.setTextSize(20);
-            gameAttributesLayout.addView(releaseDateTextView);
-
-            gameRatingLayout = (LinearLayout) view.findViewById(R.id.gameRatingLayout);
-            ratingTextView = (TextView) view.findViewById(R.id.gameRatingText);
-
-            gameRating = (RatingBar) view.findViewById(R.id.gameRatingBar);
-            gameRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-                @Override
-                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                    ratingTextView.setText("Rating: "+String.valueOf((int)ratingBar.getRating()));
-                }
-            });
-
-            borrowerInfoLayout = (LinearLayout) view.findViewById(R.id.gameBorrowerInfoLayout);
-
             gameRatingSmall = (RatingBar) view.findViewById(R.id.gameRatingBarSmall);
-
-            if (activity.getClass() == BarcodeResultActivity.class) {
-                createGameDetailFloatingActionButtons();
-                setVisibilities(true);
-            }
-            if (activity.getClass() == NaviDrawerActivity.class){
-                setVisibilities(false);
-            }
-            if (BarcodeResultActivity.LOCAL_GAME){
-                if(addGameActionButton!=null)
-                    addGameActionButton.setVisibility(View.GONE);
-                gameRating.setIsIndicator(true);
-            }
+            gameRatingSmall.setVisibility(View.VISIBLE);
         }
 
         @Override
         public void onClick(View v) {
-            if (v.getTag().equals(TAG_ADD_TO_DB)) {
-                Toast.makeText(activity, "Add to DB", Toast.LENGTH_SHORT).show();
-                Game game = gamesList.get(0);
-                if (gameRatingLayout.getVisibility() == View.VISIBLE) {
-                    RatingBar ratingBar = (RatingBar) activity.findViewById(R.id.gameRatingBar);
-                    game.setRating((int) ratingBar.getRating());
-                }
-                GamesDataSource dataSource = new GamesDataSource(activity);
-                dataSource.open();
-                Log.i("DB operation", "DB opened.");
-                if(BarcodeResultActivity.UPC_CODE!=null){
-                    game.setUpcCode(BarcodeResultActivity.UPC_CODE);
-                }
-                long insertId = dataSource.addGame(game);
-                if(insertId != -1){
-                    Toast.makeText(activity, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
-                    activity.finish();
-                }
-                addGameActionMenu.close(true);
-            }
-            if (v.getTag().equals(TAG_ADD_BORROWER)) {
-                Toast.makeText(activity, "Add Borrower", Toast.LENGTH_SHORT).show();
-                addGameActionMenu.close(true);
-            }
 
-            if (v.getTag().equals(TAG_ADD_RATING)) {
-                if(gameRatingLayout.getVisibility() == View.GONE) {
-                    Toast.makeText(activity, "Add Rating", Toast.LENGTH_SHORT).show();
-                    gameRatingLayout.setVisibility(View.VISIBLE);
-
-                }else if(gameRatingLayout.getVisibility() == View.VISIBLE){
-                    Toast.makeText(activity, "Remove Rating", Toast.LENGTH_SHORT).show();
-                    gameRatingLayout.setVisibility(View.GONE);
-                }
-                addGameActionMenu.close(true);
-            }
+            /* enter game detail activity by clicking in game list*/
             if(v.getTag().equals(TAG_VIEW)) {
                 if (activity.getClass() == NaviDrawerActivity.class) {
                     Intent intent = new Intent(activity, GameDetailActivity.class);
@@ -275,123 +133,6 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
                 }
             }
 
-        }
-
-        public void createGameDetailFloatingActionButtons() {
-            ImageView floatingActionButtonIcon = new ImageView(activity);
-            floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
-            // Create a button to attach the menu:
-            addGameActionButton = new FloatingActionButton.Builder(activity)
-                    .setContentView(floatingActionButtonIcon)
-                    .setBackgroundDrawable(R.drawable.selector_button_cyan)
-                    .build();
-            // Create menu items:
-            SubActionButton.Builder itemBuilder = new SubActionButton.Builder(activity);
-            itemBuilder.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.selector_button_cyan));
-            // repeat many times:
-            ImageView itemAddToDBIcon = new ImageView(activity);
-            itemAddToDBIcon.setImageResource(R.drawable.ic_add_to_db);
-            SubActionButton addToDBButton = itemBuilder.setContentView(itemAddToDBIcon).build();
-            addToDBButton.setOnClickListener(this);
-            addToDBButton.setTag(TAG_ADD_TO_DB);
-
-            ImageView itemAddContactIcon = new ImageView(activity);
-            itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
-            SubActionButton addContactButton = itemBuilder.setContentView(itemAddContactIcon).build();
-            addContactButton.setOnClickListener(this);
-            addContactButton.setTag(TAG_ADD_BORROWER);
-
-            ImageView itemAddRatingIcon = new ImageView(activity);
-            itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
-            SubActionButton addRatingButton = itemBuilder.setContentView(itemAddRatingIcon).build();
-            addRatingButton.setOnClickListener(this);
-            addRatingButton.setTag(TAG_ADD_RATING);
-            // Create the menu with the items:
-            addGameActionMenu = new FloatingActionMenu.Builder(activity)
-                    .addSubActionView(addToDBButton)
-                    .addSubActionView(addContactButton)
-                    .addSubActionView(addRatingButton)
-                    .attachTo(addGameActionButton)
-                    .build();
-        }
-
-        public void createGameUpdateFloatingActionButtons() {
-            ImageView floatingActionButtonIcon = new ImageView(activity);
-            floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
-            // Create a button to attach the menu:
-            updateGameActionButton = new FloatingActionButton.Builder(activity)
-                    .setContentView(floatingActionButtonIcon)
-                    .setBackgroundDrawable(R.drawable.selector_button_cyan)
-                    .build();
-            // Create menu items:
-            SubActionButton.Builder itemBuilder = new SubActionButton.Builder(activity);
-            itemBuilder.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.selector_button_cyan));
-            // repeat many times:
-            ImageView itemAddToDBIcon = new ImageView(activity);
-            itemAddToDBIcon.setImageResource(R.drawable.ic_add_to_db);
-            SubActionButton addToDBButton = itemBuilder.setContentView(itemAddToDBIcon).build();
-            addToDBButton.setOnClickListener(this);
-            addToDBButton.setTag(TAG_ADD_TO_DB);
-
-            ImageView itemAddContactIcon = new ImageView(activity);
-            itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
-            SubActionButton addContactButton = itemBuilder.setContentView(itemAddContactIcon).build();
-            addContactButton.setOnClickListener(this);
-            addContactButton.setTag(TAG_ADD_BORROWER);
-
-            ImageView itemAddRatingIcon = new ImageView(activity);
-            itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
-            SubActionButton addRatingButton = itemBuilder.setContentView(itemAddRatingIcon).build();
-            addRatingButton.setOnClickListener(this);
-            addRatingButton.setTag(TAG_ADD_RATING);
-            // Create the menu with the items:
-            updateGameActionMenu = new FloatingActionMenu.Builder(activity)
-                    .addSubActionView(addToDBButton)
-                    .addSubActionView(addContactButton)
-                    .addSubActionView(addRatingButton)
-                    .attachTo(updateGameActionButton)
-                    .build();
-        }
-
-        public void setVisibilities(boolean isVisible){
-            if(isVisible) {
-                gameAttributesLayout.setVisibility(View.VISIBLE);
-                //gameRatingLayout.setVisibility(View.VISIBLE);
-                //borrowerInfoLayout.setVisibility(View.VISIBLE);
-                gameRatingSmall.setVisibility(View.GONE);
-            }else {
-                gameAttributesLayout.setVisibility(View.GONE);
-                gameRatingLayout.setVisibility(View.GONE);
-                borrowerInfoLayout.setVisibility(View.GONE);
-                gameRatingSmall.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-    class ImageDownloader extends AsyncTask<String, String, Bitmap> {
-
-        @Override
-        protected Bitmap doInBackground(String... args) {
-
-            try {
-                bitmap = BitmapFactory.decodeStream((InputStream) new URL(args[0]).getContent());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return bitmap;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap image) {
-            if (image != null) {
-                holder.imageView.setImageBitmap(image);
-            }
         }
     }
 }

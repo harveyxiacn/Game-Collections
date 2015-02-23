@@ -1,5 +1,8 @@
 package com.itgarage.harvey.gamecollections.activities;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -12,9 +15,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
+import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
+import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
 import com.itgarage.harvey.gamecollections.models.Game;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
@@ -39,10 +45,13 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
     static final String UPDATE_CONTACT = "update contact";
     static final String DELETE_CONTACT = "delete contact";
 
-    SubActionButton updateToDBButton, updateContactButton, removeContactButton, updateRaitngButton;
-    ImageView itemUpdateRatingIcon, itemRemoveContactIcon, itemUpdateContactIcon, itemUpdateToDBIcon;
+    SubActionButton updateToDBButton, updateContactButton, removeContactButton, updateRaitngButton, deleteFromDBButton;
+    ImageView itemUpdateRatingIcon, itemRemoveContactIcon, itemUpdateContactIcon, itemUpdateToDBIcon, itemDeleteFromDBIcon;
     SubActionButton.Builder itemBuilder;
     FloatingActionMenu updateGameActionMenu;
+    public GamesDataSource dataSource;
+    public Game game;
+    public Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +66,10 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         int postion = intent.getIntExtra("game position", -1);
         String intentTitle = intent.getStringExtra("game title");
         String intentBarcode = intent.getStringExtra(NaviDrawerActivity.BARCODE_PASS);
-        GamesDataSource dataSource = new GamesDataSource(this);
+        dataSource = new GamesDataSource(this);
         dataSource.open();
         List<Game> gameList = dataSource.getAllGames();
-        Game game = null;
+        game = null;
         if(postion!=-1) {
              game = gameList.get(postion);
         }
@@ -197,16 +206,16 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         itemBuilder.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.selector_button_cyan));
         // repeat many times:
         itemUpdateToDBIcon = new ImageView(this);
-        itemUpdateToDBIcon.setImageResource(R.drawable.ic_add_to_db);
+        itemUpdateToDBIcon.setImageResource(R.drawable.ic_update_game);
         updateToDBButton = itemBuilder.setContentView(itemUpdateToDBIcon).build();
         updateToDBButton.setOnClickListener(this);
         updateToDBButton.setTag(UPDATE_GAME);
 
-        itemUpdateContactIcon = new ImageView(this);
-        itemUpdateContactIcon.setImageResource(R.drawable.ic_add_borrower);
-        updateContactButton = itemBuilder.setContentView(itemUpdateContactIcon).build();
-        updateContactButton.setOnClickListener(this);
-        updateContactButton.setTag(UPDATE_CONTACT);
+        itemDeleteFromDBIcon = new ImageView(this);
+        itemDeleteFromDBIcon.setImageResource(R.drawable.ic_delete_game);
+        deleteFromDBButton = itemBuilder.setContentView(itemDeleteFromDBIcon).build();
+        deleteFromDBButton.setOnClickListener(this);
+        deleteFromDBButton.setTag(DELETE_GAME);
 
         itemRemoveContactIcon = new ImageView(this);
         itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
@@ -222,7 +231,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         // Create the menu with the items:
         updateGameActionMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(updateToDBButton)
-                .addSubActionView(updateContactButton)
+                .addSubActionView(deleteFromDBButton)
                 .addSubActionView(removeContactButton)
                 .addSubActionView(updateRaitngButton)
                 .attachTo(updateGameActionButton)
@@ -265,9 +274,52 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 Log.i("rating bar", "small");
                 gameRatingSmall.setVisibility(View.VISIBLE);
                 gameRatingLayout.setVisibility(View.GONE);
+                itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
             }
             updateGameActionMenu.close(true);
         }
+        if(v.getTag().equals(DELETE_CONTACT)){
+            if(borrowerInfoLayout.getVisibility()==View.VISIBLE) {
+                Log.i("rating bar", "large");
+                borrowerInfoLayout.setVisibility(View.GONE);
+                itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
+                //updateRaitngButton = itemBuilder.setContentView(itemUpdateRatingIcon).build();
+            }else {
+                Log.i("rating bar", "small");
+                borrowerInfoLayout.setVisibility(View.VISIBLE);
+                itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
+            }
+            updateGameActionMenu.close(true);
+        }
+        if(v.getTag().equals(DELETE_GAME)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Delete "+titleTextView.getText()+"?")
+            .setTitle("Delete confirmation")
+            .setIcon(R.drawable.ic_delete_confirm)
+            .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    dataSource.open();
+                    dataSource.deleteGame(game.getId());
+                    dataSource.close();
+                    Toast.makeText(context, game.getTitle()+" deleted.", Toast.LENGTH_SHORT).show();
+                    if(HomeFragment.imageSlideAdapter!=null)
+                        HomeFragment.imageSlideAdapter.deleteGame(game);
+                    if(GamesFragment.gamesAdapter!=null)
+                        GamesFragment.gamesAdapter.deleteGame(game);
+                    ((GameDetailActivity) context).finish();
+                }
+            })
+            .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
+        }
     }
 }

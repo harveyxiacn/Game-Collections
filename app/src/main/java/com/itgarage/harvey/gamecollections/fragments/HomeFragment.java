@@ -24,6 +24,7 @@ import java.util.List;
 public class HomeFragment extends Fragment {
     static int focusedPage;
     NaviDrawerActivity activity;
+    public static ImageSlideAdapter imageSlideAdapter;
     /**
      * Returns a new instance of this fragment for the given section number.
      */
@@ -46,7 +47,7 @@ public class HomeFragment extends Fragment {
         dataSource.open();
         List<Game> gameList = dataSource.getAllGames();
         dataSource.close();
-        ImageSlideAdapter adapter = new ImageSlideAdapter(rootView.getContext(), gameList, viewPager);
+        imageSlideAdapter = new ImageSlideAdapter(rootView.getContext(), gameList, viewPager);
         //viewPager.setAdapter(adapter);
         //viewPager.setCurrentItem(0);
 
