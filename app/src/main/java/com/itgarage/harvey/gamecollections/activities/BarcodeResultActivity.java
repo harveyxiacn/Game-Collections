@@ -128,6 +128,7 @@ public class BarcodeResultActivity extends ActionBarActivity{
         Game game;
         game = dataSource.getGameByUPC(resultStr);
         if(game==null) {
+            LOCAL_GAME = false;
             new SearchAmazonTask().execute();
         }else {
             LOCAL_GAME = true;

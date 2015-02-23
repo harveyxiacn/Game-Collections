@@ -151,9 +151,9 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
         private static final String TAG_ADD_RATING = "TAG_ADD_RATING";
         List<Game> gamesList;
-        FloatingActionMenu actionMenuGameDetail;
+        FloatingActionMenu addGameActionMenu, updateGameActionMenu;
         TextView ratingTextView;
-        FloatingActionButton actionButton;
+        FloatingActionButton addGameActionButton, updateGameActionButton;
 
         public GameListViewHolder(View view, Activity activity) {
             super(view);
@@ -216,7 +216,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
                 setVisibilities(false);
             }
             if (BarcodeResultActivity.LOCAL_GAME){
-                actionButton.setVisibility(View.GONE);
+                addGameActionButton.setVisibility(View.GONE);
                 gameRating.setIsIndicator(true);
             }
         }
@@ -241,22 +241,23 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
                     Toast.makeText(activity, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
                     activity.finish();
                 }
-                actionMenuGameDetail.close(true);
+                addGameActionMenu.close(true);
             }
             if (v.getTag().equals(TAG_ADD_BORROWER)) {
                 Toast.makeText(activity, "Add Borrower", Toast.LENGTH_SHORT).show();
-                actionMenuGameDetail.close(true);
+                addGameActionMenu.close(true);
             }
 
             if (v.getTag().equals(TAG_ADD_RATING)) {
                 if(gameRatingLayout.getVisibility() == View.GONE) {
                     Toast.makeText(activity, "Add Rating", Toast.LENGTH_SHORT).show();
                     gameRatingLayout.setVisibility(View.VISIBLE);
+
                 }else if(gameRatingLayout.getVisibility() == View.VISIBLE){
                     Toast.makeText(activity, "Remove Rating", Toast.LENGTH_SHORT).show();
                     gameRatingLayout.setVisibility(View.GONE);
                 }
-                actionMenuGameDetail.close(true);
+                addGameActionMenu.close(true);
             }
 
         }
@@ -265,7 +266,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             ImageView floatingActionButtonIcon = new ImageView(activity);
             floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
             // Create a button to attach the menu:
-            actionButton = new FloatingActionButton.Builder(activity)
+            addGameActionButton = new FloatingActionButton.Builder(activity)
                     .setContentView(floatingActionButtonIcon)
                     .setBackgroundDrawable(R.drawable.selector_button_cyan)
                     .build();
@@ -291,11 +292,49 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             addRatingButton.setOnClickListener(this);
             addRatingButton.setTag(TAG_ADD_RATING);
             // Create the menu with the items:
-            actionMenuGameDetail = new FloatingActionMenu.Builder(activity)
+            addGameActionMenu = new FloatingActionMenu.Builder(activity)
                     .addSubActionView(addToDBButton)
                     .addSubActionView(addContactButton)
                     .addSubActionView(addRatingButton)
-                    .attachTo(actionButton)
+                    .attachTo(addGameActionButton)
+                    .build();
+        }
+
+        public void createGameUpdateFloatingActionButtons() {
+            ImageView floatingActionButtonIcon = new ImageView(activity);
+            floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
+            // Create a button to attach the menu:
+            updateGameActionButton = new FloatingActionButton.Builder(activity)
+                    .setContentView(floatingActionButtonIcon)
+                    .setBackgroundDrawable(R.drawable.selector_button_cyan)
+                    .build();
+            // Create menu items:
+            SubActionButton.Builder itemBuilder = new SubActionButton.Builder(activity);
+            itemBuilder.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.selector_button_cyan));
+            // repeat many times:
+            ImageView itemAddToDBIcon = new ImageView(activity);
+            itemAddToDBIcon.setImageResource(R.drawable.ic_add_to_db);
+            SubActionButton addToDBButton = itemBuilder.setContentView(itemAddToDBIcon).build();
+            addToDBButton.setOnClickListener(this);
+            addToDBButton.setTag(TAG_ADD_TO_DB);
+
+            ImageView itemAddContactIcon = new ImageView(activity);
+            itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
+            SubActionButton addContactButton = itemBuilder.setContentView(itemAddContactIcon).build();
+            addContactButton.setOnClickListener(this);
+            addContactButton.setTag(TAG_ADD_BORROWER);
+
+            ImageView itemAddRatingIcon = new ImageView(activity);
+            itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
+            SubActionButton addRatingButton = itemBuilder.setContentView(itemAddRatingIcon).build();
+            addRatingButton.setOnClickListener(this);
+            addRatingButton.setTag(TAG_ADD_RATING);
+            // Create the menu with the items:
+            updateGameActionMenu = new FloatingActionMenu.Builder(activity)
+                    .addSubActionView(addToDBButton)
+                    .addSubActionView(addContactButton)
+                    .addSubActionView(addRatingButton)
+                    .attachTo(updateGameActionButton)
                     .build();
         }
 
