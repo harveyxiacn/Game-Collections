@@ -42,13 +42,8 @@ public class ImageSlideAdapter extends PagerAdapter implements View.OnClickListe
         return super.getItemPosition(object);
     }
 
-    public void addGame(Game game){
-        gamesList.add(game);
-        notifyDataSetChanged();
-    }
-
-    public void deleteGame(Game game){
-        gamesList.remove(game);
+    public void updateList(List<Game> gamesList){
+        this.gamesList = gamesList;
         notifyDataSetChanged();
     }
 

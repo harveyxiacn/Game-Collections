@@ -40,17 +40,6 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         notifyDataSetChanged();
     }
 
-    public void addGame(Game game){
-        gamesList.add(game);
-        notifyDataSetChanged();
-    }
-
-    public void deleteGame(Game game){
-        int position = gamesList.indexOf(game);
-        gamesList.remove(game);
-        notifyItemRemoved(position);
-    }
-
     @Override
     public int getItemCount() {
         if (gamesList != null)

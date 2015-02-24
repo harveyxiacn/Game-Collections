@@ -94,6 +94,9 @@ public class Parser {
         game.setGenre(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_GENRE));
         game.setPlatform(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_PLATFORM));
         game.setHardwarePlatform(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_HARDWARE_PLATFORM));
+        if(game.getPlatform().equals("")){
+            game.setPlatform(game.getHardwarePlatform());
+        }
         game.setManufacturer(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_MANUFACTURER));
         game.setEdition(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_EDITION));
         game.setPublicationDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_PUBLICATION_DATE));

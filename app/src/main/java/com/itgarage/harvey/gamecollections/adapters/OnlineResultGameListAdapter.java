@@ -237,11 +237,12 @@ public class OnlineResultGameListAdapter extends RecyclerView.Adapter<OnlineResu
                 }
                 long insertId = dataSource.addGame(game);
                 if(insertId != -1){
+                    gamesList = dataSource.getAllGames();
                     Toast.makeText(activity, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
                     if(GamesFragment.gamesAdapter!=null)
-                        GamesFragment.gamesAdapter.addGame(game);
+                        GamesFragment.gamesAdapter.updateList(gamesList);
                     if(HomeFragment.imageSlideAdapter!=null)
-                        HomeFragment.imageSlideAdapter.addGame(game);
+                        HomeFragment.imageSlideAdapter.updateList(gamesList);
                     activity.finish();
                 }
                 dataSource.close();

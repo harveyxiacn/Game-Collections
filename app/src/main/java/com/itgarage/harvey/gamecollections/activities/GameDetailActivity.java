@@ -60,7 +60,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
         //getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
         int postion = intent.getIntExtra("game position", -1);
@@ -92,6 +92,13 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         dataSource.close();
         String title;
         titleTextView = (TextView) findViewById(R.id.textViewGameTitle);
+        platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
+        gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
+        gameAttributesLayout = (LinearLayout) findViewById(R.id.gameAttributesLayout);
+
+        gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
+        ratingTextView = (TextView) findViewById(R.id.gameRatingText);
+        gameRatingSmall = (RatingBar) findViewById(R.id.gameRatingBarSmall);
         if(game!=null){
             title = game.getTitle();
             getSupportActionBar().setTitle(title);
@@ -99,18 +106,16 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             titleTextView.setText(title);
             String platform = game.getPlatform();
             if (platform!=null) {
-                platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
+
                 platformTextview.setText(game.getPlatform());
                 platformTextview.setText(platform);
             }
 
             String mediumImage = game.getMediumImage();
-            //new ImageDownloader().execute(mediumImage);
-            gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
-            gameImage.setImageFromUri(game.getMediumImage());
+
             gameImage.setImageFromUri(mediumImage);
 
-            gameAttributesLayout = (LinearLayout) findViewById(R.id.gameAttributesLayout);
+
 
             String genre = game.getGenre();
             if (genre!=null) {
@@ -169,18 +174,16 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
             int rating = game.getRating();
             if (rating != -1) {
-                gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
-                ratingTextView = (TextView) findViewById(R.id.gameRatingText);
+
                 gameRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
                     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                        ratingTextView.setText("Rating: "+String.valueOf((int)ratingBar.getRating()));
+                        ratingTextView.setText("Rating: " + String.valueOf((int) ratingBar.getRating()));
                     }
                 });
-                gameRating.setRating((float)rating);
-
-                gameRatingSmall = (RatingBar) findViewById(R.id.gameRatingBarSmall);
+                gameRating.setRating((float) rating);
                 gameRatingSmall.setRating((float) rating);
+                gameRatingSmall.setVisibility(View.VISIBLE);
             }
 
             borrowerInfoLayout = (LinearLayout) findViewById(R.id.gameBorrowerInfoLayout);
@@ -263,21 +266,44 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
+        /*update the rating of the game*/
         if(v.getTag().equals(UPDATE_RATING)){
             if(gameRatingSmall.getVisibility()==View.VISIBLE) {
-                Log.i("rating bar", "large");
-                gameRatingSmall.setVisibility(View.GONE);
-                gameRatingLayout.setVisibility(View.VISIBLE);
-                itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
-                //updateRaitngButton = itemBuilder.setContentView(itemUpdateRatingIcon).build();
+                if(game.getRating()!=-1) {
+                    Log.i("rating bar", "show large hide small");
+                    gameRatingSmall.setVisibility(View.GONE);
+                    gameRatingLayout.setVisibility(View.VISIBLE);
+                    itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
+                }
             }else {
-                Log.i("rating bar", "small");
-                gameRatingSmall.setVisibility(View.VISIBLE);
-                gameRatingLayout.setVisibility(View.GONE);
-                itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
+                if(game.getRating()==-1){
+                    Log.i("rating bar", "show large");
+                    gameRatingLayout.setVisibility(View.VISIBLE);
+                    itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
+                    gameRatingSmall.setRating(gameRating.getRating());
+                    game.setRating((int)gameRating.getRating());
+                    dataSource.open();
+                    dataSource.updateGame(game);
+                    List<Game> gameList = dataSource.getAllGames();
+                    dataSource.close();
+                    GamesFragment.gamesAdapter.updateList(gameList);
+                }else {
+                    Log.i("rating bar", "show small hide large");
+                    gameRatingSmall.setVisibility(View.VISIBLE);
+                    gameRatingLayout.setVisibility(View.GONE);
+                    itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
+                    gameRatingSmall.setRating(gameRating.getRating());
+                    game.setRating((int)gameRating.getRating());
+                    dataSource.open();
+                    dataSource.updateGame(game);
+                    List<Game> gameList = dataSource.getAllGames();
+                    dataSource.close();
+                    GamesFragment.gamesAdapter.updateList(gameList);
+                }
             }
             updateGameActionMenu.close(true);
         }
+        /*delete the contact/borrower*/
         if(v.getTag().equals(DELETE_CONTACT)){
             if(borrowerInfoLayout.getVisibility()==View.VISIBLE) {
                 Log.i("rating bar", "large");
@@ -291,6 +317,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
             updateGameActionMenu.close(true);
         }
+        /*Delete the game*/
         if(v.getTag().equals(DELETE_GAME)){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Delete "+titleTextView.getText()+"?")
@@ -302,12 +329,13 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     dialog.dismiss();
                     dataSource.open();
                     dataSource.deleteGame(game.getId());
+                    List<Game> gameList = dataSource.getAllGames();
                     dataSource.close();
                     Toast.makeText(context, game.getTitle()+" deleted.", Toast.LENGTH_SHORT).show();
                     if(HomeFragment.imageSlideAdapter!=null)
-                        HomeFragment.imageSlideAdapter.deleteGame(game);
+                        HomeFragment.imageSlideAdapter.updateList(gameList);
                     if(GamesFragment.gamesAdapter!=null)
-                        GamesFragment.gamesAdapter.deleteGame(game);
+                        GamesFragment.gamesAdapter.updateList(gameList);
                     ((GameDetailActivity) context).finish();
                 }
             })
