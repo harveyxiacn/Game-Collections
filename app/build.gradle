@@ -50,8 +50,6 @@ dependencies {
     compile 'com.oguzdev:CircularFloatingActionMenu:1.0.2'
     //compile files('libs/spear-1.3.0.jar')
     //compile 'cn.trinea.android.view.autoscrollviewpager:android-auto-scroll-view-pager:1.1.2'
-    compile files('libs/aws-java-sdk-1.9.22.jar')
-    compile files('libs/aws-java-sdk-1.9.22-javadoc.jar')
-    compile files('libs/aws-java-sdk-1.9.22-sources.jar')
-    compile files('libs/aws-java-sdk-flow-build-tools-1.9.22.jar')
+    compile files('libs/aws-android-sdk-2.1.8-core.jar')
+    compile files('libs/aws-android-sdk-2.1.8-cognito.jar')
 }
