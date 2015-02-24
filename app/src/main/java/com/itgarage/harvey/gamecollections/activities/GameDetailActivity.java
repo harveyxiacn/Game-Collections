@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -52,6 +53,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
     public GamesDataSource dataSource;
     public Game game;
     public Context context = this;
+
+    private static final int CONTACT_PICKER_RESULT = 1;
+    static final String DEBUG_TAG = "DEBUG_TAG";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -331,11 +335,22 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     dataSource.deleteGame(game.getId());
                     List<Game> gameList = dataSource.getAllGames();
                     dataSource.close();
-                    Toast.makeText(context, game.getTitle()+" deleted.", Toast.LENGTH_SHORT).show();
-                    if(HomeFragment.imageSlideAdapter!=null)
-                        HomeFragment.imageSlideAdapter.updateList(gameList);
-                    if(GamesFragment.gamesAdapter!=null)
-                        GamesFragment.gamesAdapter.updateList(gameList);
+                    Toast.makeText(context, game.getTitle() + " deleted.", Toast.LENGTH_SHORT).show();
+                    if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
+                        if (HomeFragment.imageSlideAdapter != null) {
+                            HomeFragment.imageSlideAdapter.updateList(gameList);
+                            if (gameList == null) {
+                                HomeFragment.changeUIsWhenDataSetChange(false);
+                            }
+                        }
+                    } else if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
+                        if (GamesFragment.gamesAdapter != null) {
+                            GamesFragment.gamesAdapter.updateList(gameList);
+                            if (gameList == null) {
+                                GamesFragment.changeUIsWhenDataSetChange(false);
+                            }
+                        }
+                    }
                     ((GameDetailActivity) context).finish();
                 }
             })
@@ -350,4 +365,62 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
         }
     }
+
+    public void doLaunchContactPicker(View view) {
+        Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
+                ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(contactPickerIntent, CONTACT_PICKER_RESULT);
+    }
+
+    /*@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case CONTACT_PICKER_RESULT:
+                    // handle contact results
+                    Cursor cursor = null;
+                    String email = "";
+                    try{
+                        Uri result = data.getData();
+                        Log.v(DEBUG_TAG, "Got a contact result: "
+                                + result.toString());
+                        // get the contact id from the Uri
+                        String id = result.getLastPathSegment();
+
+                        // query for everything email
+                        cursor = getContentResolver().query(Email.CONTENT_URI,
+                                null, Email.CONTACT_ID + "=?", new String[] { id },
+                                null);
+
+                        int emailIdx = cursor.getColumnIndex(Email.DATA);
+
+                        // let's just get the first email
+                        if (cursor.moveToFirst()) {
+                            email = cursor.getString(emailIdx);
+                            Log.v(DEBUG_TAG, "Got email: " + email);
+                        } else {
+                            Log.w(DEBUG_TAG, "No results");
+                        }
+                    } catch (Exception e) {
+                        Log.e(DEBUG_TAG, "Failed to get email data", e);
+                    } finally {
+                        if (cursor != null) {
+                            cursor.close();
+                        }
+                        *//*EditText emailEntry = (EditText) findViewById(R.id.invite_email);
+                        emailEntry.setText(email);
+                        if (email.length() == 0) {
+                            Toast.makeText(this, "No email found for contact.",
+                                    Toast.LENGTH_LONG).show();
+                        }*//*
+
+                    }
+                    break;
+            }
+
+        } else {
+            // gracefully handle failure
+            Log.w(DEBUG_TAG, "Warning: activity result not ok");
+        }
+    }*/
 }

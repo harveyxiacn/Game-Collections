@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
@@ -23,8 +24,10 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
     static int focusedPage;
-    NaviDrawerActivity activity;
+    public static NaviDrawerActivity activity;
     public static ImageSlideAdapter imageSlideAdapter;
+    public static ViewPager viewPager;
+    public static LinearLayout noResultLinearLayout;
     /**
      * Returns a new instance of this fragment for the given section number.
      */
@@ -42,12 +45,18 @@ public class HomeFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_home, container,
                 false);
         //final AutoScrollViewPager viewPager = (AutoScrollViewPager) rootView.findViewById(R.id.homeSlider);
-        final ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.homeSlider);
+        viewPager = (ViewPager) rootView.findViewById(R.id.homeSlider);
         GamesDataSource dataSource = new GamesDataSource(rootView.getContext());
         dataSource.open();
         List<Game> gameList = dataSource.getAllGames();
         dataSource.close();
         imageSlideAdapter = new ImageSlideAdapter(rootView.getContext(), gameList, viewPager);
+        noResultLinearLayout = (LinearLayout) rootView.findViewById(R.id.noGameInDataBaseLinearLayout);
+        if(gameList!=null){
+            changeUIsWhenDataSetChange(true);
+        }else {
+            changeUIsWhenDataSetChange(false);
+        }
         //viewPager.setAdapter(adapter);
         //viewPager.setCurrentItem(0);
 
@@ -68,6 +77,16 @@ public class HomeFragment extends Fragment {
             }
         });*/
         return rootView;
+    }
+
+    public static void changeUIsWhenDataSetChange(boolean hasData){
+        if(hasData){
+            noResultLinearLayout.setVisibility(View.GONE);
+            viewPager.setVisibility(View.VISIBLE);
+        }else {
+            noResultLinearLayout.setVisibility(View.VISIBLE);
+            viewPager.setVisibility(View.GONE);
+        }
     }
 
     @Override

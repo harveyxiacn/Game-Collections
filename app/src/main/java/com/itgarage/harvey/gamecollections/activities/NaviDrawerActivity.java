@@ -55,6 +55,7 @@ public class NaviDrawerActivity extends ActionBarActivity {
     public final static String BARCODE_PASS = "pass barcode to game detail";
     public final static String TOOL_BAR_TITLE_SAVED_TAG = "Tool Bar Title Saved";
     public final static String FRAGMENT_ID_SAVED_TAG = "Fragment id Saved";
+    public static String CURRENT_FRAGMENT = "";
     public static boolean LOCAL_GAME = false;
 
     @Override
@@ -77,6 +78,7 @@ public class NaviDrawerActivity extends ActionBarActivity {
             fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
             mTitle = getString(R.string.home_page_text);
             getSupportActionBar().setTitle(mTitle);
+            CURRENT_FRAGMENT = "home";
             //Log.i("toolbar", "toolbar first in:"+mTitle);
         }
 
@@ -116,18 +118,22 @@ public class NaviDrawerActivity extends ActionBarActivity {
                         Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
+                        CURRENT_FRAGMENT = "home";
                     }else if(position==2){
                         Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, GamesFragment.newInstance()).commit();
+                        CURRENT_FRAGMENT = "games";
                     }else if(position==3){
                         Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, SearchFragment.newInstance()).commit();
+                        CURRENT_FRAGMENT = "search";
                     }else if(position==4){
                         Log.i("On attach", "mTitle:" + mTitle);
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment.newInstance()).commit();
+                        CURRENT_FRAGMENT = "settings";
                     }
                     return true;
 

@@ -20,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
+import com.itgarage.harvey.gamecollections.adapters.ImageSlideAdapter;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLookupArgs;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
@@ -331,10 +333,25 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             if(insertId != -1){
                 gamesList = dataSource.getAllGames();
                 Toast.makeText(this, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
-                if(GamesFragment.gamesAdapter!=null)
-                    GamesFragment.gamesAdapter.updateList(gamesList);
-                if(HomeFragment.imageSlideAdapter!=null)
-                    HomeFragment.imageSlideAdapter.updateList(gamesList);
+                if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
+                    if (GamesFragment.gamesAdapter != null) {
+                        GamesFragment.gamesAdapter.updateList(gamesList);
+                        GamesFragment.changeUIsWhenDataSetChange(true);
+                    } else {
+                        GamesFragment.gamesAdapter = new GameListAdapter(gamesList, GamesFragment.naviDrawerActivity);
+                        GamesFragment.changeUIsWhenDataSetChange(true);
+                    }
+                }else if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
+                    if (HomeFragment.imageSlideAdapter != null) {
+                        Log.i("imageSlideAdapter", "not null, update list");
+                        HomeFragment.imageSlideAdapter.updateList(gamesList);
+                        HomeFragment.changeUIsWhenDataSetChange(true);
+                    } else {
+                        Log.i("imageSlideAdapter", "null, create, update list");
+                        HomeFragment.imageSlideAdapter = new ImageSlideAdapter(HomeFragment.activity.getContext(), gamesList, HomeFragment.viewPager);
+                        HomeFragment.changeUIsWhenDataSetChange(true);
+                    }
+                }
                 finish();
             }
             dataSource.close();

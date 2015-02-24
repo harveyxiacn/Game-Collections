@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.itgarage.harvey.gamecollections.R;
@@ -23,11 +24,12 @@ import java.util.List;
  * Created by harvey on 2015/2/16.
  */
 public class GamesFragment extends Fragment {
-    RecyclerView gamesCardListView;
+    static RecyclerView gamesCardListView;
     public static GameListAdapter gamesAdapter;
-    RecyclerView.LayoutManager gamesCardListLayoutManager;
-    NaviDrawerActivity naviDrawerActivity;
-    TextView noResultTextView;
+    static RecyclerView.LayoutManager gamesCardListLayoutManager;
+    public static NaviDrawerActivity naviDrawerActivity;
+    static TextView noResultTextView;
+    static LinearLayout noResultLinearLayout;
     /**
      * Returns a new instance of this fragment for the given section number.
      */
@@ -50,18 +52,32 @@ public class GamesFragment extends Fragment {
         gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
         gamesAdapter = new GameListAdapter(getGameList(), naviDrawerActivity);
 
-        noResultTextView = (TextView) rootView.findViewById(R.id.textViewNoResult);
-        noResultTextView.setVisibility(View.GONE);
+        /*noResultTextView = (TextView) rootView.findViewById(R.id.textViewNoResult);
+        noResultTextView.setVisibility(View.GONE);*/
 
-        if(gamesAdapter.getItemCount() == 0){
+        noResultLinearLayout = (LinearLayout) rootView.findViewById(R.id.noGameInDataBaseLinearLayout);
+
+        if(gamesAdapter.getItemCount()==0){
+            changeUIsWhenDataSetChange(false);
+        }else {
+            changeUIsWhenDataSetChange(true);
+        }
+        return rootView;
+    }
+
+    public static void changeUIsWhenDataSetChange(boolean hasData){
+
+        if(!hasData){
             gamesCardListView.setVisibility(View.GONE);
-            noResultTextView.setVisibility(View.VISIBLE);
+            //noResultTextView.setVisibility(View.VISIBLE);
+            noResultLinearLayout.setVisibility(View.VISIBLE);
+
         }else {
             gamesCardListView.setAdapter(gamesAdapter);
             gamesCardListView.setVisibility(View.VISIBLE);
-            noResultTextView.setVisibility(View.GONE);
+            //noResultTextView.setVisibility(View.GONE);
+            noResultLinearLayout.setVisibility(View.GONE);
         }
-        return rootView;
     }
 
     @Override

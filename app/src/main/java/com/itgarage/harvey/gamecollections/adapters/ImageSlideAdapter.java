@@ -49,6 +49,8 @@ public class ImageSlideAdapter extends PagerAdapter implements View.OnClickListe
 
     @Override
     public int getCount() {
+        if(gamesList==null)
+            return 0;
         return gamesList.size();
     }
 
