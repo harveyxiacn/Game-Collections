@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -84,9 +87,11 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     GamesDataSource dataSource;
     String title;
 
-    /*private static final String TAG_ADD_TO_DB = "TAG_ADD_TO_DB";
-    private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
-    private static final String TAG_ADD_RATING = "TAG_ADD_RATING";*/
+    private static final int CONTACT_PICKER_RESULT = 1;
+    final String PHONE_TEXTVIEW_TAG = "delete contact";
+    int contactId = -1;
+    LinearLayout emailLinearLayout, phoneLinearLayout;
+    static final String DEBUG_TAG = "DEBUG_TAG";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,18 +202,6 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         }
         gameRatingLayout = (LinearLayout) findViewById(R.id.gameRatingLayout);
 
-        /*int rating = game.getRating();
-        if (rating != -1) {
-            gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
-            ratingTextView = (TextView) findViewById(R.id.gameRatingText);
-            gameRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-                @Override
-                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                    ratingTextView.setText("Rating: "+String.valueOf((int)ratingBar.getRating()));
-                }
-            });
-            gameRating.setRating((float)rating);
-        }*/
         gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
         ratingTextView = (TextView) findViewById(R.id.gameRatingText);
         gameRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -219,6 +212,8 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         });
 
         borrowerInfoLayout = (LinearLayout) findViewById(R.id.gameBorrowerInfoLayout);
+        emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
+        phoneLinearLayout = (LinearLayout) findViewById(R.id.phoneLinearLayout);
 
         createGameDetailFloatingActionButtons();
     }
@@ -361,11 +356,18 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         if (v.getTag().equals(TAG_ADD_BORROWER)) {
             if(borrowerInfoLayout.getVisibility() == View.GONE) {
                 Toast.makeText(this, "Add Borrower", Toast.LENGTH_SHORT).show();
-                addGameActionMenu.close(true);
+                //addGameActionMenu.close(true);
                 itemAddContactIcon.setImageResource(R.drawable.ic_remove_contact);
+                doLaunchContactPicker(v);
+                borrowerInfoLayout.setVisibility(View.VISIBLE);
             }else {
                 Toast.makeText(this, "hide Borrower layout", Toast.LENGTH_SHORT).show();
                 addGameActionMenu.close(true);
+                game.setContactId(-1);
+                TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
+                nameTextView.setText("Name");
+                phoneLinearLayout.removeAllViews();
+                emailLinearLayout.removeAllViews();
                 itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
             }
         }
@@ -380,7 +382,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
                 gameRatingLayout.setVisibility(View.GONE);
                 itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
             }
-            addGameActionMenu.close(true);
+            //addGameActionMenu.close(true);
         }
     }
 
@@ -433,5 +435,129 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         //dataSource.close();
         Log.i("database operation", "db close");
         super.onDestroy();
+    }
+
+    public void doLaunchContactPicker(View view) {
+        Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
+                ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(contactPickerIntent, CONTACT_PICKER_RESULT);
+    }
+
+    public void getContact(String id){
+        if(id.equals("")){
+            // get contact by the contactId from SQLite database
+            id = String.valueOf(contactId);
+        }
+        // if the id is not empty, get contact by the id back from contact picker intent
+        try{
+
+            String name = "";
+            // get display name
+            String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
+            Cursor nameCursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
+                    null, ContactsContract.Contacts._ID + "=?", new String[] { id },
+                    null);
+            if(nameCursor.moveToFirst()) {
+                name = nameCursor.getString(nameCursor.getColumnIndex(DISPLAY_NAME));
+                Log.v(DEBUG_TAG, "Got name: " + name);
+            }else {
+                Log.w(DEBUG_TAG, "No results");
+            }
+
+            TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
+            nameTextView.setText(name);
+
+            String email = "";
+            // query for everything email
+            Cursor emailCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                    null, ContactsContract.CommonDataKinds.Email.CONTACT_ID + "=?", new String[] { id },
+                    null);
+
+            int emailIdx = emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA);
+
+            // get the first email
+            if (emailCursor.moveToFirst()) {
+                email = emailCursor.getString(emailIdx);
+                Log.v(DEBUG_TAG, "Got email: " + email);
+            } else {
+                Log.w(DEBUG_TAG, "No results");
+            }
+            TextView emailTag = (TextView) findViewById(R.id.borrowerEmailTag);
+            if(email.length()==0){
+                emailTag.setVisibility(View.GONE);
+            }else {
+                emailTag.setVisibility(View.VISIBLE);
+            }
+
+            TextView emailAddress = new TextView(this);
+            emailAddress.setText(email);
+
+
+            emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
+            emailLinearLayout.addView(emailAddress);
+
+            emailCursor.close();
+
+            // get phone numbers
+            TextView phoneTag = (TextView) findViewById(R.id.borrowerPhoneTag);
+            String phoneNumber = "";
+            int phoneType = -1;
+            int hasPhoneNumber = Integer.parseInt(nameCursor.getString(nameCursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)));
+            if(hasPhoneNumber>0) {
+                phoneTag.setVisibility(View.VISIBLE);
+                Cursor phoneCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?", new String[]{id}, null);
+                phoneLinearLayout = (LinearLayout) findViewById(R.id.phoneLinearLayout);
+                int phoneIndex = 0;
+                while (phoneCursor.moveToNext()) {
+                    phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
+                    phoneType = phoneCursor.getInt(ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+                    if(phoneType == -1){
+                        phoneType = phoneCursor.getInt(ContactsContract.CommonDataKinds.Phone.TYPE_WORK_MOBILE);
+                    }
+                    Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
+                    Log.i(DEBUG_TAG, "Got phone type "+phoneType);
+                    TextView phoneNumberTextView = new TextView(this);
+                    phoneNumberTextView.setText(phoneNumber);
+                    phoneNumberTextView.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
+                    phoneLinearLayout.addView(phoneNumberTextView);
+                }
+                phoneCursor.close();
+            }else {
+                phoneTag.setVisibility(View.GONE);
+            }
+            nameCursor.close();
+        } catch (Exception e) {
+            Log.e(DEBUG_TAG, "Failed to get email data", e);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case CONTACT_PICKER_RESULT:
+                    // handle contact results
+                    Cursor cursor = null;
+                    Uri result = data.getData();
+                    Log.v(DEBUG_TAG, "Got a contact result: "
+                            + result.toString());
+                    // get the contact id from the Uri
+                    String id = result.getLastPathSegment();
+                    contactId = Integer.parseInt(id);
+                    getContact(id);
+                    game.setContactId(contactId);
+                    break;
+            }
+        } else {
+            // gracefully handle failure
+            Log.w(DEBUG_TAG, "Warning: activity result not ok");
+            switch (requestCode) {
+                case CONTACT_PICKER_RESULT:
+                    borrowerInfoLayout.setVisibility(View.GONE);
+                    itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
+                    break;
+            }
+        }
     }
 }

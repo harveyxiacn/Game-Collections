@@ -42,7 +42,8 @@
         <activity
             android:name=".activities.GameDetailActivity"
             android:label="@string/title_activity_game_detail"
-            android:parentActivityName=".activities.NaviDrawerActivity" >
+            android:parentActivityName=".activities.NaviDrawerActivity"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity" />

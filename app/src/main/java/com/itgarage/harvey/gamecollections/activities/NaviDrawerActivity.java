@@ -221,22 +221,26 @@ public class NaviDrawerActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (scanResult != null) {
-            String resultStr = scanResult.getContents();
-            Log.d("code", resultStr);
-            Game game = dataSource.getGameByUPC(resultStr);
-            if(game==null) {
-                Intent intent = new Intent(this, BarcodeResultActivity.class);
-                intent.putExtra(BARCODE_SCAN_RESULT, resultStr);
-                startActivity(intent);
-            }else {
-                Intent intent = new Intent(this, GameDetailActivity.class);
-                intent.putExtra(BARCODE_PASS, resultStr);
-                startActivity(intent);
+        if (resultCode == RESULT_OK) {
+            IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (scanResult != null) {
+                String resultStr = scanResult.getContents();
+                Log.d("code", resultStr);
+                Game game = dataSource.getGameByUPC(resultStr);
+                if (game == null) {
+                    Intent intent = new Intent(this, BarcodeResultActivity.class);
+                    intent.putExtra(BARCODE_SCAN_RESULT, resultStr);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(this, GameDetailActivity.class);
+                    intent.putExtra(BARCODE_PASS, resultStr);
+                    startActivity(intent);
+                }
             }
+        } else {
+            // gracefully handle failure
+            Log.w("Debug", "Warning: activity result not ok");
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     // set mTitle and change title in toolbar when fragment attach

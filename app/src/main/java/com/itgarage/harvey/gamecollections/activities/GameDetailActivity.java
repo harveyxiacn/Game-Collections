@@ -4,8 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
+import com.itgarage.harvey.gamecollections.adapters.ImageSlideAdapter;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
@@ -31,6 +37,8 @@ import java.util.List;
 
 import me.xiaopan.android.spear.SpearImageView;
 
+;
+
 public class GameDetailActivity extends ActionBarActivity implements View.OnClickListener{
     Toolbar toolbar;
     SpearImageView gameImage;
@@ -39,12 +47,18 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             editionTextView, publicationDateTextView, releaseDateTextView, ratingTextView;
     RatingBar gameRating, gameRatingSmall;
     LinearLayout gameAttributesLayout, gameRatingLayout, borrowerInfoLayout;
+
+    LinearLayout emailLinearLayout, phoneLinearLayout;
+
     static final String UPDATE_GAME = "update game";
     static final String DELETE_GAME = "delete game";
     static final String UPDATE_RATING = "update rating";
     static final String DELETE_RATING = "delete rating";
     static final String UPDATE_CONTACT = "update contact";
     static final String DELETE_CONTACT = "delete contact";
+
+    final String PHONE_TEXTVIEW_TAG = "delete contact";
+    int contactId = -1;
 
     SubActionButton updateToDBButton, updateContactButton, removeContactButton, updateRaitngButton, deleteFromDBButton;
     ImageView itemUpdateRatingIcon, itemRemoveContactIcon, itemUpdateContactIcon, itemUpdateToDBIcon, itemDeleteFromDBIcon;
@@ -191,6 +205,15 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
 
             borrowerInfoLayout = (LinearLayout) findViewById(R.id.gameBorrowerInfoLayout);
+            contactId = game.getContactId();
+            if(contactId != -1){
+                borrowerInfoLayout.setVisibility(View.VISIBLE);
+                getContact("");
+            }else {
+                borrowerInfoLayout.setVisibility(View.GONE);
+            }
+            emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
+            phoneLinearLayout = (LinearLayout) findViewById(R.id.phoneLinearLayout);
 
             createGameUpdateFloatingActionButtons();
 
@@ -225,7 +248,11 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         deleteFromDBButton.setTag(DELETE_GAME);
 
         itemRemoveContactIcon = new ImageView(this);
-        itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
+        if(borrowerInfoLayout.getVisibility() == View.VISIBLE)
+            itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
+        else {
+            itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
+        }
         removeContactButton = itemBuilder.setContentView(itemRemoveContactIcon).build();
         removeContactButton.setOnClickListener(this);
         removeContactButton.setTag(DELETE_CONTACT);
@@ -237,7 +264,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         updateRaitngButton.setTag(UPDATE_RATING);
         // Create the menu with the items:
         updateGameActionMenu = new FloatingActionMenu.Builder(this)
-                .addSubActionView(updateToDBButton)
+                //.addSubActionView(updateToDBButton)
                 .addSubActionView(deleteFromDBButton)
                 .addSubActionView(removeContactButton)
                 .addSubActionView(updateRaitngButton)
@@ -286,11 +313,12 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
                     game.setRating((int)gameRating.getRating());
-                    dataSource.open();
+                    /*dataSource.open();
                     dataSource.updateGame(game);
                     List<Game> gameList = dataSource.getAllGames();
                     dataSource.close();
-                    GamesFragment.gamesAdapter.updateList(gameList);
+                    GamesFragment.gamesAdapter.updateList(gameList);*/
+                    updateFragmentUIsByUpdateDatabase();
                 }else {
                     Log.i("rating bar", "show small hide large");
                     gameRatingSmall.setVisibility(View.VISIBLE);
@@ -298,28 +326,37 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
                     game.setRating((int)gameRating.getRating());
-                    dataSource.open();
+                    /*dataSource.open();
                     dataSource.updateGame(game);
                     List<Game> gameList = dataSource.getAllGames();
                     dataSource.close();
-                    GamesFragment.gamesAdapter.updateList(gameList);
+                    GamesFragment.gamesAdapter.updateList(gameList);*/
+                    updateFragmentUIsByUpdateDatabase();
                 }
+                updateGameActionMenu.close(true);
             }
-            updateGameActionMenu.close(true);
+            //updateGameActionMenu.close(true);
         }
         /*delete the contact/borrower*/
         if(v.getTag().equals(DELETE_CONTACT)){
             if(borrowerInfoLayout.getVisibility()==View.VISIBLE) {
-                Log.i("rating bar", "large");
+                Log.i("contact", "remove");
                 borrowerInfoLayout.setVisibility(View.GONE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
-                //updateRaitngButton = itemBuilder.setContentView(itemUpdateRatingIcon).build();
+                game.setContactId(-1);
+                updateFragmentUIsByUpdateDatabase();
+                TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
+                nameTextView.setText("Name");
+                phoneLinearLayout.removeAllViews();
+                emailLinearLayout.removeAllViews();
+                Toast.makeText(this, "Removed contact from this game.", Toast.LENGTH_SHORT).show();
             }else {
-                Log.i("rating bar", "small");
+                Log.i("contact", "picker launch");
+                doLaunchContactPicker(v);
                 borrowerInfoLayout.setVisibility(View.VISIBLE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
             }
-            updateGameActionMenu.close(true);
+            //updateGameActionMenu.close(true);
         }
         /*Delete the game*/
         if(v.getTag().equals(DELETE_GAME)){
@@ -366,61 +403,155 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         }
     }
 
+    public void updateFragmentUIsByUpdateDatabase(){
+        dataSource.open();
+        dataSource.updateGame(game);
+        List<Game> gamesList = dataSource.getAllGames();
+        dataSource.close();
+        if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
+            if (GamesFragment.gamesAdapter != null) {
+                GamesFragment.gamesAdapter.updateList(gamesList);
+                GamesFragment.changeUIsWhenDataSetChange(true);
+            } else {
+                GamesFragment.gamesAdapter = new GameListAdapter(gamesList, GamesFragment.naviDrawerActivity);
+                GamesFragment.changeUIsWhenDataSetChange(true);
+            }
+        }else if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
+            if (HomeFragment.imageSlideAdapter != null) {
+                Log.i("imageSlideAdapter", "not null, update list");
+                HomeFragment.imageSlideAdapter.updateList(gamesList);
+                HomeFragment.changeUIsWhenDataSetChange(true);
+            } else {
+                Log.i("imageSlideAdapter", "null, create, update list");
+                HomeFragment.imageSlideAdapter = new ImageSlideAdapter(HomeFragment.activity.getContext(), gamesList, HomeFragment.viewPager);
+                HomeFragment.changeUIsWhenDataSetChange(true);
+            }
+        }
+    }
+
     public void doLaunchContactPicker(View view) {
         Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
         startActivityForResult(contactPickerIntent, CONTACT_PICKER_RESULT);
     }
 
-    /*@Override
+    public void getContact(String id){
+        if(id.equals("")){
+            // get contact by the contactId from SQLite database
+            id = String.valueOf(contactId);
+        }
+            // if the id is not empty, get contact by the id back from contact picker intent
+        try{
+
+            String name = "";
+            // get display name
+            String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
+            Cursor nameCursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
+                    null, ContactsContract.Contacts._ID + "=?", new String[] { id },
+                    null);
+            if(nameCursor.moveToFirst()) {
+                name = nameCursor.getString(nameCursor.getColumnIndex(DISPLAY_NAME));
+                Log.v(DEBUG_TAG, "Got name: " + name);
+            }else {
+                Log.w(DEBUG_TAG, "No results");
+            }
+
+            TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
+            nameTextView.setText(name);
+
+            String email = "";
+            // query for everything email
+            Cursor emailCursor = getContentResolver().query(Email.CONTENT_URI,
+                    null, Email.CONTACT_ID + "=?", new String[] { id },
+                    null);
+
+            int emailIdx = emailCursor.getColumnIndex(Email.DATA);
+
+            // get the first email
+            if (emailCursor.moveToFirst()) {
+                email = emailCursor.getString(emailIdx);
+                Log.v(DEBUG_TAG, "Got email: " + email);
+            } else {
+                Log.w(DEBUG_TAG, "No results");
+            }
+            TextView emailTag = (TextView) findViewById(R.id.borrowerEmailTag);
+            if(email.length()==0){
+                emailTag.setVisibility(View.GONE);
+            }else {
+                emailTag.setVisibility(View.VISIBLE);
+            }
+
+            TextView emailAddress = new TextView(this);
+            emailAddress.setText(email);
+
+
+
+            emailLinearLayout.addView(emailAddress);
+
+            emailCursor.close();
+
+            // get phone numbers
+            TextView phoneTag = (TextView) findViewById(R.id.borrowerPhoneTag);
+            String phoneNumber = "";
+            int phoneType = -1;
+            int hasPhoneNumber = Integer.parseInt(nameCursor.getString(nameCursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)));
+            if(hasPhoneNumber>0) {
+                phoneTag.setVisibility(View.VISIBLE);
+                Cursor phoneCursor = getContentResolver().query(Phone.CONTENT_URI, null,
+                        Phone.CONTACT_ID + "=?", new String[]{id}, null);
+
+                int phoneIndex = 0;
+                while (phoneCursor.moveToNext()) {
+                    phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(Phone.NORMALIZED_NUMBER));
+                    phoneType = phoneCursor.getInt(Phone.TYPE_MOBILE);
+                    if(phoneType == -1){
+                        phoneType = phoneCursor.getInt(Phone.TYPE_WORK_MOBILE);
+                    }
+                    Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
+                    Log.i(DEBUG_TAG, "Got phone type "+phoneType);
+                    TextView phoneNumberTextView = new TextView(this);
+                    phoneNumberTextView.setText(phoneNumber);
+                    phoneNumberTextView.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
+                    phoneLinearLayout.addView(phoneNumberTextView);
+                }
+                phoneCursor.close();
+            }else {
+                phoneTag.setVisibility(View.GONE);
+            }
+            nameCursor.close();
+        } catch (Exception e) {
+            Log.e(DEBUG_TAG, "Failed to get email data", e);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case CONTACT_PICKER_RESULT:
                     // handle contact results
                     Cursor cursor = null;
-                    String email = "";
-                    try{
-                        Uri result = data.getData();
-                        Log.v(DEBUG_TAG, "Got a contact result: "
-                                + result.toString());
-                        // get the contact id from the Uri
-                        String id = result.getLastPathSegment();
-
-                        // query for everything email
-                        cursor = getContentResolver().query(Email.CONTENT_URI,
-                                null, Email.CONTACT_ID + "=?", new String[] { id },
-                                null);
-
-                        int emailIdx = cursor.getColumnIndex(Email.DATA);
-
-                        // let's just get the first email
-                        if (cursor.moveToFirst()) {
-                            email = cursor.getString(emailIdx);
-                            Log.v(DEBUG_TAG, "Got email: " + email);
-                        } else {
-                            Log.w(DEBUG_TAG, "No results");
-                        }
-                    } catch (Exception e) {
-                        Log.e(DEBUG_TAG, "Failed to get email data", e);
-                    } finally {
-                        if (cursor != null) {
-                            cursor.close();
-                        }
-                        *//*EditText emailEntry = (EditText) findViewById(R.id.invite_email);
-                        emailEntry.setText(email);
-                        if (email.length() == 0) {
-                            Toast.makeText(this, "No email found for contact.",
-                                    Toast.LENGTH_LONG).show();
-                        }*//*
-
-                    }
+                    Uri result = data.getData();
+                    Log.v(DEBUG_TAG, "Got a contact result: "
+                            + result.toString());
+                    // get the contact id from the Uri
+                    String id = result.getLastPathSegment();
+                    contactId = Integer.parseInt(id);
+                    getContact(id);
+                    game.setContactId(contactId);
+                    Toast.makeText(this, "Added contact to this game.", Toast.LENGTH_SHORT).show();
+                    updateFragmentUIsByUpdateDatabase();
                     break;
             }
-
         } else {
             // gracefully handle failure
             Log.w(DEBUG_TAG, "Warning: activity result not ok");
+            switch (requestCode) {
+                case CONTACT_PICKER_RESULT:
+                    borrowerInfoLayout.setVisibility(View.GONE);
+                    itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
+                    break;
+            }
         }
-    }*/
+    }
 }

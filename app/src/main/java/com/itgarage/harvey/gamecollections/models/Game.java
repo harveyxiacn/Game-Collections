@@ -17,8 +17,9 @@ public class Game {
     private String largeImage;
     private int rating;
     private String upcCode;
+    private int contactId;
 
-    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String edition, String publicationDate, String releaseDate, String manufacturer, String smallImage, String mediumImage, String largeImage, int rating, String upcCode) {
+    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String edition, String publicationDate, String releaseDate, String manufacturer, String smallImage, String mediumImage, String largeImage, int rating, String upcCode, int contactId) {
         this.id = id;
         this.title = title;
         this.platform = platform;
@@ -33,6 +34,7 @@ public class Game {
         this.largeImage = largeImage;
         this.rating = rating;
         this.upcCode = upcCode;
+        this.contactId = contactId;
     }
 
     public Game() {
@@ -50,6 +52,7 @@ public class Game {
         releaseDate = null;
         rating = -1;
         upcCode = null;
+        contactId = -1;
     }
 
     public int getId() {
@@ -174,6 +177,14 @@ public class Game {
 
     public void setUpcCode(String upcCode) {
         this.upcCode = upcCode;
+    }
+
+    public int getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(int contactId) {
+        this.contactId = contactId;
     }
 
     @Override
