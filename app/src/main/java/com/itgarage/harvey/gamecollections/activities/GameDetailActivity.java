@@ -11,11 +11,14 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -39,7 +42,7 @@ import me.xiaopan.android.spear.SpearImageView;
 
 ;
 
-public class GameDetailActivity extends ActionBarActivity implements View.OnClickListener{
+public class GameDetailActivity extends ActionBarActivity implements View.OnClickListener {
     Toolbar toolbar;
     SpearImageView gameImage;
     TextView titleTextView, platformTextview;
@@ -59,6 +62,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
     final String PHONE_TEXTVIEW_TAG = "delete contact";
     int contactId = -1;
+    CardView contactDetailView, gameDetailCardView;
 
     SubActionButton updateToDBButton, updateContactButton, removeContactButton, updateRaitngButton, deleteFromDBButton;
     ImageView itemUpdateRatingIcon, itemRemoveContactIcon, itemUpdateContactIcon, itemUpdateToDBIcon, itemDeleteFromDBIcon;
@@ -88,27 +92,28 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         dataSource.open();
         List<Game> gameList = dataSource.getAllGames();
         game = null;
-        if(postion!=-1) {
-             game = gameList.get(postion);
+        if (postion != -1) {
+            game = gameList.get(postion);
         }
-        if(intentTitle!=null){
+        if (intentTitle != null) {
             String gameTitle = "";
             int position = 0;
             Game gameTemp = null;
-            do{
+            do {
                 gameTemp = gameList.get(position);
                 gameTitle = gameTemp.getTitle();
-                if(gameTitle.equals(intentTitle))
+                if (gameTitle.equals(intentTitle))
                     break;
                 position++;
-            }while (position<gameList.size());
+            } while (position < gameList.size());
             game = gameTemp;
         }
-        if(intentBarcode!=null){
+        if (intentBarcode != null) {
             game = dataSource.getGameByUPC(intentBarcode);
         }
         dataSource.close();
         String title;
+        gameDetailCardView = (CardView) findViewById(R.id.card_view);
         titleTextView = (TextView) findViewById(R.id.textViewGameTitle);
         platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
         gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
@@ -117,13 +122,13 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
         ratingTextView = (TextView) findViewById(R.id.gameRatingText);
         gameRatingSmall = (RatingBar) findViewById(R.id.gameRatingBarSmall);
-        if(game!=null){
+        if (game != null) {
             title = game.getTitle();
             getSupportActionBar().setTitle(title);
 
             titleTextView.setText(title);
             String platform = game.getPlatform();
-            if (platform!=null) {
+            if (platform != null) {
 
                 platformTextview.setText(game.getPlatform());
                 platformTextview.setText(platform);
@@ -134,9 +139,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             gameImage.setImageFromUri(mediumImage);
 
 
-
             String genre = game.getGenre();
-            if (genre!=null) {
+            if (genre != null) {
                 genreTextView = new TextView(this);
                 genreTextView.setTextSize(20);
                 gameAttributesLayout.addView(genreTextView);
@@ -145,7 +149,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
 
             String hardwarePlatform = game.getHardwarePlatform();
-            if (hardwarePlatform!=null) {
+            if (hardwarePlatform != null) {
                 hardwarePlatformTextView = new TextView(this);
                 hardwarePlatformTextView.setTextSize(20);
                 gameAttributesLayout.addView(hardwarePlatformTextView);
@@ -154,7 +158,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
 
             String edition = game.getEdition();
-            if (edition!=null) {
+            if (edition != null) {
                 editionTextView = new TextView(this);
                 editionTextView.setTextSize(20);
                 gameAttributesLayout.addView(editionTextView);
@@ -163,7 +167,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
 
             String manufacturer = game.getManufacturer();
-            if (manufacturer!=null) {
+            if (manufacturer != null) {
                 manufacturerTextView = new TextView(this);
                 manufacturerTextView.setTextSize(20);
                 gameAttributesLayout.addView(manufacturerTextView);
@@ -172,7 +176,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
 
             String publicationDate = game.getPublicationDate();
-            if (publicationDate!=null) {
+            if (publicationDate != null) {
                 publicationDateTextView = new TextView(this);
                 publicationDateTextView.setTextSize(20);
                 gameAttributesLayout.addView(publicationDateTextView);
@@ -181,7 +185,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
 
             String releaseDate = game.getReleaseDate();
-            if (releaseDate!=null) {
+            if (releaseDate != null) {
                 releaseDateTextView = new TextView(this);
                 releaseDateTextView.setTextSize(20);
                 gameAttributesLayout.addView(releaseDateTextView);
@@ -206,18 +210,19 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
             borrowerInfoLayout = (LinearLayout) findViewById(R.id.gameBorrowerInfoLayout);
             contactId = game.getContactId();
-            if(contactId != -1){
-                borrowerInfoLayout.setVisibility(View.VISIBLE);
-                getContact("");
-            }else {
-                borrowerInfoLayout.setVisibility(View.GONE);
-            }
             emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
             phoneLinearLayout = (LinearLayout) findViewById(R.id.phoneLinearLayout);
+            contactDetailView = (CardView) findViewById(R.id.borrowerCardView);
+            if (contactId != -1) {
+                borrowerInfoLayout.setVisibility(View.VISIBLE);
+                getContact("");
+            } else {
+                borrowerInfoLayout.setVisibility(View.GONE);
+            }
 
             createGameUpdateFloatingActionButtons();
 
-        }else {
+        } else {
             titleTextView.setText(getString(R.string.null_game_title));
         }
 
@@ -248,7 +253,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         deleteFromDBButton.setTag(DELETE_GAME);
 
         itemRemoveContactIcon = new ImageView(this);
-        if(borrowerInfoLayout.getVisibility() == View.VISIBLE)
+        if (borrowerInfoLayout.getVisibility() == View.VISIBLE)
             itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
         else {
             itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
@@ -298,39 +303,29 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         /*update the rating of the game*/
-        if(v.getTag().equals(UPDATE_RATING)){
-            if(gameRatingSmall.getVisibility()==View.VISIBLE) {
-                if(game.getRating()!=-1) {
+        if (v.getTag().equals(UPDATE_RATING)) {
+            if (gameRatingSmall.getVisibility() == View.VISIBLE) {
+                if (game.getRating() != -1) {
                     Log.i("rating bar", "show large hide small");
                     gameRatingSmall.setVisibility(View.GONE);
                     gameRatingLayout.setVisibility(View.VISIBLE);
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
                 }
-            }else {
-                if(game.getRating()==-1){
+            } else {
+                if (game.getRating() == -1) {
                     Log.i("rating bar", "show large");
                     gameRatingLayout.setVisibility(View.VISIBLE);
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
-                    game.setRating((int)gameRating.getRating());
-                    /*dataSource.open();
-                    dataSource.updateGame(game);
-                    List<Game> gameList = dataSource.getAllGames();
-                    dataSource.close();
-                    GamesFragment.gamesAdapter.updateList(gameList);*/
+                    game.setRating((int) gameRating.getRating());
                     updateFragmentUIsByUpdateDatabase();
-                }else {
+                } else {
                     Log.i("rating bar", "show small hide large");
                     gameRatingSmall.setVisibility(View.VISIBLE);
                     gameRatingLayout.setVisibility(View.GONE);
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
-                    game.setRating((int)gameRating.getRating());
-                    /*dataSource.open();
-                    dataSource.updateGame(game);
-                    List<Game> gameList = dataSource.getAllGames();
-                    dataSource.close();
-                    GamesFragment.gamesAdapter.updateList(gameList);*/
+                    game.setRating((int) gameRating.getRating());
                     updateFragmentUIsByUpdateDatabase();
                 }
                 updateGameActionMenu.close(true);
@@ -338,8 +333,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             //updateGameActionMenu.close(true);
         }
         /*delete the contact/borrower*/
-        if(v.getTag().equals(DELETE_CONTACT)){
-            if(borrowerInfoLayout.getVisibility()==View.VISIBLE) {
+        if (v.getTag().equals(DELETE_CONTACT)) {
+            if (borrowerInfoLayout.getVisibility() == View.VISIBLE) {
                 Log.i("contact", "remove");
                 borrowerInfoLayout.setVisibility(View.GONE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
@@ -347,68 +342,71 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 updateFragmentUIsByUpdateDatabase();
                 TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
                 nameTextView.setText("Name");
+                TextView nameDetailTextView = (TextView) findViewById(R.id.borrowerNameDetailTextView);
+                nameDetailTextView.setText("Name");
                 phoneLinearLayout.removeAllViews();
                 emailLinearLayout.removeAllViews();
                 Toast.makeText(this, "Removed contact from this game.", Toast.LENGTH_SHORT).show();
-            }else {
+            } else {
                 Log.i("contact", "picker launch");
                 doLaunchContactPicker(v);
                 borrowerInfoLayout.setVisibility(View.VISIBLE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
+                hideContactDetial(v);
             }
             //updateGameActionMenu.close(true);
         }
         /*Delete the game*/
-        if(v.getTag().equals(DELETE_GAME)){
+        if (v.getTag().equals(DELETE_GAME)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Delete "+titleTextView.getText()+"?")
-            .setTitle("Delete confirmation")
-            .setIcon(R.drawable.ic_delete_confirm)
-            .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    dataSource.open();
-                    dataSource.deleteGame(game.getId());
-                    List<Game> gameList = dataSource.getAllGames();
-                    dataSource.close();
-                    Toast.makeText(context, game.getTitle() + " deleted.", Toast.LENGTH_SHORT).show();
-                    if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
-                        if (HomeFragment.imageSlideAdapter != null) {
-                            HomeFragment.imageSlideAdapter.updateList(gameList);
-                            if (gameList == null) {
-                                HomeFragment.changeUIsWhenDataSetChange(false);
+            builder.setMessage("Delete " + titleTextView.getText() + "?")
+                    .setTitle("Delete confirmation")
+                    .setIcon(R.drawable.ic_delete_confirm)
+                    .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            dataSource.open();
+                            dataSource.deleteGame(game.getId());
+                            List<Game> gameList = dataSource.getAllGames();
+                            dataSource.close();
+                            Toast.makeText(context, game.getTitle() + " deleted.", Toast.LENGTH_SHORT).show();
+                            if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
+                                if (HomeFragment.imageSlideAdapter != null) {
+                                    HomeFragment.imageSlideAdapter.updateList(gameList);
+                                    if (gameList == null) {
+                                        HomeFragment.changeUIsWhenDataSetChange(false);
+                                    }
+                                }
+                            } else if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
+                                if (GamesFragment.gamesAdapter != null) {
+                                    GamesFragment.gamesAdapter.updateList(gameList);
+                                    if (gameList == null) {
+                                        GamesFragment.changeUIsWhenDataSetChange(false);
+                                    }
+                                }
                             }
+                            ((GameDetailActivity) context).finish();
                         }
-                    } else if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
-                        if (GamesFragment.gamesAdapter != null) {
-                            GamesFragment.gamesAdapter.updateList(gameList);
-                            if (gameList == null) {
-                                GamesFragment.changeUIsWhenDataSetChange(false);
-                            }
+                    })
+                    .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
                         }
-                    }
-                    ((GameDetailActivity) context).finish();
-                }
-            })
-            .setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+                    });
             AlertDialog dialog = builder.create();
             dialog.show();
 
         }
     }
 
-    public void updateFragmentUIsByUpdateDatabase(){
+    public void updateFragmentUIsByUpdateDatabase() {
         dataSource.open();
         dataSource.updateGame(game);
         List<Game> gamesList = dataSource.getAllGames();
         dataSource.close();
-        if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
+        if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
             if (GamesFragment.gamesAdapter != null) {
                 GamesFragment.gamesAdapter.updateList(gamesList);
                 GamesFragment.changeUIsWhenDataSetChange(true);
@@ -416,7 +414,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 GamesFragment.gamesAdapter = new GameListAdapter(gamesList, GamesFragment.naviDrawerActivity);
                 GamesFragment.changeUIsWhenDataSetChange(true);
             }
-        }else if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
+        } else if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
             if (HomeFragment.imageSlideAdapter != null) {
                 Log.i("imageSlideAdapter", "not null, update list");
                 HomeFragment.imageSlideAdapter.updateList(gamesList);
@@ -435,34 +433,38 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         startActivityForResult(contactPickerIntent, CONTACT_PICKER_RESULT);
     }
 
-    public void getContact(String id){
-        if(id.equals("")){
+    public void getContact(String id) {
+        if (id.equals("")) {
             // get contact by the contactId from SQLite database
             id = String.valueOf(contactId);
         }
-            // if the id is not empty, get contact by the id back from contact picker intent
-        try{
+        // if the id is not empty, get contact by the id back from contact picker intent
+        try {
 
             String name = "";
             // get display name
             String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
             Cursor nameCursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
-                    null, ContactsContract.Contacts._ID + "=?", new String[] { id },
+                    null, ContactsContract.Contacts._ID + "=?", new String[]{id},
                     null);
-            if(nameCursor.moveToFirst()) {
+            if (nameCursor.moveToFirst()) {
                 name = nameCursor.getString(nameCursor.getColumnIndex(DISPLAY_NAME));
                 Log.v(DEBUG_TAG, "Got name: " + name);
-            }else {
+            } else {
                 Log.w(DEBUG_TAG, "No results");
             }
+            final String sendTo = name;
 
             TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
-            nameTextView.setText(name);
-
+            TextView nameDetailTextView = (TextView) findViewById(R.id.borrowerNameDetailTextView);
+            if (name != null) {
+                nameTextView.setText(name);
+                nameDetailTextView.setText(name);
+            }
             String email = "";
             // query for everything email
             Cursor emailCursor = getContentResolver().query(Email.CONTENT_URI,
-                    null, Email.CONTACT_ID + "=?", new String[] { id },
+                    null, Email.CONTACT_ID + "=?", new String[]{id},
                     null);
 
             int emailIdx = emailCursor.getColumnIndex(Email.DATA);
@@ -474,19 +476,35 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             } else {
                 Log.w(DEBUG_TAG, "No results");
             }
+            final String sendToEmail = email;
             TextView emailTag = (TextView) findViewById(R.id.borrowerEmailTag);
-            if(email.length()==0){
+            if (email.length() == 0) {
                 emailTag.setVisibility(View.GONE);
-            }else {
-                emailTag.setVisibility(View.VISIBLE);
+                emailLinearLayout.setVisibility(View.GONE);
             }
-
-            TextView emailAddress = new TextView(this);
+            emailTag.setVisibility(View.VISIBLE);
+            emailLinearLayout.setVisibility(View.VISIBLE);
+            LinearLayout emailRowLayout = new LinearLayout(this);
+            emailRowLayout.setOrientation(LinearLayout.HORIZONTAL);
+            final TextView emailAddress = new TextView(this);
             emailAddress.setText(email);
+            Button sendEmail = new Button(this);
+            sendEmail.setText("Send Email");
+            sendEmail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intentEmail = new Intent(Intent.ACTION_SEND);
+                    intentEmail.putExtra(Intent.EXTRA_EMAIL, new String[]{sendToEmail});
+                    intentEmail.putExtra(Intent.EXTRA_SUBJECT, "Return " + game.getTitle() + "!");
+                    intentEmail.putExtra(Intent.EXTRA_TEXT, "Hi " + sendTo + ",\nI need the " + game.getTitle() + ". Please return it to me.");
+                    intentEmail.setType("message/rfc822");
+                    startActivity(Intent.createChooser(intentEmail, "Choose an email provider :"));
+                }
+            });
+            emailRowLayout.addView(emailAddress);
+            emailRowLayout.addView(sendEmail);
+            emailLinearLayout.addView(emailRowLayout);
 
-
-
-            emailLinearLayout.addView(emailAddress);
 
             emailCursor.close();
 
@@ -495,7 +513,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             String phoneNumber = "";
             int phoneType = -1;
             int hasPhoneNumber = Integer.parseInt(nameCursor.getString(nameCursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)));
-            if(hasPhoneNumber>0) {
+            if (hasPhoneNumber > 0) {
                 phoneTag.setVisibility(View.VISIBLE);
                 Cursor phoneCursor = getContentResolver().query(Phone.CONTENT_URI, null,
                         Phone.CONTACT_ID + "=?", new String[]{id}, null);
@@ -503,19 +521,40 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 int phoneIndex = 0;
                 while (phoneCursor.moveToNext()) {
                     phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(Phone.NORMALIZED_NUMBER));
-                    phoneType = phoneCursor.getInt(Phone.TYPE_MOBILE);
-                    if(phoneType == -1){
-                        phoneType = phoneCursor.getInt(Phone.TYPE_WORK_MOBILE);
-                    }
                     Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
-                    Log.i(DEBUG_TAG, "Got phone type "+phoneType);
-                    TextView phoneNumberTextView = new TextView(this);
+                    final TextView phoneNumberTextView = new TextView(this);
                     phoneNumberTextView.setText(phoneNumber);
                     phoneNumberTextView.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
-                    phoneLinearLayout.addView(phoneNumberTextView);
+                    Button sendSms = new Button(this);
+                    sendSms.setText("Send SMS");
+                    sendSms.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
+                    sendSms.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(GameDetailActivity.this, "phone number:" + phoneNumberTextView.getText(), Toast.LENGTH_SHORT).show();
+                            try {
+                                SmsManager smsManager = SmsManager.getDefault();
+                                String message = "Hi " + sendTo + ",\nI need the " + game.getTitle() + ". Please return it to me.";
+                                smsManager.sendTextMessage(phoneNumberTextView.getText().toString(), null, message, null, null);
+                                Toast.makeText(getApplicationContext(), "SMS sent.",
+                                        Toast.LENGTH_LONG).show();
+                            } catch (Exception e) {
+                                Toast.makeText(getApplicationContext(),
+                                        "SMS faild, please try again.",
+                                        Toast.LENGTH_LONG).show();
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    LinearLayout phoneRowLayout = new LinearLayout(this);
+                    phoneRowLayout.setOrientation(LinearLayout.HORIZONTAL);
+                    phoneRowLayout.addView(phoneNumberTextView);
+                    phoneRowLayout.addView(sendSms);
+                    phoneLinearLayout.addView(phoneRowLayout);
+                    break;
                 }
                 phoneCursor.close();
-            }else {
+            } else {
                 phoneTag.setVisibility(View.GONE);
             }
             nameCursor.close();
@@ -553,5 +592,15 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     break;
             }
         }
+    }
+
+    public void showContactDetail(View view) {
+        contactDetailView.setVisibility(View.VISIBLE);
+        gameDetailCardView.setVisibility(View.GONE);
+    }
+
+    public void hideContactDetial(View view) {
+        contactDetailView.setVisibility(View.GONE);
+        gameDetailCardView.setVisibility(View.VISIBLE);
     }
 }
