@@ -20,9 +20,6 @@ import com.itgarage.harvey.gamecollections.models.Game;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by harvey on 2015/2/16.
- */
 public class GamesFragment extends Fragment {
     static RecyclerView gamesCardListView;
     public static GameListAdapter gamesAdapter;

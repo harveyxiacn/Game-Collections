@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/rootContainer"
+    tools:context="com.itgarage.harvey.gamecollections.activities.SearchKeywordActivity">
+
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/tool_bar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tool_bar"
+        android:id="@+id/SearchInputLayout"
+        android:padding="10dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/keywordInput"
+            android:hint="@string/keyword_input_hint"
+            android:ems="10"
+            android:inputType="text"/>
+        <ImageButton
+            android:id="@+id/btnSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_search_database"
+            android:background="@color/zxing_transparent"
+            android:contentDescription="@string/btn_search_keyword_desc"/>
+        </LinearLayout>
+
+    <TextView
+        android:id="@+id/noResultSearchTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/no_result_from_searching_text"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/SearchInputLayout"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rvContainer"
+        android:orientation="vertical"
+        android:layout_below="@id/SearchInputLayout"/>
+
+    <!--<android.support.v7.widget.RecyclerView
+        android:id="@+id/gameResultCardList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/noResultSearchTextView"/>-->
+</RelativeLayout>

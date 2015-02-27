@@ -52,4 +52,5 @@ dependencies {
     //compile 'cn.trinea.android.view.autoscrollviewpager:android-auto-scroll-view-pager:1.1.2'
     compile files('libs/aws-android-sdk-2.1.8-core.jar')
     compile files('libs/aws-android-sdk-2.1.8-cognito.jar')
+    compile 'com.facebook.android:facebook-android-sdk:3.21.1'
 }

@@ -18,7 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -212,7 +212,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             contactId = game.getContactId();
             emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
             phoneLinearLayout = (LinearLayout) findViewById(R.id.phoneLinearLayout);
-            contactDetailView = (CardView) findViewById(R.id.borrowerCardView);
+            //contactDetailView = (CardView) findViewById(R.id.borrowerCardView);
             if (contactId != -1) {
                 borrowerInfoLayout.setVisibility(View.VISIBLE);
                 getContact("");
@@ -342,8 +342,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 updateFragmentUIsByUpdateDatabase();
                 TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
                 nameTextView.setText("Name");
-                TextView nameDetailTextView = (TextView) findViewById(R.id.borrowerNameDetailTextView);
-                nameDetailTextView.setText("Name");
                 phoneLinearLayout.removeAllViews();
                 emailLinearLayout.removeAllViews();
                 Toast.makeText(this, "Removed contact from this game.", Toast.LENGTH_SHORT).show();
@@ -352,7 +350,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 doLaunchContactPicker(v);
                 borrowerInfoLayout.setVisibility(View.VISIBLE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
-                hideContactDetial(v);
             }
             //updateGameActionMenu.close(true);
         }
@@ -456,10 +453,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             final String sendTo = name;
 
             TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
-            TextView nameDetailTextView = (TextView) findViewById(R.id.borrowerNameDetailTextView);
             if (name != null) {
                 nameTextView.setText(name);
-                nameDetailTextView.setText(name);
             }
             String email = "";
             // query for everything email
@@ -481,29 +476,32 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             if (email.length() == 0) {
                 emailTag.setVisibility(View.GONE);
                 emailLinearLayout.setVisibility(View.GONE);
+            }else {
+                emailTag.setVisibility(View.VISIBLE);
+                emailLinearLayout.setVisibility(View.VISIBLE);
+                LinearLayout emailRowLayout = new LinearLayout(this);
+                emailRowLayout.setOrientation(LinearLayout.HORIZONTAL);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                emailRowLayout.setLayoutParams(params);
+                final TextView emailAddress = new TextView(this);
+                emailAddress.setText(email);
+                ImageButton sendEmail = new ImageButton(this);
+                sendEmail.setImageResource(R.drawable.ic_mail_send);
+                sendEmail.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intentEmail = new Intent(Intent.ACTION_SEND);
+                        intentEmail.putExtra(Intent.EXTRA_EMAIL, new String[]{sendToEmail});
+                        intentEmail.putExtra(Intent.EXTRA_SUBJECT, "Return " + game.getTitle() + "!");
+                        intentEmail.putExtra(Intent.EXTRA_TEXT, "Hi " + sendTo + ",\nI need the " + game.getTitle() + ". Please return it to me.");
+                        intentEmail.setType("message/rfc822");
+                        startActivity(Intent.createChooser(intentEmail, "Choose an email provider :"));
+                    }
+                });
+                emailRowLayout.addView(emailAddress);
+                emailRowLayout.addView(sendEmail);
+                emailLinearLayout.addView(emailRowLayout);
             }
-            emailTag.setVisibility(View.VISIBLE);
-            emailLinearLayout.setVisibility(View.VISIBLE);
-            LinearLayout emailRowLayout = new LinearLayout(this);
-            emailRowLayout.setOrientation(LinearLayout.HORIZONTAL);
-            final TextView emailAddress = new TextView(this);
-            emailAddress.setText(email);
-            Button sendEmail = new Button(this);
-            sendEmail.setText("Send Email");
-            sendEmail.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intentEmail = new Intent(Intent.ACTION_SEND);
-                    intentEmail.putExtra(Intent.EXTRA_EMAIL, new String[]{sendToEmail});
-                    intentEmail.putExtra(Intent.EXTRA_SUBJECT, "Return " + game.getTitle() + "!");
-                    intentEmail.putExtra(Intent.EXTRA_TEXT, "Hi " + sendTo + ",\nI need the " + game.getTitle() + ". Please return it to me.");
-                    intentEmail.setType("message/rfc822");
-                    startActivity(Intent.createChooser(intentEmail, "Choose an email provider :"));
-                }
-            });
-            emailRowLayout.addView(emailAddress);
-            emailRowLayout.addView(sendEmail);
-            emailLinearLayout.addView(emailRowLayout);
 
 
             emailCursor.close();
@@ -520,13 +518,13 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
                 int phoneIndex = 0;
                 while (phoneCursor.moveToNext()) {
-                    phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(Phone.NORMALIZED_NUMBER));
+                    phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(Phone.NUMBER));
                     Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
                     final TextView phoneNumberTextView = new TextView(this);
                     phoneNumberTextView.setText(phoneNumber);
                     phoneNumberTextView.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
-                    Button sendSms = new Button(this);
-                    sendSms.setText("Send SMS");
+                    ImageButton sendSms = new ImageButton(this);
+                    sendSms.setImageResource(R.drawable.ic_sent_sms);
                     sendSms.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
                     sendSms.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -548,10 +546,12 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     });
                     LinearLayout phoneRowLayout = new LinearLayout(this);
                     phoneRowLayout.setOrientation(LinearLayout.HORIZONTAL);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    phoneRowLayout.setLayoutParams(params);
                     phoneRowLayout.addView(phoneNumberTextView);
                     phoneRowLayout.addView(sendSms);
                     phoneLinearLayout.addView(phoneRowLayout);
-                    break;
+
                 }
                 phoneCursor.close();
             } else {
@@ -592,15 +592,5 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     break;
             }
         }
-    }
-
-    public void showContactDetail(View view) {
-        contactDetailView.setVisibility(View.VISIBLE);
-        gameDetailCardView.setVisibility(View.GONE);
-    }
-
-    public void hideContactDetial(View view) {
-        contactDetailView.setVisibility(View.GONE);
-        gameDetailCardView.setVisibility(View.VISIBLE);
     }
 }

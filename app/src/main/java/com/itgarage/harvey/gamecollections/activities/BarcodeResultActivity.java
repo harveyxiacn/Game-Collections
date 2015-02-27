@@ -93,6 +93,8 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     LinearLayout emailLinearLayout, phoneLinearLayout;
     static final String DEBUG_TAG = "DEBUG_TAG";
 
+    String operation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,24 +109,49 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         gamesList = new ArrayList<Game>();
 
         resultTextView = (TextView) findViewById(R.id.barcodeScanResultTextView);
+        noResultTextView = (TextView) findViewById(R.id.noResultSearchTextView);
         Intent intent = getIntent();
-        resultStr = intent.getStringExtra(NaviDrawerActivity.BARCODE_SCAN_RESULT);
-        resultTextView.setText(resultStr);
-        if (savedInstanceState != null) {
-            String barcodeScanResult = savedInstanceState.getString(BARCODE_SCAN_RESULT_SAVED_TAG);
-            resultTextView.setText(barcodeScanResult);
+        Bundle extras = intent.getExtras();
+        operation = extras.getString("operation");
+
+        if(operation.equals("Keyword Search")){
+            operationKeywordSearch(extras);
+        }else if(operation.equals("Barcode Scan")){
+            operationBarcodeScan(extras);
         }
+    }
+
+    public void operationKeywordSearch(Bundle extras){
+        game = new Game();
+        game.setUpcCode(extras.getString("upc"));
+
+
+        game.setTitle(extras.getString("title"));
+        game.setPlatform(extras.getString("platform"));
+        game.setHardwarePlatform(extras.getString("hardPlatform"));
+        game.setGenre(extras.getString("genre"));
+        game.setMediumImage(extras.getString("mediumImage"));
+        game.setEdition(extras.getString("edition"));
+        game.setManufacturer(extras.getString("manufacturer"));
+        game.setPublicationDate(extras.getString("publicationDate"));
+        game.setReleaseDate(extras.getString("releaseDate"));
+        game.setRating(extras.getInt("rating"));
+        game.setSmallImage(extras.getString("smallImage"));
+        game.setLargeImage(extras.getString("largeImage"));
+
+        createDisplayUIs();
+        noResultTextView.setVisibility(View.GONE);
+        resultTextView.setVisibility(View.GONE);
+    }
+
+    public void operationBarcodeScan(Bundle extras){
+        resultStr = extras.getString(NaviDrawerActivity.BARCODE_SCAN_RESULT);
+        resultTextView.setText(resultStr);
         UPC_CODE = resultStr;
 
         ItemLookupArgs.ITEM_ID = resultStr;
 
         gamesCardListView = (CardView) findViewById(R.id.card_view);
-
-        /*gamesCardListView = (RecyclerView) findViewById(R.id.gameCardList);
-        gamesCardListLayoutManager = new LinearLayoutManager(this);
-        gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
-        Log.i("RecyclerView", "setting layout manager");*/
-        noResultTextView = (TextView) findViewById(R.id.noResultSearchTextView);
         noResultTextView.setVisibility(View.GONE);
         /*start to search on Amazon Product Advertising API*/
         new SearchAmazonTask().execute();
@@ -313,7 +340,11 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         /* Add game to database*/
         if (v.getTag().equals(TAG_ADD_TO_DB)) {
             Toast.makeText(this, "Add to DB", Toast.LENGTH_SHORT).show();
-            Game game = gamesList.get(0);
+            /*if(operation.equals("Barcode Scan")) {
+                game = gamesList.get(0);
+            }else if(operation.equals("Keyword Search")){
+
+            }*/
             if (gameRatingLayout.getVisibility() == View.VISIBLE) {
                 RatingBar ratingBar = (RatingBar) findViewById(R.id.gameRatingBar);
                 game.setRating((int) ratingBar.getRating());
@@ -487,14 +518,11 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
                 emailTag.setVisibility(View.GONE);
             }else {
                 emailTag.setVisibility(View.VISIBLE);
+                TextView emailAddress = new TextView(this);
+                emailAddress.setText(email);
+                emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
+                emailLinearLayout.addView(emailAddress);
             }
-
-            TextView emailAddress = new TextView(this);
-            emailAddress.setText(email);
-
-
-            emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
-            emailLinearLayout.addView(emailAddress);
 
             emailCursor.close();
 
@@ -510,13 +538,8 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
                 phoneLinearLayout = (LinearLayout) findViewById(R.id.phoneLinearLayout);
                 int phoneIndex = 0;
                 while (phoneCursor.moveToNext()) {
-                    phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER));
-                    phoneType = phoneCursor.getInt(ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-                    if(phoneType == -1){
-                        phoneType = phoneCursor.getInt(ContactsContract.CommonDataKinds.Phone.TYPE_WORK_MOBILE);
-                    }
+                    phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                     Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
-                    Log.i(DEBUG_TAG, "Got phone type "+phoneType);
                     TextView phoneNumberTextView = new TextView(this);
                     phoneNumberTextView.setText(phoneNumber);
                     phoneNumberTextView.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));

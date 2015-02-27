@@ -1,6 +1,9 @@
 package com.itgarage.harvey.gamecollections.amazon_product_advertising_api;
 
 //import android.util.Base64;
+
+import android.util.Log;
+
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.UnsupportedEncodingException;
@@ -25,7 +28,7 @@ public class SignedRequestsHelper {
     private static final String REQUEST_URI = "/onca/xml";
     private static final String REQUEST_METHOD = "GET";
 
-    private String endpoint = "webservices.amazon.com"; // must be lowercase
+    private String endpoint = "ecs.amazonaws.com"; // must be lowercase
 
     // change this for the keys, get from aws console, use root account to generate. IAM is unavailable.
     // change in Keys_Tag class
@@ -58,9 +61,11 @@ public class SignedRequestsHelper {
                         + endpoint + "\n"
                         + REQUEST_URI + "\n"
                         + canonicalQS;
-        //Log.i("url", "toSign: "+toSign);
+        Log.i("url", "toSign: " + toSign);
         String hmac = hmac(toSign);
+        Log.i("signature", ""+hmac);
         String sig = percentEncodeRfc3986(hmac);
+        Log.i("encoded signature", ""+sig);
         String url = "http://" + endpoint + REQUEST_URI + "?" +
                 canonicalQS + "&Signature=" + sig;
 
@@ -106,6 +111,9 @@ public class SignedRequestsHelper {
             buffer.append(percentEncodeRfc3986(kvpair.getKey()));
             buffer.append("=");
             buffer.append(percentEncodeRfc3986(kvpair.getValue()));
+            if(kvpair.getKey().equals("Keywords")){
+                Log.i("Keywords", ""+percentEncodeRfc3986(kvpair.getValue()));
+            }
             if (iter.hasNext()) {
                 buffer.append("&");
             }
@@ -117,10 +125,10 @@ public class SignedRequestsHelper {
     private String percentEncodeRfc3986(String s) {
         String out;
         try {
-            out = URLEncoder.encode(s, UTF8_CHARSET);
-                    /*.replace("+", "%20")
+            out = URLEncoder.encode(s, UTF8_CHARSET)
+                    .replace("+", "%20")
                     .replace("*", "%2A")
-                    .replace("%7E", "~");*/
+                    .replace("%7E", "~");
         } catch (UnsupportedEncodingException e) {
             out = s;
         }

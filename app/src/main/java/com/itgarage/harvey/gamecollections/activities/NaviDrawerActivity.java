@@ -2,6 +2,7 @@ package com.itgarage.harvey.gamecollections.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -35,14 +36,14 @@ import com.itgarage.harvey.gamecollections.models.Game;
 public class NaviDrawerActivity extends ActionBarActivity {
 
     private Toolbar toolbar;
-    private String NAME = "Harvey Xia";
-    private String EMAIL = "harvey1991cn@gmail.com";
-    private int PROFILE = R.drawable.ic_user;
+    private String NAME;
+    //private String EMAIL = "harvey1991cn@gmail.com";
+    private String PROFILE;
     private String[] ITEM_NAMES;
     private int[] ITEM_ICONS;
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    public DrawerListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private DrawerLayout mDrawer;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -57,6 +58,8 @@ public class NaviDrawerActivity extends ActionBarActivity {
     public final static String FRAGMENT_ID_SAVED_TAG = "Fragment id Saved";
     public static String CURRENT_FRAGMENT = "";
     public static boolean LOCAL_GAME = false;
+
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +91,13 @@ public class NaviDrawerActivity extends ActionBarActivity {
         // setup recyclerview
         mRecyclerView = (RecyclerView) findViewById(R.id.drawer_list);
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, NAME, EMAIL, PROFILE, NaviDrawerActivity.this, NaviDrawerActivity.this);
+        sharedPreferences = getSharedPreferences("userInfo", MODE_PRIVATE);
+        NAME = sharedPreferences.getString("username", "");
+        if(NAME.equals("")){
+            NAME = "Welcome, please login from settings.";
+        }
+        PROFILE = sharedPreferences.getString("profileId", "");
+        mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, NAME, PROFILE, NaviDrawerActivity.this, NaviDrawerActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
         // create a GestureDetector object to detect SingleTapUp touch
@@ -170,6 +179,7 @@ public class NaviDrawerActivity extends ActionBarActivity {
         mDrawerToggle.syncState();
 
         onCreateDB();
+
     }
 
     @Override
@@ -190,6 +200,13 @@ public class NaviDrawerActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_navi_drawer, menu);
+        // Associate searchable configuration with the SearchView
+        /*SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));*/
         return true;
     }
 
@@ -210,9 +227,8 @@ public class NaviDrawerActivity extends ActionBarActivity {
             integrator.initiateScan();
         }
         // Search button to start search view
-        // for db testing
         if (id == R.id.action_search) {
-            Intent intent = new Intent(this, DatabaseActivity.class);
+            Intent intent = new Intent(this, SearchKeywordActivity.class);
             startActivity(intent);
         }
 
@@ -229,7 +245,10 @@ public class NaviDrawerActivity extends ActionBarActivity {
                 Game game = dataSource.getGameByUPC(resultStr);
                 if (game == null) {
                     Intent intent = new Intent(this, BarcodeResultActivity.class);
-                    intent.putExtra(BARCODE_SCAN_RESULT, resultStr);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(BARCODE_SCAN_RESULT, resultStr);
+                    bundle.putString("operation", "Barcode Scan");
+                    intent.putExtras(bundle);
                     startActivity(intent);
                 } else {
                     Intent intent = new Intent(this, GameDetailActivity.class);
@@ -292,6 +311,9 @@ public class NaviDrawerActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         Log.i("Navi", "onResume");
+        NAME = sharedPreferences.getString("username", "");
+        PROFILE = sharedPreferences.getString("profileId", "");
+        mAdapter.update(NAME, PROFILE);
 
         super.onResume();
     }

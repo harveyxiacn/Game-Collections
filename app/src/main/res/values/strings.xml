@@ -48,5 +48,14 @@
     <string name="append_please_use_no_game_in_database"> to add your first game!</string>
     <string name="btn_show_contact_detail_text">Show Contact Detail</string>
     <string name="btn_hide_contact_detail_text">Hide Contact Detail</string>
+    <string name="app_id">1560498074235480</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="search_hint">Search by keyword</string>
+    <string name="title_activity_search_results">SearchResultsActivity</string>
+    <string name="title_activity_list_datasets">ListDatasetsActivity</string>
+    <string name="title_activity_list_records">ListRecordsActivity</string>
+    <string name="title_activity_list_edit">EditRecordsActivity</string>
+    <string name="keyword_input_hint">Input the keyword of the game</string>
+    <string name="btn_search_keyword_desc">searchButton</string>
 
 </resources>

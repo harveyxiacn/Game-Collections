@@ -12,13 +12,13 @@
         android:orderInCategory="200"
         android:title="Search"
         android:icon="@drawable/ic_search"
-        app:showAsAction="ifRoom"
-        ></item>
+        app:showAsAction="collapseActionView|ifRoom"
+        android:actionViewClass="android.widget.SearchView"/>
     <item
         android:id="@+id/action_camera"
         android:orderInCategory="200"
         android:title="Scan"
         android:icon="@drawable/ic_camera"
         app:showAsAction="ifRoom"
-        ></item>
+        />
 </menu>

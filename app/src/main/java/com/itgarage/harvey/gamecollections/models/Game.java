@@ -68,16 +68,18 @@ public class Game {
     }
 
     public void setTitle(String title) {
-        if(title.length()>20){
-            Log.i("Title length", ""+title.length());
-            int index = 20;
-            do{
-                index--;
-            }while (title.charAt(index) != ' ');
-            String preSpaceTitle = title.substring(0, index-1);
-            String postSpaceTitle = title.substring(index+1);
-            title = preSpaceTitle + "\n" + postSpaceTitle;
-            Log.i("New title", title);
+        if(!title.contains("\n")) {
+            if (title.length() > 20) {
+                Log.i("Title length", "" + title.length());
+                int index = 20;
+                do {
+                    index--;
+                } while (title.charAt(index) != ' ');
+                String preSpaceTitle = title.substring(0, index - 1);
+                String postSpaceTitle = title.substring(index + 1);
+                title = preSpaceTitle + "\n" + postSpaceTitle;
+                Log.i("New title", title);
+            }
         }
         this.title = title;
     }
@@ -96,6 +98,7 @@ public class Game {
 
     public void setGenre(String genre) {
         genre = genre.replaceAll("_", " ");
+        genre = genre.replaceAll("-", " ");
         this.genre = genre;
     }
 

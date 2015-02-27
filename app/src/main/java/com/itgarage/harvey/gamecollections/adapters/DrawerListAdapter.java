@@ -10,12 +10,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.widget.ProfilePictureView;
+import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
-import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
 import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
-import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 
 public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.ViewHolder> {
 
@@ -27,22 +28,29 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     private int mIcons[];       // Int Array to store the passed icons resource value from MainActivity.java
 
     private String name;        //String Resource for header View Name
-    private int profile;        //int Resource for header view profile picture
-    private String email;       //String Resource for header view email
+    private String profile;        //int Resource for header view profile picture
+    //private String email;       //String Resource for header view email
     Context context;
     private NaviDrawerActivity activity;
 
     // Creating a ViewHolder which extends the RecyclerView View Holder
     // ViewHolder are used to to store the inflated views in order to recycle them
 
+    public void update(String username, String profile){
+        this.name = username;
+        this.profile = profile;
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         int Holderid;
 
         TextView textView;
         ImageView imageView;
-        ImageView profile;
+        //ImageView profile;
+        ProfilePictureView profile;
         TextView Name;
-        TextView email;
+        //TextView email;
         Context context;
         NaviDrawerActivity activity;
 
@@ -61,8 +69,9 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
                 Holderid = 1;                                               // setting holder id as 1 as the object being populated are of type item row
             } else {
                 Name = (TextView) itemView.findViewById(R.id.username_text);         // Creating Text View object from header.xml for name
-                email = (TextView) itemView.findViewById(R.id.user_email_text);       // Creating Text View object from header.xml for email
-                profile = (ImageView) itemView.findViewById(R.id.user_image);// Creating Image view object from header.xml for profile pic
+                //email = (TextView) itemView.findViewById(R.id.user_email_text);       // Creating Text View object from header.xml for email
+                //profile = (ImageView) itemView.findViewById(R.id.user_image);// Creating Image view object from header.xml for profile pic
+                profile = (ProfilePictureView) itemView.findViewById(R.id.user_image);
                 Holderid = 0;                                                // Setting holder id = 0 as the object being populated are of type header view
             }
         }
@@ -87,12 +96,12 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     }
 
 
-    public DrawerListAdapter(String Titles[], int Icons[], String Name, String Email, int Profile, Context passedContext, NaviDrawerActivity activity) { // DrawerListAdapter Constructor with titles and icons parameter
+    public DrawerListAdapter(String Titles[], int Icons[], String Name, String Profile, Context passedContext, NaviDrawerActivity activity) { // DrawerListAdapter Constructor with titles and icons parameter
         // titles, icons, name, email, profile pic are passed from the main activity as we
         mNavTitles = Titles;                //have seen earlier
         mIcons = Icons;
         name = Name;
-        email = Email;
+        //email = Email;
         profile = Profile;                     //here we assign those passed values to the values we declared here
         this.context = passedContext;
         this.activity = activity;
@@ -140,9 +149,10 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
             holder.imageView.setImageResource(mIcons[position - 1]);// Settimg the image with array of our icons
         } else {
 
-            holder.profile.setImageResource(profile);           // Similarly we set the resources for header view
+            //holder.profile.setImageResource(profile);           // Similarly we set the resources for header view
+            holder.profile.setProfileId(profile);
             holder.Name.setText(name);
-            holder.email.setText(email);
+            //holder.email.setText(email);
         }
     }
 
