@@ -194,7 +194,7 @@ public class ListDatasetsActivity extends ListActivity {
                                         dialog.dismiss();
                                         Intent intent = new Intent(
                                                 ListDatasetsActivity.this,
-                                                LoginActivity.class);
+                                                LoginTestActivity.class);
                                         startActivity(intent);
                                     }
                                 }).setCancelable(false).show();

@@ -57,5 +57,6 @@
     <string name="title_activity_list_edit">EditRecordsActivity</string>
     <string name="keyword_input_hint">Input the keyword of the game</string>
     <string name="btn_search_keyword_desc">searchButton</string>
+    <string name="login_title">login title</string>
 
 </resources>

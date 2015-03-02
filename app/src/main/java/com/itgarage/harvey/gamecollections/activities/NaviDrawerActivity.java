@@ -326,22 +326,4 @@ public class NaviDrawerActivity extends ActionBarActivity {
         Log.i("Navi", "onPause");
         super.onPause();
     }
-
-    private long lastClickTime = 0;
-    @Override
-    public void onBackPressed() {
-        //super.onBackPressed();
-        if(lastClickTime<=0){
-            Toast.makeText(this, getString(R.string.back_button_click_toast_text), Toast.LENGTH_SHORT).show();
-            lastClickTime = System.currentTimeMillis();
-        }else {
-            long currentClickTime = System.currentTimeMillis();
-            if(currentClickTime-lastClickTime<2000){
-                finish();
-            }else {
-                Toast.makeText(this, getString(R.string.back_button_click_toast_text), Toast.LENGTH_SHORT).show();
-                lastClickTime = System.currentTimeMillis();
-            }
-        }
-    }
 }

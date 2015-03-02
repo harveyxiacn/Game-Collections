@@ -1,13 +1,10 @@
 package com.itgarage.harvey.gamecollections.activities;
 
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,49 +15,53 @@ import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+import com.facebook.widget.LoginButton.UserInfoChangedCallback;
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncClientManager;
-import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 
-public class LoginActivity extends ActionBarActivity implements Session.StatusCallback{
-    Toolbar toolbar;
-    private static final String TAG = "LoginActivity";
+import java.util.Arrays;
 
-    private static final String[] APP_SCOPES = {
-            "profile"
-    };
-    private Button btnLoginFacebook, btnWipedata, btnLogoutFacebook;
+public class LoginActivity extends Activity implements Session.StatusCallback{
+
 
     SharedPreferences preferences;
+    LoginButton facebookLoginButton;
+    Button appStart;
+    TextView welcomeTv;
+    static final String TAG = "LoginActivity";
+    private UiLifecycleHelper uiHelper;
 
-    TextView tvTitle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        uiHelper = new UiLifecycleHelper(this, this);
+        uiHelper.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
-        toolbar = (Toolbar) findViewById(R.id.tool_bar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        /**
-         * Initializes the sync client. This must be call before you can use it.
-         */
+
         CognitoSyncClientManager.init(this);
 
-        btnLoginFacebook = (Button) findViewById(R.id.btnLoginFacebook);
-        btnLoginFacebook.setOnClickListener(new View.OnClickListener() {
+        welcomeTv = (TextView) findViewById(R.id.welcomeTextView);
+        appStart = (Button) findViewById(R.id.btn_app_start);
+
+        facebookLoginButton = (LoginButton) findViewById(R.id.btn_facebook_login);
+        facebookLoginButton.setReadPermissions(Arrays.asList("email"));
+        facebookLoginButton.setUserInfoChangedCallback(new UserInfoChangedCallback() {
             @Override
-            public void onClick(View v) {
-                // start Facebook Login
-                Session.openActiveSession(LoginActivity.this, true,
-                        LoginActivity.this);
+            public void onUserInfoFetched(GraphUser user) {
+                if (user != null) {
+                    welcomeTv.setText("Hello " + user.getName());
+                } else {
+                    welcomeTv.setText("You are not logged in.");
+                }
             }
         });
-
-        btnLogoutFacebook = (Button) findViewById(R.id.btnLogoutFacebook);
 
         final Session session = Session
                 .openActiveSessionFromCache(LoginActivity.this);
@@ -68,142 +69,21 @@ public class LoginActivity extends ActionBarActivity implements Session.StatusCa
             setFacebookSession(session);
         }
 
-        btnLogoutFacebook.setOnClickListener(new View.OnClickListener() {
+        appStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(LoginActivity.this)
-                        .setTitle("Logout facebook?")
-                        .setMessage(
-                                "This will log off your current session. ")
-                        .setPositiveButton("Yes",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        // clear facebook login status
-                                        if (session != null) {
-                                            session.closeAndClearTokenInformation();
-                                        }
-                                        btnLoginFacebook
-                                                .setVisibility(View.VISIBLE);
-                                        btnLogoutFacebook.setVisibility(View.GONE);
-                                        /*if (mAuthManager != null) {
-                                            mAuthManager
-                                                    .clearAuthorizationState(null);
-                                        }
-                                        btnLoginLWA.setVisibility(View.VISIBLE);*/
-                                        // wipe data
-                                        /*CognitoSyncManager client = CognitoSyncClientManager.getInstance();
-                                        Dataset dataset = client.openOrCreateDataset("games");
-                                        dataset.delete();*/
-
-
-                                        // Wipe shared preferences
-                                        /*AmazonSharedPreferencesWrapper.wipe(PreferenceManager
-                                                .getDefaultSharedPreferences(LoginActivity.this));*/
-
-                                        TextView title = (TextView) findViewById(R.id.tvTitle);
-                                        title.setText("Login");
-
-                                        SharedPreferences.Editor editor = preferences.edit();
-                                        editor.putString("username", "");
-                                        editor.putString("profileId", "");
-                                        editor.apply();
-                                    }
-
-                                })
-                        .setNegativeButton("No",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        dialog.cancel();
-                                    }
-                                }).show();
+                Intent intent = new Intent(LoginActivity.this, NaviDrawerActivity.class);
+                startActivity(intent);
             }
         });
-
-        btnWipedata = (Button) findViewById(R.id.btnWipedata);
-        btnWipedata.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new AlertDialog.Builder(LoginActivity.this)
-                        .setTitle("Wipe data?")
-                        .setMessage(
-                                "This will log off your current session and wipe all user data. "
-                                        + "Any data not synchronized will be lost.")
-                        .setPositiveButton("Yes",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        // clear facebook login status
-                                        if (session != null) {
-                                            session.closeAndClearTokenInformation();
-                                        }
-                                        btnLoginFacebook
-                                                .setVisibility(View.VISIBLE);
-                                        /*if (mAuthManager != null) {
-                                            mAuthManager
-                                                    .clearAuthorizationState(null);
-                                        }
-                                        btnLoginLWA.setVisibility(View.VISIBLE);*/
-                                        // wipe data
-                                        CognitoSyncClientManager.getInstance()
-                                                .wipeData();
-
-                                        TextView title = (TextView) findViewById(R.id.tvTitle);
-                                        title.setText("Login");
-
-                                        SharedPreferences.Editor editor = preferences.edit();
-                                        editor.putString("username", "");
-                                        editor.putString("profileId", "");
-                                        editor.apply();
-                                    }
-
-                                })
-                        .setNegativeButton("No",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        dialog.cancel();
-                                    }
-                                }).show();
-            }
-        });
-
-        findViewById(R.id.btnListDatasets).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(LoginActivity.this,
-                                ListDatasetsActivity.class);
-                        startActivity(intent);
-                    }
-                });
-
-        findViewById(R.id.btnSyncGames).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(LoginActivity.this);
-                cognitoSyncGames.refreshDatasetMetadata();
-            }
-        });
-
-        tvTitle = (TextView) findViewById(R.id.tvTitle);
-        String username = preferences.getString("username", "");
-        if(!username.equals("")){
-            tvTitle.setText(username);
-        }
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Session.getActiveSession().onActivityResult(this, requestCode,
                 resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -218,10 +98,10 @@ public class LoginActivity extends ActionBarActivity implements Session.StatusCa
                 public void onCompleted(GraphUser user, Response response) {
                     if (user != null) {
                         Toast.makeText(LoginActivity.this,
-                                "Hello " + user.getName(), Toast.LENGTH_LONG)
+                                "Hello " + user.getName(), Toast.LENGTH_SHORT)
                                 .show();
-                        TextView title = (TextView) findViewById(R.id.tvTitle);
-                        title.setText("Hello " + user.getName());
+                        /*TextView title = (TextView) findViewById(R.id.welcomeTextView);
+                        title.setText("Hello " + user.getName());*/
                         preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("username", user.getName());
@@ -230,13 +110,65 @@ public class LoginActivity extends ActionBarActivity implements Session.StatusCa
                     }
                 }
             }).executeAsync();
+        }else if(session.isClosed()){
+            Log.i(TAG, "facebook session is closed");
+            Toast.makeText(LoginActivity.this,
+                    "You logged out.", Toast.LENGTH_SHORT)
+                    .show();
+            preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("username", "");
+            editor.putString("profileId", "");
+            editor.apply();
+            appStart.setVisibility(View.GONE);
         }
     }
+
     private void setFacebookSession(Session session) {
         Log.i(TAG, "facebook token: " + session.getAccessToken());
         CognitoSyncClientManager.addLogins("graph.facebook.com",
                 session.getAccessToken());
-        btnLoginFacebook.setVisibility(View.GONE);
-        btnLogoutFacebook.setVisibility(View.VISIBLE);
+        appStart.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        uiHelper.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        uiHelper.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        uiHelper.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedState) {
+        super.onSaveInstanceState(savedState);
+        uiHelper.onSaveInstanceState(savedState);
+    }
+    private long lastClickTime = 0;
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        if(lastClickTime<=0){
+            Toast.makeText(this, getString(R.string.back_button_click_toast_text), Toast.LENGTH_SHORT).show();
+            lastClickTime = System.currentTimeMillis();
+        }else {
+            long currentClickTime = System.currentTimeMillis();
+            if(currentClickTime-lastClickTime<2000){
+                finish();
+            }else {
+                Toast.makeText(this, getString(R.string.back_button_click_toast_text), Toast.LENGTH_SHORT).show();
+                lastClickTime = System.currentTimeMillis();
+            }
+        }
     }
 }

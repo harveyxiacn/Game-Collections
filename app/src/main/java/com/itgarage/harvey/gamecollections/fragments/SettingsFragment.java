@@ -11,7 +11,7 @@ import android.widget.Button;
 
 import com.facebook.UiLifecycleHelper;
 import com.itgarage.harvey.gamecollections.R;
-import com.itgarage.harvey.gamecollections.activities.LoginActivity;
+import com.itgarage.harvey.gamecollections.activities.LoginTestActivity;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 
 public class SettingsFragment extends Fragment {
@@ -48,7 +48,7 @@ public class SettingsFragment extends Fragment {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(activity.getContext(), LoginActivity.class);
+                Intent intent = new Intent(activity.getContext(), LoginTestActivity.class);
                 startActivity(intent);
             }
         });

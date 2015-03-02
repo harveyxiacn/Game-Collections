@@ -16,7 +16,7 @@ import com.amazonaws.mobileconnectors.cognito.Record;
 import com.amazonaws.mobileconnectors.cognito.SyncConflict;
 import com.amazonaws.mobileconnectors.cognito.exceptions.DataStorageException;
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
-import com.itgarage.harvey.gamecollections.activities.LoginActivity;
+import com.itgarage.harvey.gamecollections.activities.LoginTestActivity;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLookupArgs;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
@@ -382,7 +382,7 @@ public class CognitoSyncGames {
                                         dialog.dismiss();
                                         Intent intent = new Intent(
                                                 activity,
-                                                LoginActivity.class);
+                                                LoginTestActivity.class);
                                         activity.startActivity(intent);
                                     }
                                 }).setCancelable(false).show();
