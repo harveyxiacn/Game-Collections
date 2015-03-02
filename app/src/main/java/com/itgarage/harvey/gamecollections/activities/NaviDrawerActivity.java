@@ -24,6 +24,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.adapters.DrawerListAdapter;
+import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncClientManager;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
@@ -179,6 +180,8 @@ public class NaviDrawerActivity extends ActionBarActivity {
         mDrawerToggle.syncState();
 
         onCreateDB();
+
+        CognitoSyncClientManager.init(this);
 
     }
 
