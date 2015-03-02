@@ -29,6 +29,7 @@ import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLo
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.UrlParameterHandler;
+import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
@@ -357,6 +358,8 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             }
             long insertId = dataSource.addGame(game);
             if(insertId != -1){
+                CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
+                cognitoSyncGames.addRecord(game);
                 gamesList = dataSource.getAllGames();
                 Toast.makeText(this, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
                 if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {

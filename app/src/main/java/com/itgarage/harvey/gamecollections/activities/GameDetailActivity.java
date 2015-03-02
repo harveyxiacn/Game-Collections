@@ -15,8 +15,6 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -28,6 +26,7 @@ import android.widget.Toast;
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
 import com.itgarage.harvey.gamecollections.adapters.ImageSlideAdapter;
+import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
@@ -74,6 +73,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
     private static final int CONTACT_PICKER_RESULT = 1;
     static final String DEBUG_TAG = "DEBUG_TAG";
+
+    CognitoSyncGames cognitoSyncGames;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,7 +226,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         } else {
             titleTextView.setText(getString(R.string.null_game_title));
         }
-
+        // sync stuff
+        cognitoSyncGames = new CognitoSyncGames(this);
     }
 
     public void createGameUpdateFloatingActionButtons() {
@@ -277,29 +279,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 .build();
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_game_detail, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @Override
     public void onClick(View v) {
         /*update the rating of the game*/
@@ -318,6 +297,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
                     game.setRating((int) gameRating.getRating());
+                    cognitoSyncGames.updateRating(game);
                     updateFragmentUIsByUpdateDatabase();
                 } else {
                     Log.i("rating bar", "show small hide large");
@@ -326,6 +306,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
                     game.setRating((int) gameRating.getRating());
+                    cognitoSyncGames.updateRating(game);
                     updateFragmentUIsByUpdateDatabase();
                 }
                 updateGameActionMenu.close(true);
@@ -339,6 +320,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 borrowerInfoLayout.setVisibility(View.GONE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
                 game.setContactId(-1);
+                cognitoSyncGames.updateContactId(game);
                 updateFragmentUIsByUpdateDatabase();
                 TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
                 nameTextView.setText("Name");
@@ -365,6 +347,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                             dialog.dismiss();
                             dataSource.open();
                             dataSource.deleteGame(game.getId());
+                            cognitoSyncGames.deleteRecord(game.getUpcCode());
                             List<Game> gameList = dataSource.getAllGames();
                             dataSource.close();
                             Toast.makeText(context, game.getTitle() + " deleted.", Toast.LENGTH_SHORT).show();
@@ -578,6 +561,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     contactId = Integer.parseInt(id);
                     getContact(id);
                     game.setContactId(contactId);
+                    cognitoSyncGames.updateContactId(game);
                     Toast.makeText(this, "Added contact to this game.", Toast.LENGTH_SHORT).show();
                     updateFragmentUIsByUpdateDatabase();
                     break;

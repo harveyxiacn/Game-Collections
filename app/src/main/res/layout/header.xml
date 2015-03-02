@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:facebook="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="178dp"
     android:background="@drawable/background_poly">
@@ -22,7 +23,7 @@
             android:textSize="14sp"
             android:textStyle="bold"/>
 
-        <TextView
+        <!--<TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/user_email_text"
@@ -31,14 +32,21 @@
             android:layout_marginTop="5dp"
             android:text="harvey1991cn@gmail.com"
             android:textSize="14sp"
-            android:textStyle="normal"/>
+            android:textStyle="normal"/>-->
     </LinearLayout>
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <!--<de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:src="@drawable/ic_user"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="38dp"
-        android:id="@+id/user_image"/>
+        android:id="@+id/user_image"/>-->
+    <com.facebook.widget.ProfilePictureView
+        android:id="@+id/user_image"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="38dp"
+        facebook:preset_size="small" />
 </RelativeLayout>
