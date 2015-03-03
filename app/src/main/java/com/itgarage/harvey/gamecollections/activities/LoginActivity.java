@@ -284,7 +284,8 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
             Account[] accounts = accountManager.getAccountsByType(GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
             try {
                 googleToken = GoogleAuthUtil.getToken(getApplicationContext(), accounts[0].name,
-                        "audience:server:client_id:google_service_account_client_id");
+                        "audience:server:client_id:google_service_client_id");
+
             } catch (IOException | GoogleAuthException e) {
                 e.printStackTrace();
             }

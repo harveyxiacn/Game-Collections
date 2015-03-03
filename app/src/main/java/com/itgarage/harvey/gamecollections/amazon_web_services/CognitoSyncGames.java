@@ -50,6 +50,8 @@ public class CognitoSyncGames {
     List<Record> existedInPool, // save record upc/key contactId/value of the games are in pool, for searching in local database and upload the non existed games
             notExistedInDB; // save record upc/key contactId/value of the games are not in local database, for search upc codes and download games info
     List<Game> notExistedInPool;// save upc of the games are not in pool, for upload to pool
+    Intent intentNavi;
+    boolean onDownloadGame;// state for on create data set or not
 
     public CognitoSyncGames(Activity activity) {
         // initialize the client to prepare to use
@@ -59,6 +61,8 @@ public class CognitoSyncGames {
         existedInPool = new ArrayList<>();
         notExistedInDB = new ArrayList<>();
         notExistedInPool = new ArrayList<>();
+        intentNavi = null;
+        onDownloadGame = false;
     }
 
     public Dataset getDataset() {
@@ -120,6 +124,7 @@ public class CognitoSyncGames {
         }
         if (notExistedInDB.size() != 0) {
             Log.i(TAG, "not exist in db, gonna download");
+            onDownloadGame = true;
             downloadGamesFromPool();
         }
         if (notExistedInPool != null) {
@@ -226,12 +231,17 @@ public class CognitoSyncGames {
     // download the games are not in local DB
     public void downloadGamesFromPool() {
         Log.i(TAG, "gonna download");
-        for (Record record : notExistedInDB) {
+        for (int i = 0; i < notExistedInDB.size(); i++) {
+            Record record = notExistedInDB.get(i);
+            boolean lastOne = false;
+            if(i==notExistedInDB.size()-1){
+                lastOne = true;
+            }
             try {
                 JSONObject value = new JSONObject(record.getValue());
                 int downloadContactID = value.getInt("contactID");
                 int downloadRating = value.getInt("rating");
-                new SearchAmazonTask().execute(record.getKey(), String.valueOf(downloadContactID), String.valueOf(downloadRating));
+                new SearchAmazonTask().execute(record.getKey(), String.valueOf(downloadContactID), String.valueOf(downloadRating), String.valueOf(lastOne));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -260,7 +270,7 @@ public class CognitoSyncGames {
         if (dialog.isShowing())
             dialog.dismiss();
         JSONObject value = new JSONObject();
-        Map<String, String> values = new HashMap<String, String>();
+        Map<String, String> values = dataset.getAll();
         try {
             value.put("contactID", game.getContactId());
             value.put("rating", game.getRating());
@@ -467,8 +477,18 @@ public class CognitoSyncGames {
                 datasets = client.listDatasets();
                 if (datasets.size() == 0) {// first use app, have not synced ever
                     createDataset();
+                    if(activity.getClass()==LoginActivity.class) {
+                        Intent intent = new Intent(activity, NaviDrawerActivity.class);
+                        activity.startActivity(intent);
+                    }
                 } else {// not first time use app, has dataset in congnito pool
                     openDataset();
+                    if(!onDownloadGame){
+                        if(activity.getClass()==LoginActivity.class) {
+                            Intent intent = new Intent(activity, NaviDrawerActivity.class);
+                            activity.startActivity(intent);
+                        }
+                    }
                 }
             } else {
                 // Probably an authentication (or lackthereof) error
@@ -509,10 +529,6 @@ public class CognitoSyncGames {
                         dialog.dismiss();
                     }
                 });
-                if(activity.getClass()==LoginActivity.class) {
-                    Intent intent = new Intent(activity, NaviDrawerActivity.class);
-                    activity.startActivity(intent);
-                }
             }
 
             @Override
@@ -820,6 +836,7 @@ public class CognitoSyncGames {
         protected Game doInBackground(String... params) {
             Log.i(TAG, "executing");
             ItemLookupArgs.ITEM_ID = params[0];
+            boolean lastOne = Boolean.parseBoolean(params[3]);
             Game downloadGame = getGame();
             if (downloadGame != null) {
                 Log.i(TAG, "download game: " + downloadGame.getTitle());
@@ -828,6 +845,9 @@ public class CognitoSyncGames {
                 }
                 downloadGame.setContactId(Integer.parseInt(params[1]));
                 downloadGame.setRating(Integer.parseInt(params[2]));
+            }
+            if(lastOne){
+                intentNavi = new Intent(activity, NaviDrawerActivity.class);
             }
             return downloadGame;
         }
@@ -841,9 +861,8 @@ public class CognitoSyncGames {
                 Log.i(TAG, "add game: " + game.getTitle());
                 dataSource.close();
             }
-            if (activity.getClass() == LoginActivity.class) {
-                Intent intent = new Intent(activity, NaviDrawerActivity.class);
-                activity.startActivity(intent);
+            if(intentNavi!=null){
+                activity.startActivity(intentNavi);
             }
             if (pd != null) {
                 pd.dismiss();
