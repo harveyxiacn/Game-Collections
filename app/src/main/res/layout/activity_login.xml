@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:facebook="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -8,6 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@color/ColorPrimary"
+    android:orientation="vertical"
     tools:context="com.itgarage.harvey.gamecollections.activities.LoginActivity">
 
     <ImageView
@@ -16,39 +17,50 @@
         android:src="@drawable/title_login"
         android:contentDescription="@string/login_title"
         android:id="@+id/login_title"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_marginTop="47dp" />
-
-    <com.facebook.widget.LoginButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/welcomeTextView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="39dp"
-        android:id="@+id/btn_facebook_login"
-        android:visibility="visible"
-        facebook:confirm_logout="false"
-        facebook:fetch_user_info="true"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="App Start"
-        android:id="@+id/btn_app_start"
-        android:visibility="gone"
-        android:layout_marginTop="43dp"
-        android:layout_below="@+id/btn_facebook_login"
-        android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/welcomeTextView"
+        android:text="welcome"
         android:layout_marginTop="39dp"
-        android:layout_below="@+id/login_title"
-        android:layout_centerHorizontal="true" />
+        android:layout_gravity="center_horizontal"/>
 
-</RelativeLayout>
+    <com.facebook.widget.LoginButton
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="39dp"
+        android:id="@+id/btn_facebook_login"
+        facebook:confirm_logout="false"
+        facebook:fetch_user_info="true"
+        android:layout_gravity="center_horizontal"/>
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/btn_google_login"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Log In with Google+"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="39dp"/>
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Log out Google+"
+        android:id="@+id/btn_google_logout"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="39dp"
+        android:background="@color/ColorGp"
+        android:textColor="@color/ColorTextIcon"/>
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="App Start"
+        android:id="@+id/btn_app_start"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="39dp"
+        android:textColor="@color/ColorTextIcon"/>
+</LinearLayout>

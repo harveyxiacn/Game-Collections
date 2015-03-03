@@ -2,19 +2,21 @@ package com.itgarage.harvey.gamecollections.amazon_web_services;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import com.amazonaws.auth.AWSAbstractCognitoIdentityProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.auth.CognitoCredentialsProvider;
+import com.amazonaws.auth.IdentityChangedListener;
 import com.amazonaws.mobileconnectors.cognito.CognitoSyncManager;
 import com.amazonaws.regions.Regions;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class CognitoSyncClientManager {
+public class CognitoSyncClientManager implements IdentityChangedListener {
 
-    private static final String TAG = "CognitoSyncClientManager";
+    private static final String TAG = "CognitoSyncClientManage";
 
     /**
      * Enter here the Identity Pool associated with your app and the AWS
@@ -83,7 +85,8 @@ public class CognitoSyncClientManager {
             logins = new HashMap<String, String>();
         }
         logins.put(providerName, token);
-        credentialsProvider.setLogins(logins);
+        Log.i(TAG, logins.toString());
+        credentialsProvider.withLogins(logins);
     }
 
     /**
@@ -106,5 +109,10 @@ public class CognitoSyncClientManager {
      */
     public CognitoCredentialsProvider getCredentialsProvider() {
         return credentialsProvider;
+    }
+
+    @Override
+    public void identityChanged(String oldIdentityId, String newIdentityId) {
+
     }
 }

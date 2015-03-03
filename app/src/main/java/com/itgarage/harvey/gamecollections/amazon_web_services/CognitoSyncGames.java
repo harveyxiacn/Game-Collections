@@ -16,7 +16,9 @@ import com.amazonaws.mobileconnectors.cognito.Record;
 import com.amazonaws.mobileconnectors.cognito.SyncConflict;
 import com.amazonaws.mobileconnectors.cognito.exceptions.DataStorageException;
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
+import com.itgarage.harvey.gamecollections.activities.LoginActivity;
 import com.itgarage.harvey.gamecollections.activities.LoginTestActivity;
+import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLookupArgs;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
@@ -36,9 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by harvey on 2015-02-27.
- */
 public class CognitoSyncGames {
     CognitoSyncManager client;
     private static final String TAG = "CognitoSyncGames";
@@ -50,6 +49,7 @@ public class CognitoSyncGames {
     ProgressDialog dialog;
     List<Record> existedInPool, // save record upc/key contactId/value of the games are in pool, for searching in local database and upload the non existed games
             notExistedInDB; // save record upc/key contactId/value of the games are not in local database, for search upc codes and download games info
+    List<Game> notExistedInPool;// save upc of the games are not in pool, for upload to pool
 
     public CognitoSyncGames(Activity activity) {
         // initialize the client to prepare to use
@@ -58,6 +58,7 @@ public class CognitoSyncGames {
         dataSource = new GamesDataSource(activity);
         existedInPool = new ArrayList<>();
         notExistedInDB = new ArrayList<>();
+        notExistedInPool = new ArrayList<>();
     }
 
     public Dataset getDataset() {
@@ -82,20 +83,22 @@ public class CognitoSyncGames {
         dataSource.open();
         List<Game> gamesList = dataSource.getAllGames();
         dataSource.close();
-        for (Game game : gamesList) {
-            Log.i(TAG, "upload " + game.getTitle());
-            String key = game.getUpcCode();
-            JSONObject value = new JSONObject();
-            try {
-                value.put("contactID", game.getContactId());
-                value.put("rating", game.getRating());
-            } catch (JSONException e) {
-                e.printStackTrace();
+        if (gamesList != null) {
+            for (Game game : gamesList) {
+                Log.i(TAG, "upload " + game.getTitle());
+                String key = game.getUpcCode();
+                JSONObject value = new JSONObject();
+                try {
+                    value.put("contactID", game.getContactId());
+                    value.put("rating", game.getRating());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                values.put(key, value.toString());
             }
-            values.put(key, value.toString());
+            dataset.putAll(values);
+            Log.i(TAG, "put all values");
         }
-        dataset.putAll(values);
-        Log.i(TAG, "put all values");
         synchronize();
         Log.i(TAG, "sync");
         if (dialog.isShowing())
@@ -119,9 +122,32 @@ public class CognitoSyncGames {
             Log.i(TAG, "not exist in db, gonna download");
             downloadGamesFromPool();
         }
+        if (notExistedInPool != null) {
+            if (notExistedInPool.size() != 0) {
+                Log.i(TAG, "not exist in pool, gonna upload");
+                uploadLackGamesToPool(notExistedInPool);
+            }
+        }
         synchronize();
         if (dialog.isShowing())
             dialog.dismiss();
+    }
+
+    private void uploadLackGamesToPool(List<Game> notExistedInPool) {
+        Map<String, String> values = new HashMap<String, String>();
+        for (Game game : notExistedInPool) {
+            String key = game.getUpcCode();
+            JSONObject value = new JSONObject();
+            try {
+                value.put("contactID", game.getContactId());
+                value.put("rating", game.getRating());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            values.put(key, value.toString());
+        }
+        dataset.putAll(values);
+        Log.i(TAG, "put all values");
     }
 
     // get list of upc codes of the games exist in pool or not
@@ -132,7 +158,7 @@ public class CognitoSyncGames {
         Game game = null;
         Log.i(TAG, "get all records");
         List<Record> records = dataset.getAllRecords();
-        Log.i(TAG, "records in dataset " + records.isEmpty());
+        Log.i(TAG, "records in dataset " + !records.isEmpty());
         for (Record record : records) {
             Log.i(TAG, "record " + record.getKey());
             if (!record.isDeleted()) {
@@ -142,12 +168,16 @@ public class CognitoSyncGames {
                 if (game != null) { // the game exists in both local DB and cognito pool
                     Log.i(TAG, "exist in db and pool");
                     existedInPool.add(record);
+                    gamesList.remove(game);// the remain games are in local DB but not in cognito pool
                 } else {// the game exists in cognite pool but not in local DB
                     Log.i(TAG, "not in db");
                     notExistedInDB.add(record);
                 }
             }
         }
+
+        notExistedInPool = gamesList;
+
         dataSource.close();
     }
 
@@ -166,14 +196,14 @@ public class CognitoSyncGames {
                 //int contactId = value.getInt("contactID");
                 Game game = dataSource.getGameByUPC(upcCode);
                 //if (game.getContactId() != contactId) {
-                    // if the contact id is not the same, put the local new contact id into values to update
-                    value.put("contactID", game.getContactId());
-                    //Log.i(TAG, "different contact id");
+                // if the contact id is not the same, put the local new contact id into values to update
+                value.put("contactID", game.getContactId());
+                //Log.i(TAG, "different contact id");
                 //}
                 //int rating = value.getInt("rating");
                 //if(game.getRating() !=rating){
-                    // if the rating is not the same, put the local new contact id into values to update
-                    value.put("rating", game.getRating());
+                // if the rating is not the same, put the local new contact id into values to update
+                value.put("rating", game.getRating());
                 //    Log.i(TAG, "different rating");
                 //}
                 /*boolean favourite = value.getBoolean("favourite");
@@ -212,17 +242,19 @@ public class CognitoSyncGames {
     // delete game record when delete game when using delete game in datasource
     public void deleteRecord(String key) {
         dataset = client.openOrCreateDataset("games");
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
+        //synchronize();
+        /*if (dialog.isShowing())
+            dialog.dismiss();*/
+        Log.i(TAG, "deleteRecord " + key);
         dataset.remove(key);
         synchronize();
         if (dialog.isShowing())
             dialog.dismiss();
     }
+
     // add game record to dataset when add new/reAdd game using insert game in datasourse
-    public void addRecord(Game game){
-        Log.i(TAG, "add new game "+game.getTitle());
+    public void addRecord(Game game) {
+        Log.i(TAG, "add new game " + game.getTitle());
         dataset = client.openOrCreateDataset("games");
         synchronize();
         if (dialog.isShowing())
@@ -242,8 +274,9 @@ public class CognitoSyncGames {
         if (dialog.isShowing())
             dialog.dismiss();
     }
+
     // update contactID when update contact id in game detail page
-    public void updateContactId(Game game){
+    public void updateContactId(Game game) {
         dataset = client.openOrCreateDataset("games");
         synchronize();
         if (dialog.isShowing())
@@ -257,7 +290,7 @@ public class CognitoSyncGames {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.i(TAG, "update contact id "+contactID+"->"+game.getContactId());
+        Log.i(TAG, "update contact id " + contactID + "->" + game.getContactId());
         JSONObject value = new JSONObject();
         Map<String, String> values = new HashMap<String, String>();
         try {
@@ -272,15 +305,16 @@ public class CognitoSyncGames {
         if (dialog.isShowing())
             dialog.dismiss();
     }
+
     // update rating when update rating in game detail page
-    public void updateRating(Game game){
-        Log.i(TAG, "update game rating"+game.getTitle());
+    public void updateRating(Game game) {
+        Log.i(TAG, "update game rating" + game.getTitle());
         dataset = client.openOrCreateDataset("games");
         synchronize();
         if (dialog.isShowing())
             dialog.dismiss();
         String valueData = dataset.get(game.getUpcCode());
-        Log.i(TAG, "value data "+valueData);
+        Log.i(TAG, "value data " + valueData);
         JSONObject Jvalue;
         int rating = 0;
         try {
@@ -290,7 +324,7 @@ public class CognitoSyncGames {
             e.printStackTrace();
         }
 
-        Log.i(TAG, "update rating "+rating+"->"+game.getRating());
+        Log.i(TAG, "update rating " + rating + "->" + game.getRating());
         JSONObject value = new JSONObject();
         Map<String, String> values = new HashMap<String, String>();
         try {
@@ -305,8 +339,9 @@ public class CognitoSyncGames {
         if (dialog.isShowing())
             dialog.dismiss();
     }
+
     // update favourite when update favourite in game detail page
-    public void updateFavourite(Game game){
+    public void updateFavourite(Game game) {
         dataset = client.openOrCreateDataset("games");
         synchronize();
         if (dialog.isShowing())
@@ -390,6 +425,74 @@ public class CognitoSyncGames {
         }
     }
 
+    public void refreshDatasetMetadata(Activity activity) {
+        new RefreshDatasetMetadataTaskActivity(activity).execute();
+    }
+
+    public class RefreshDatasetMetadataTaskActivity extends
+            AsyncTask<Void, Void, Void> {
+        ProgressDialog dialog;
+        boolean authError;
+        Activity activity;
+
+        public RefreshDatasetMetadataTaskActivity(Activity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog = ProgressDialog.show(activity, "Syncing",
+                    "Please wait");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                client.refreshDatasetMetadata();
+            } catch (DataStorageException dse) {
+                Log.e(TAG, "failed to refresh dataset metadata", dse);
+            } catch (NotAuthorizedException e) {
+                Log.e(TAG, "failed to refresh dataset metadata", e);
+                authError = true;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            dialog.dismiss();
+            if (!authError) {
+                //refreshListData();
+                // if no auth error, get dataset
+                datasets = client.listDatasets();
+                if (datasets.size() == 0) {// first use app, have not synced ever
+                    createDataset();
+                } else {// not first time use app, has dataset in congnito pool
+                    openDataset();
+                }
+            } else {
+                // Probably an authentication (or lackthereof) error
+                new AlertDialog.Builder(activity)
+                        .setTitle("There was an error")
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setMessage(
+                                "You must be logged in or have allowed access to unauthorized users to browse your data")
+                        .setPositiveButton("Back",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog,
+                                                        int which) {
+                                        dialog.dismiss();
+                                        Intent intent = new Intent(
+                                                activity,
+                                                LoginTestActivity.class);
+                                        activity.startActivity(intent);
+                                    }
+                                }).setCancelable(false).show();
+            }
+        }
+    }
+
     private void synchronize() {
         dialog = ProgressDialog.show(activity, "Syncing", "Please wait");
         Log.i("Sync", "synchronize");
@@ -406,6 +509,10 @@ public class CognitoSyncGames {
                         dialog.dismiss();
                     }
                 });
+                if(activity.getClass()==LoginActivity.class) {
+                    Intent intent = new Intent(activity, NaviDrawerActivity.class);
+                    activity.startActivity(intent);
+                }
             }
 
             @Override
@@ -714,8 +821,11 @@ public class CognitoSyncGames {
             Log.i(TAG, "executing");
             ItemLookupArgs.ITEM_ID = params[0];
             Game downloadGame = getGame();
-            if(downloadGame!=null){
-                Log.i(TAG, "download game: "+downloadGame.getTitle());
+            if (downloadGame != null) {
+                Log.i(TAG, "download game: " + downloadGame.getTitle());
+                if(!downloadGame.getUpcCode().equals(params[0])){
+                    downloadGame.setUpcCode(params[0]);
+                }
                 downloadGame.setContactId(Integer.parseInt(params[1]));
                 downloadGame.setRating(Integer.parseInt(params[2]));
             }
@@ -725,11 +835,15 @@ public class CognitoSyncGames {
         @Override
         protected void onPostExecute(Game game) {
             super.onPostExecute(game);
-            if(game!=null){
+            if (game != null) {
                 dataSource.open();
                 dataSource.addGame(game);
-                Log.i(TAG, "add game: "+game.getTitle());
+                Log.i(TAG, "add game: " + game.getTitle());
                 dataSource.close();
+            }
+            if (activity.getClass() == LoginActivity.class) {
+                Intent intent = new Intent(activity, NaviDrawerActivity.class);
+                activity.startActivity(intent);
             }
             if (pd != null) {
                 pd.dismiss();

@@ -1,8 +1,12 @@
 package com.itgarage.harvey.gamecollections.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +22,8 @@ import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
 import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
 import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
 
+import java.io.InputStream;
+
 public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;  // Declaring Variable to Understand which View is being worked on
@@ -28,10 +34,13 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     private int mIcons[];       // Int Array to store the passed icons resource value from MainActivity.java
 
     private String name;        //String Resource for header View Name
-    private String profile;        //int Resource for header view profile picture
+    private String profile;        //int Resource for header view profile_fb picture
     //private String email;       //String Resource for header view email
     Context context;
     private NaviDrawerActivity activity;
+    private boolean is_fb_or_google;// 1 fb, 0 google
+    private String FB_OR_GOOGLE;
+    private static final String TAG = "DrawerListAdapter";
 
     // Creating a ViewHolder which extends the RecyclerView View Holder
     // ViewHolder are used to to store the inflated views in order to recycle them
@@ -47,8 +56,9 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
 
         TextView textView;
         ImageView imageView;
-        //ImageView profile;
-        ProfilePictureView profile;
+        //ImageView profile_fb;
+        ProfilePictureView profile_fb;
+        ImageView profile_google;
         TextView Name;
         //TextView email;
         Context context;
@@ -70,8 +80,9 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
             } else {
                 Name = (TextView) itemView.findViewById(R.id.username_text);         // Creating Text View object from header.xml for name
                 //email = (TextView) itemView.findViewById(R.id.user_email_text);       // Creating Text View object from header.xml for email
-                //profile = (ImageView) itemView.findViewById(R.id.user_image);// Creating Image view object from header.xml for profile pic
-                profile = (ProfilePictureView) itemView.findViewById(R.id.user_image);
+                //profile_fb = (ImageView) itemView.findViewById(R.id.user_image);// Creating Image view object from header.xml for profile_fb pic
+                profile_fb = (ProfilePictureView) itemView.findViewById(R.id.user_image_fb);
+                profile_google = (ImageView) itemView.findViewById(R.id.user_image_google);
                 Holderid = 0;                                                // Setting holder id = 0 as the object being populated are of type header view
             }
         }
@@ -96,8 +107,8 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     }
 
 
-    public DrawerListAdapter(String Titles[], int Icons[], String Name, String Profile, Context passedContext, NaviDrawerActivity activity) { // DrawerListAdapter Constructor with titles and icons parameter
-        // titles, icons, name, email, profile pic are passed from the main activity as we
+    public DrawerListAdapter(String Titles[], int Icons[], String Name, String Profile, String FB_OR_GOOGLE, Context passedContext, NaviDrawerActivity activity) { // DrawerListAdapter Constructor with titles and icons parameter
+        // titles, icons, name, email, profile_fb pic are passed from the main activity as we
         mNavTitles = Titles;                //have seen earlier
         mIcons = Icons;
         name = Name;
@@ -105,6 +116,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         profile = Profile;                     //here we assign those passed values to the values we declared here
         this.context = passedContext;
         this.activity = activity;
+        this.FB_OR_GOOGLE = FB_OR_GOOGLE;
         //in adapter
     }
     //Below first we override the method onCreateViewHolder which is called when the ViewHolder is
@@ -149,8 +161,24 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
             holder.imageView.setImageResource(mIcons[position - 1]);// Settimg the image with array of our icons
         } else {
 
-            //holder.profile.setImageResource(profile);           // Similarly we set the resources for header view
-            holder.profile.setProfileId(profile);
+            //holder.profile_fb.setImageResource(profile_fb);           // Similarly we set the resources for header view
+            switch (FB_OR_GOOGLE) {
+                case "facebook": //facebook login
+                    Log.i(TAG, "facebook");
+                    holder.profile_fb.setProfileId(profile);
+                    holder.profile_fb.setVisibility(View.VISIBLE);
+                    break;
+                case "google": //google login
+                    Log.i(TAG, "google profile "+profile);
+                    new LoadProfileImage(holder.profile_google).execute(profile);
+                    holder.profile_google.setVisibility(View.VISIBLE);
+                    break;
+                case "":
+                    Log.i(TAG, "no login");
+                    holder.profile_fb.setVisibility(View.GONE);
+                    holder.profile_google.setVisibility(View.GONE);
+                    break;
+            }
             holder.Name.setText(name);
             //holder.email.setText(email);
         }
@@ -176,4 +204,31 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         return position == 0;
     }
 
+    /**
+     * Background Async task to load user profile picture from url
+     * */
+    private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public LoadProfileImage(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+    }
 }

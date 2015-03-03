@@ -3,50 +3,40 @@
     xmlns:facebook="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="178dp"
-    android:background="@drawable/background_poly">
+    android:background="@color/ColorPrimary">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="150dp"
         android:orientation="vertical"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="24dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp">
+
+        <com.facebook.widget.ProfilePictureView
+            android:id="@+id/user_image_fb"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            facebook:preset_size="normal"
+            android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/user_image_google"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_user"
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:id="@+id/username_text"
-            android:layout_marginLeft="16dp"
             android:textColor="@color/ColorTextIcon"
             android:text="@string/username_text"
             android:textSize="14sp"
             android:textStyle="bold"/>
-
-        <!--<TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/user_email_text"
-            android:textColor="@color/ColorTextIcon"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="5dp"
-            android:text="harvey1991cn@gmail.com"
-            android:textSize="14sp"
-            android:textStyle="normal"/>-->
     </LinearLayout>
-
-    <!--<de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:src="@drawable/ic_user"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="38dp"
-        android:id="@+id/user_image"/>-->
-    <com.facebook.widget.ProfilePictureView
-        android:id="@+id/user_image"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="38dp"
-        facebook:preset_size="small" />
 </RelativeLayout>

@@ -40,6 +40,7 @@ public class NaviDrawerActivity extends ActionBarActivity {
     private String NAME;
     //private String EMAIL = "harvey1991cn@gmail.com";
     private String PROFILE;
+    private String FB_OR_GOOGLE;
     private String[] ITEM_NAMES;
     private int[] ITEM_ICONS;
 
@@ -98,7 +99,9 @@ public class NaviDrawerActivity extends ActionBarActivity {
             NAME = "Welcome, please login from settings.";
         }
         PROFILE = sharedPreferences.getString("profileId", "");
-        mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, NAME, PROFILE, NaviDrawerActivity.this, NaviDrawerActivity.this);
+        FB_OR_GOOGLE = sharedPreferences.getString("is fb or google", "");
+
+        mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, NAME, PROFILE, FB_OR_GOOGLE, NaviDrawerActivity.this, NaviDrawerActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
         // create a GestureDetector object to detect SingleTapUp touch
