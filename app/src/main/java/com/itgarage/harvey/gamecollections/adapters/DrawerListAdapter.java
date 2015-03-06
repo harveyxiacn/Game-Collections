@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,17 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.widget.ProfilePictureView;
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
-import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
-import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
-import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
-import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
+import com.itgarage.harvey.gamecollections.db.GamesDataSource;
+import com.itgarage.harvey.gamecollections.models.Game;
 
 import java.io.InputStream;
+import java.util.List;
 
 public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.ViewHolder> {
 
@@ -35,10 +32,8 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
 
     private String name;        //String Resource for header View Name
     private String profile;        //int Resource for header view profile_fb picture
-    //private String email;       //String Resource for header view email
     Context context;
     private NaviDrawerActivity activity;
-    private boolean is_fb_or_google;// 1 fb, 0 google
     private String FB_OR_GOOGLE;
     private static final String TAG = "DrawerListAdapter";
 
@@ -51,7 +46,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder{
         int Holderid;
 
         TextView textView;
@@ -63,13 +58,13 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         //TextView email;
         Context context;
         NaviDrawerActivity activity;
+        TextView allGameTotalTv, favouriteGameTotalTv, lendGameTotalTv, wishGameTotalTv;
 
 
         public ViewHolder(View itemView, int ViewType, Context c, NaviDrawerActivity activity) {                 // Creating ViewHolder Constructor with View and viewType As a parameter
             super(itemView);
             context = c;
             itemView.setClickable(true);
-            itemView.setOnClickListener(this);
             this.activity = activity;
             // Here we set the appropriate view in accordance with the the view type as passed when the holder object is created
 
@@ -83,26 +78,12 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
                 //profile_fb = (ImageView) itemView.findViewById(R.id.user_image);// Creating Image view object from header.xml for profile_fb pic
                 profile_fb = (ProfilePictureView) itemView.findViewById(R.id.user_image_fb);
                 profile_google = (ImageView) itemView.findViewById(R.id.user_image_google);
-                Holderid = 0;                                                // Setting holder id = 0 as the object being populated are of type header view
+                Holderid = 0;                                             // Setting holder id = 0 as the object being populated are of type header view
+                allGameTotalTv = (TextView) itemView.findViewById(R.id.allGameTotalTv);
+                favouriteGameTotalTv = (TextView) itemView.findViewById(R.id.FavouriteGameTotalTv);
+                lendGameTotalTv = (TextView) itemView.findViewById(R.id.lendGameTotalTv);
+                wishGameTotalTv = (TextView) itemView.findViewById(R.id.wishGameTotalTv);
             }
-        }
-
-        @Override
-        public void onClick(View v) {
-
-            Toast.makeText(context, "The Item Clicked is: " + getPosition(), Toast.LENGTH_SHORT).show();
-            int position = getPosition();
-            FragmentManager fragmentManager = activity.getSupportFragmentManager();
-            if (position == 1) {
-                fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
-            } else if (position == 2) {
-                fragmentManager.beginTransaction().replace(R.id.fragment_container, GamesFragment.newInstance()).commit();
-            } else if (position == 3) {
-                fragmentManager.beginTransaction().replace(R.id.fragment_container, SearchFragment.newInstance()).commit();
-            } else if (position == 4) {
-                fragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment.newInstance()).commit();
-            }
-
         }
     }
 
@@ -180,7 +161,12 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
                     break;
             }
             holder.Name.setText(name);
-            //holder.email.setText(email);
+            GamesDataSource dataSource = new GamesDataSource(holder.activity);
+            dataSource.open();
+            List<Game> gameList = dataSource.getAllGames();
+            dataSource.close();
+            // calculate how many games are in DB
+            holder.allGameTotalTv.setText(holder.allGameTotalTv.getText()+String.valueOf(gameList.size()));
         }
     }
 

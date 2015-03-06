@@ -2,7 +2,6 @@ package com.itgarage.harvey.gamecollections.amazon_web_services;
 
 
 import android.content.Context;
-import android.util.Log;
 
 import com.amazonaws.auth.AWSAbstractCognitoIdentityProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -85,7 +84,7 @@ public class CognitoSyncClientManager implements IdentityChangedListener {
             logins = new HashMap<String, String>();
         }
         logins.put(providerName, token);
-        Log.i(TAG, logins.toString());
+        //Log.i(TAG, logins.toString());
         credentialsProvider.withLogins(logins);
     }
 

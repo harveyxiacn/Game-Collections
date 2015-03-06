@@ -1,32 +1,53 @@
 package com.itgarage.harvey.gamecollections.fragments;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
+import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GamesFragment extends Fragment {
+public class GamesFragment extends Fragment implements View.OnClickListener{
     static RecyclerView gamesCardListView;
     public static GameListAdapter gamesAdapter;
-    static RecyclerView.LayoutManager gamesCardListLayoutManager;
+    RecyclerView.LayoutManager gamesCardListLayoutManager;
+    RecyclerView.LayoutManager gamesCardGridLayoutManager;
     public static NaviDrawerActivity naviDrawerActivity;
-    static TextView noResultTextView;
     static LinearLayout noResultLinearLayout;
+    boolean isGridLayout;
+
+    SubActionButton layoutChangeButton, sortByTitleButton, sortByPlatformButton, sortByRatingButton, sortByFavouriteButton;
+    ImageView itemLayoutChangeIcon, itemSortByTitletIcon, itemSortByPlatformIcon, itemSortByRatingIcon, itemSortByFavourtiteIcon;
+    SubActionButton.Builder itemBuilder;
+    FloatingActionMenu gameListActionMenu;
+    FloatingActionButton gameListActionButton;
+    static final String CHANGE_LAYOUT = "change layout";
+    static final String SORT_TITLE = "sort title";
+    static final String SORT_PLATFORM = "sort platform";
+    static final String SORT_RATING = "sort rating";
+    static final String SORT_FAVOURITE = "sort favourite";
+
+    SharedPreferences preferences;
     /**
      * Returns a new instance of this fragment for the given section number.
      */
@@ -43,15 +64,19 @@ public class GamesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_games, container,
                 false);
+        preferences = naviDrawerActivity.getSharedPreferences("layoutPreference", Context.MODE_PRIVATE);
+        isGridLayout = preferences.getBoolean("isGameListLayout", false);
+
         gamesCardListView = (RecyclerView) rootView.findViewById(R.id.gameCardList);
-        //gamesCardListView.setHasFixedSize(true);
         gamesCardListLayoutManager = new LinearLayoutManager(naviDrawerActivity.getContext());
-        gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
-        gamesAdapter = new GameListAdapter(getGameList(), naviDrawerActivity);
-
-        /*noResultTextView = (TextView) rootView.findViewById(R.id.textViewNoResult);
-        noResultTextView.setVisibility(View.GONE);*/
-
+        // 3 is span size, 3 items in a row
+        gamesCardGridLayoutManager = new GridLayoutManager(naviDrawerActivity.getContext(), 3);
+        if(isGridLayout) {
+            gamesCardListView.setLayoutManager(gamesCardGridLayoutManager);
+        }else {
+            gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
+        }
+        gamesAdapter = new GameListAdapter(getGameList(), naviDrawerActivity, isGridLayout);
         noResultLinearLayout = (LinearLayout) rootView.findViewById(R.id.noGameInDataBaseLinearLayout);
 
         if(gamesAdapter.getItemCount()==0){
@@ -59,22 +84,81 @@ public class GamesFragment extends Fragment {
         }else {
             changeUIsWhenDataSetChange(true);
         }
+        createGameListFloatingActionButton();
         return rootView;
     }
 
+    /**
+     * Change the UIs in this fragment visibility by has data or not.
+     * @param hasData If the data set is empty or not.
+     */
     public static void changeUIsWhenDataSetChange(boolean hasData){
 
         if(!hasData){
             gamesCardListView.setVisibility(View.GONE);
-            //noResultTextView.setVisibility(View.VISIBLE);
             noResultLinearLayout.setVisibility(View.VISIBLE);
 
         }else {
             gamesCardListView.setAdapter(gamesAdapter);
             gamesCardListView.setVisibility(View.VISIBLE);
-            //noResultTextView.setVisibility(View.GONE);
             noResultLinearLayout.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Create floating action button.
+     */
+    public void createGameListFloatingActionButton(){
+        ImageView floatingActionButtonIcon = new ImageView(naviDrawerActivity);
+        floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
+        // Create a button to attach the menu:
+        gameListActionButton = new FloatingActionButton.Builder(naviDrawerActivity)
+                .setContentView(floatingActionButtonIcon)
+                .setBackgroundDrawable(R.drawable.selector_button_cyan)
+                .build();
+        // Create menu items:
+        itemBuilder = new SubActionButton.Builder(naviDrawerActivity);
+        itemBuilder.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.selector_button_cyan));
+
+        itemLayoutChangeIcon = new ImageView(naviDrawerActivity);
+        itemLayoutChangeIcon.setImageResource(R.drawable.ic_layout_change);
+        layoutChangeButton = itemBuilder.setContentView(itemLayoutChangeIcon).build();
+        layoutChangeButton.setOnClickListener(this);
+        layoutChangeButton.setTag(CHANGE_LAYOUT);
+
+        itemSortByTitletIcon = new ImageView(naviDrawerActivity);
+        itemSortByTitletIcon.setImageResource(R.drawable.ic_sort_title);
+        sortByTitleButton = itemBuilder.setContentView(itemSortByTitletIcon).build();
+        sortByTitleButton.setOnClickListener(this);
+        sortByTitleButton.setTag(SORT_TITLE);
+
+        itemSortByPlatformIcon = new ImageView(naviDrawerActivity);
+        itemSortByPlatformIcon.setImageResource(R.drawable.ic_sort_platform);
+        sortByPlatformButton = itemBuilder.setContentView(itemSortByPlatformIcon).build();
+        sortByPlatformButton.setOnClickListener(this);
+        sortByPlatformButton.setTag(SORT_PLATFORM);
+
+        itemSortByRatingIcon = new ImageView(naviDrawerActivity);
+        itemSortByRatingIcon.setImageResource(R.drawable.ic_sort_rating);
+        sortByRatingButton = itemBuilder.setContentView(itemSortByRatingIcon).build();
+        sortByRatingButton.setOnClickListener(this);
+        sortByRatingButton.setTag(SORT_RATING);
+
+        itemSortByFavourtiteIcon = new ImageView(naviDrawerActivity);
+        itemSortByFavourtiteIcon.setImageResource(R.drawable.ic_sort_favourite);
+        sortByFavouriteButton = itemBuilder.setContentView(itemSortByFavourtiteIcon).build();
+        sortByFavouriteButton.setOnClickListener(this);
+        sortByFavouriteButton.setTag(SORT_FAVOURITE);
+
+        // Create the menu with the items:
+        gameListActionMenu = new FloatingActionMenu.Builder(naviDrawerActivity)
+                .addSubActionView(layoutChangeButton)
+                .addSubActionView(sortByTitleButton)
+                .addSubActionView(sortByPlatformButton)
+                .addSubActionView(sortByRatingButton)
+                .addSubActionView(sortByFavouriteButton)
+                .attachTo(gameListActionButton)
+                .build();
     }
 
     @Override
@@ -84,6 +168,10 @@ public class GamesFragment extends Fragment {
         this.naviDrawerActivity = (NaviDrawerActivity) activity;
     }
 
+    /**
+     * Get games list from DB
+     * @return A game list if success, null if failed.
+     */
     private List<Game> getGameList() {
         List<Game> gamesList = new ArrayList<Game>();
         GamesDataSource dataSource = naviDrawerActivity.getDataSource();
@@ -91,4 +179,36 @@ public class GamesFragment extends Fragment {
         return gamesList;
     }
 
+    @Override
+    public void onClick(View v) {
+        if(v.getTag().equals(CHANGE_LAYOUT)){
+            Toast.makeText(naviDrawerActivity, "Click "+CHANGE_LAYOUT, Toast.LENGTH_SHORT).show();
+            isGridLayout = !isGridLayout;
+            gamesAdapter.setGridLayout(isGridLayout);
+            if(isGridLayout){
+                gamesCardListView.setLayoutManager(gamesCardGridLayoutManager);
+            }else {
+                gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
+            }
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("isGameListLayout", isGridLayout);
+            editor.apply();
+        }else if(v.getTag().equals(SORT_TITLE)){
+            Toast.makeText(naviDrawerActivity, "Click "+SORT_TITLE, Toast.LENGTH_SHORT).show();
+        }else if(v.getTag().equals(SORT_PLATFORM)){
+            Toast.makeText(naviDrawerActivity, "Click "+SORT_PLATFORM, Toast.LENGTH_SHORT).show();
+        }else if(v.getTag().equals(SORT_RATING)){
+            Toast.makeText(naviDrawerActivity, "Click "+SORT_RATING, Toast.LENGTH_SHORT).show();
+        }else if(v.getTag().equals(SORT_FAVOURITE)){
+            Toast.makeText(naviDrawerActivity, "Click "+SORT_FAVOURITE, Toast.LENGTH_SHORT).show();
+        }
+        gameListActionMenu.close(true);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        gameListActionMenu.close(true);
+        gameListActionButton.detach();
+    }
 }

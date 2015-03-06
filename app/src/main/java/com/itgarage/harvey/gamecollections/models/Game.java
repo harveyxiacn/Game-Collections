@@ -18,8 +18,10 @@ public class Game {
     private int rating;
     private String upcCode;
     private int contactId;
+    private int favourite;
+    private int wish;
 
-    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String edition, String publicationDate, String releaseDate, String manufacturer, String smallImage, String mediumImage, String largeImage, int rating, String upcCode, int contactId) {
+    public Game(int id, String title, String platform, String genre, String hardwarePlatform, String edition, String publicationDate, String releaseDate, String manufacturer, String smallImage, String mediumImage, String largeImage, int rating, String upcCode, int contactId, int favourite, int wish) {
         this.id = id;
         this.title = title;
         this.platform = platform;
@@ -35,6 +37,8 @@ public class Game {
         this.rating = rating;
         this.upcCode = upcCode;
         this.contactId = contactId;
+        this.favourite = favourite;
+        this.wish = wish;
     }
 
     public Game() {
@@ -53,6 +57,8 @@ public class Game {
         rating = -1;
         upcCode = null;
         contactId = -1;
+        favourite = 0;
+        wish = 0;
     }
 
     public int getId() {
@@ -188,6 +194,22 @@ public class Game {
 
     public void setContactId(int contactId) {
         this.contactId = contactId;
+    }
+
+    public int getFavourite() {
+        return favourite;
+    }
+
+    public void setFavourite(int favourite) {
+        this.favourite = favourite;
+    }
+
+    public int getWish() {
+        return wish;
+    }
+
+    public void setWish(int wish) {
+        this.wish = wish;
     }
 
     @Override

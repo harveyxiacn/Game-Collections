@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:columnCount="2"
-                android:rowCount="6">
+                android:rowCount="7">
 
 
                 <me.xiaopan.android.spear.SpearImageView
@@ -76,12 +76,38 @@
                     android:visibility="gone" />
 
                 <LinearLayout
+                    android:id="@+id/checkboxLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_row="3"
+                    android:layout_column="0"
+                    android:layout_columnSpan="2">
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/favouriteCheckBox"
+                        android:text="Favourite"
+                        android:button="@drawable/favourite_checkbox"
+                        android:layout_margin="8dp"/>
+
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/wishCheckBox"
+                        android:text="Wish"
+                        android:button="@drawable/wish_checkbox"
+                        android:layout_margin="8dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/gameAttributesLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_column="0"
                     android:layout_columnSpan="2"
-                    android:layout_row="3"
+                    android:layout_row="4"
                     android:orientation="vertical"
                     android:paddingLeft="@dimen/button_margin_left" />
 
@@ -91,7 +117,7 @@
                     android:layout_height="wrap_content"
                     android:layout_column="0"
                     android:layout_columnSpan="2"
-                    android:layout_row="4"
+                    android:layout_row="5"
                     android:orientation="vertical"
                     android:paddingLeft="@dimen/button_margin_left"
                     android:visibility="gone">
@@ -120,7 +146,7 @@
                     android:layout_height="wrap_content"
                     android:layout_column="0"
                     android:layout_columnSpan="2"
-                    android:layout_row="5"
+                    android:layout_row="6"
                     android:orientation="vertical"
                     android:paddingLeft="@dimen/button_margin_left">
 

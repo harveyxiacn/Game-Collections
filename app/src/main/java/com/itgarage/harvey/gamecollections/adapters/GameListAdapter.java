@@ -2,7 +2,6 @@ package com.itgarage.harvey.gamecollections.adapters;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,23 +20,41 @@ import java.util.List;
 import me.xiaopan.android.spear.DisplayOptions;
 import me.xiaopan.android.spear.SpearImageView;
 
-public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameListViewHolder> {
+public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameListViewHolder>{
 
-    List<Game> gamesList;
+    List<Game> gamesList, origenalList;
     String mediumImage;
-    Bitmap bitmap;
     GameListViewHolder holder;
     Activity activity;
     GameListAdapter adapter;
+    boolean isGridLayout;
 
-    public GameListAdapter(List<Game> gamesList, Activity activity) {
+    public GameListAdapter(List<Game> gamesList, Activity activity, boolean isGridLayout) {
         this.gamesList = gamesList;
         this.activity = activity;
+        this.isGridLayout = isGridLayout;
     }
 
-    public void updateList(List<Game> gamesList){
+    public void updateList(List<Game> gamesList) {
         this.gamesList = gamesList;
         notifyDataSetChanged();
+    }
+
+    public void setGridLayout(boolean isGridLayout) {
+        this.isGridLayout = isGridLayout;
+        updateVisibilityByLayoutChange(isGridLayout);
+    }
+
+    public void updateVisibilityByLayoutChange(boolean isGridLayout){
+        if(isGridLayout){
+            holder.titleTextView.setVisibility(View.GONE);
+            holder.platformTextView.setVisibility(View.GONE);
+            holder.gameRatingSmall.setVisibility(View.GONE);
+        }else {
+            holder.titleTextView.setVisibility(View.VISIBLE);
+            holder.platformTextView.setVisibility(View.VISIBLE);
+            holder.gameRatingSmall.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -53,24 +70,25 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         Game game = gamesList.get(position);
         this.holder = holder;
         this.adapter = this;
+        // bind title text view with the game title
         holder.titleTextView.setText(game.getTitle());
-
+        // bind platform text view with the game platform
         String platform = game.getPlatform();
-        if (platform!=null) {
+        if (platform != null) {
             holder.platformTextView.setText(platform);
         }
-
-        mediumImage = game.getMediumImage();
-        //new ImageDownloader().execute(mediumImage);
-        holder.imageView.setImageFromUri(mediumImage);
-
+        // bind rating bar with the game rating
         int rating = game.getRating();
+        // display the small rating bar if the rating is not equal -1
         if (rating != -1) {
-            holder.gameRatingSmall.setRating((float)rating);
+            holder.gameRatingSmall.setRating((float) rating);
         } else {
             holder.gameRatingSmall.setVisibility(View.GONE);
         }
-
+        // bind image view with the medium image url
+        mediumImage = game.getMediumImage();
+        holder.imageView.setImageFromUri(mediumImage);
+        updateVisibilityByLayoutChange(isGridLayout);
         holder.gamesList = gamesList;
     }
 
@@ -111,9 +129,8 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
 
         @Override
         public void onClick(View v) {
-
             /* enter game detail activity by clicking in game list*/
-            if(v.getTag().equals(TAG_VIEW)) {
+            if (v.getTag().equals(TAG_VIEW)) {
                 if (activity.getClass() == NaviDrawerActivity.class) {
                     Intent intent = new Intent(activity, GameDetailActivity.class);
                     intent.putExtra("game position", getPosition());

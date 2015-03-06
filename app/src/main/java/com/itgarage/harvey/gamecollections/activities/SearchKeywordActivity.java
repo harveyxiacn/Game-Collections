@@ -9,7 +9,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -22,7 +24,6 @@ import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemSe
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.UrlParameterHandler;
-import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
 
 import org.w3c.dom.NodeList;
@@ -38,20 +39,17 @@ import java.util.Map;
 public class SearchKeywordActivity extends ActionBarActivity {
     EditText keywordInput;
     ImageButton btnSearch;
-    private Toolbar toolbar;
-    private GamesDataSource dataSource;
     RecyclerView gamesCardListView;
     OnlineResultGameListAdapter gamesAdapter;
     RecyclerView.LayoutManager gamesCardListLayoutManager;
     List<Game> gamesList;
     TextView noResultTextView;
-    Game game;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_keyword);
-        toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Search by keyword");
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -63,6 +61,15 @@ public class SearchKeywordActivity extends ActionBarActivity {
         keywordInput = (EditText) findViewById(R.id.keywordInput);
         ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE))
                 .showSoftInput(keywordInput, InputMethodManager.SHOW_FORCED);
+        keywordInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId == EditorInfo.IME_ACTION_DONE){
+                    doSearch();
+                }
+                return false;
+            }
+        });
         //keywordInput.requestFocus();
         //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
@@ -70,20 +77,25 @@ public class SearchKeywordActivity extends ActionBarActivity {
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("SearchKeyword", "onSearchKeyword");
-                ItemSearchArgs.KEYWORDS = keywordInput.getText().toString();
-
-                new SearchAmazonTask().execute();
-                hideKeyboard();
+                doSearch();
             }
         });
         gamesList = new ArrayList<>();
-        /*gamesCardListView = (RecyclerView) findViewById(R.id.gameResultCardList);
-        gamesCardListLayoutManager = new LinearLayoutManager(this);
+        gamesCardListView = new RecyclerView(SearchKeywordActivity.this);
+        gamesCardListLayoutManager = new LinearLayoutManager(SearchKeywordActivity.this);
         gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
-        gamesList = null;
-        gamesAdapter = new OnlineResultGameListAdapter(gamesList, this);
-        gamesCardListView.setAdapter(gamesAdapter);*/
+        gamesAdapter = new OnlineResultGameListAdapter(gamesList, SearchKeywordActivity.this);
+        gamesCardListView.setAdapter(gamesAdapter);
+        Log.i("RecyclerView", "setting adapter");
+        LinearLayout container = (LinearLayout) findViewById(R.id.rvContainer);
+        container.addView(gamesCardListView);
+    }
+
+    private void doSearch(){
+        Log.i("SearchKeyword", "onSearchKeyword");
+        ItemSearchArgs.KEYWORDS = keywordInput.getText().toString();
+        new SearchAmazonTask().execute();
+        hideKeyboard();
     }
 
     public void hideKeyboard() {
@@ -109,9 +121,10 @@ public class SearchKeywordActivity extends ActionBarActivity {
             Parser parser = new Parser();
             NodeList nodeList = parser.getResponseNodeList(signedUrl);
             if (nodeList != null) {
+                gamesList.clear();
                 for(int position=0; position<nodeList.getLength(); position++) {
                     Game game = parser.getSearchObject(nodeList, position);
-                    Log.i("add Game", "" + game.getTitle());
+                    //Log.i("add Game", "" + game.getTitle());
                     gamesList.add(game);
                 }
             } else {
@@ -130,37 +143,26 @@ public class SearchKeywordActivity extends ActionBarActivity {
             pd.setTitle("One Sec...");
             pd.setMessage("Loading...");
             pd.show();
-            Log.i("pre", "pre execute");
+            //Log.i("pre", "pre execute");
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.i("exe", "executing");
+            //Log.i("exe", "executing");
             getGameList();
-            Log.i("gameList", "" + gamesList);
+            //Log.i("gameList", "" + gamesList);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            //gamesAdapter = new OnlineResultGameListAdapter(gamesList, passActivity);
-            //gamesCardListView.setAdapter(gamesAdapter);
-            //Log.i("RecyclerView", "setting adapter");
-            //if (gamesAdapter.getItemCount() == 0) {
             if (gamesList!=null){
-                gamesCardListView = new RecyclerView(SearchKeywordActivity.this);
-                gamesCardListLayoutManager = new LinearLayoutManager(SearchKeywordActivity.this);
-                gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
-                gamesAdapter = new OnlineResultGameListAdapter(gamesList, SearchKeywordActivity.this);
-                gamesCardListView.setAdapter(gamesAdapter);
-                Log.i("RecyclerView", "setting adapter");
+                gamesAdapter.update(gamesList);
                 gamesCardListView.setVisibility(View.VISIBLE);
-                LinearLayout container = (LinearLayout) findViewById(R.id.rvContainer);
-                container.addView(gamesCardListView);
                 noResultTextView.setVisibility(View.GONE);
             } else {
-                //gamesCardListView.setVisibility(View.GONE);
+                gamesCardListView.setVisibility(View.GONE);
                 noResultTextView.setVisibility(View.VISIBLE);
             }
 

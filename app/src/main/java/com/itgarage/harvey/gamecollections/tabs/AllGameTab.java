@@ -1,0 +1,219 @@
+package com.itgarage.harvey.gamecollections.tabs;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
+import com.itgarage.harvey.gamecollections.db.GamesDataSource;
+import com.itgarage.harvey.gamecollections.models.Game;
+import com.itgarage.harvey.gamecollections.utils.GameSorter;
+import com.itgarage.harvey.gamecollections.utils.SortListener;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
+import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
+import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by harvey on 2015-03-05.
+ */
+public class AllGameTab extends Fragment implements SortListener{
+    RecyclerView gamesCardListView;
+    GameListAdapter gamesAdapter;
+    RecyclerView.LayoutManager gamesCardListLayoutManager;
+    RecyclerView.LayoutManager gamesCardGridLayoutManager;
+    LinearLayout noResultLinearLayout;
+    boolean isGridLayout;
+
+    SubActionButton layoutChangeButton, sortByTitleButton, sortByPlatformButton, sortByRatingButton, sortByFavouriteButton;
+    ImageView itemLayoutChangeIcon, itemSortByTitletIcon, itemSortByPlatformIcon, itemSortByRatingIcon, itemSortByFavourtiteIcon;
+    SubActionButton.Builder itemBuilder;
+    FloatingActionMenu gameListActionMenu;
+    FloatingActionButton gameListActionButton;
+    static final String CHANGE_LAYOUT = "change layout";
+    static final String SORT_TITLE = "sort title";
+    static final String SORT_PLATFORM = "sort platform";
+    static final String SORT_RATING = "sort rating";
+    static final String SORT_FAVOURITE = "sort favourite";
+
+    SharedPreferences preferences;
+    GamesDataSource dataSource;
+
+    SearchView searchView;
+    GameSorter gameSorter;
+    ArrayList<Game> gamesList;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.tab_all_games, container, false);
+        gameSorter = new GameSorter();
+        dataSource = new GamesDataSource(getActivity());
+        gamesList = new ArrayList<Game>();
+        getGameList();
+        gamesCardListView = (RecyclerView) rootView.findViewById(R.id.gameCardList);
+        searchView = (SearchView) rootView.findViewById(R.id.keyWordSearchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                Log.i("all game tab", "onQueryTextSubmit");
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                List<Game> results;
+                dataSource.open();
+                if(s.isEmpty()){
+                    results = dataSource.getAllGames();
+                }else {
+                    results = dataSource.searchKeyword(s);
+                }
+                dataSource.close();
+                gamesAdapter.updateList(results);
+                return false;
+            }
+        });
+        preferences = getActivity().getSharedPreferences("layoutPreference", Context.MODE_PRIVATE);
+        isGridLayout = preferences.getBoolean("isGameListLayout", false);
+        gamesCardListLayoutManager = new LinearLayoutManager(getActivity());
+        // 3 is span size, 3 items in a row
+        gamesCardGridLayoutManager = new GridLayoutManager(getActivity(), 3);
+        if(isGridLayout) {
+            gamesCardListView.setLayoutManager(gamesCardGridLayoutManager);
+        }else {
+            gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
+        }
+        gamesAdapter = new GameListAdapter(gamesList, getActivity(), isGridLayout);
+        noResultLinearLayout = (LinearLayout) rootView.findViewById(R.id.noGameInDataBaseLinearLayout);
+
+        if(gamesAdapter.getItemCount()==0){
+            changeUIsWhenDataSetChange(false);
+        }else {
+            changeUIsWhenDataSetChange(true);
+        }
+        return rootView;
+    }
+    /**
+     * Change the UIs in this fragment visibility by has data or not.
+     * @param hasData If the data set is empty or not.
+     */
+    private void changeUIsWhenDataSetChange(boolean hasData){
+
+        if(!hasData){
+            gamesCardListView.setVisibility(View.GONE);
+            noResultLinearLayout.setVisibility(View.VISIBLE);
+
+        }else {
+            gamesCardListView.setAdapter(gamesAdapter);
+            gamesCardListView.setVisibility(View.VISIBLE);
+            noResultLinearLayout.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Get games list from DB
+     */
+    private void getGameList() {
+        dataSource.open();
+        gamesList = dataSource.getAllGames();
+        dataSource.close();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("All game tab", "onResume");
+        dataSource.open();
+        gamesList = dataSource.getAllGames();
+        dataSource.close();
+        gamesAdapter.updateList(gamesList);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_game_list, menu);
+        MenuItem switchLayout = menu.findItem(R.id.action_switch_layout);
+        if(isGridLayout){
+            switchLayout.setIcon(R.drawable.listview);
+        }else {
+            switchLayout.setIcon(R.drawable.gridview);
+        }
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_switch_layout:
+                isGridLayout = !isGridLayout;
+                gamesAdapter.setGridLayout(isGridLayout);
+                if(isGridLayout){
+                    gamesCardListView.setLayoutManager(gamesCardGridLayoutManager);
+                    item.setIcon(R.drawable.listview);
+                }else {
+                    gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
+                    item.setIcon(R.drawable.gridview);
+                }
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("isGameListLayout", isGridLayout);
+                editor.apply();
+                break;
+            case R.id.action_sort_title:
+                Toast.makeText(getActivity(), "Sort title", Toast.LENGTH_SHORT).show();
+                onSortByTitle();
+                break;
+            case R.id.action_sort_platform:
+                Toast.makeText(getActivity(), "Sort platform", Toast.LENGTH_SHORT).show();
+                onSortByPlatform();
+                break;
+            case R.id.action_sort_rating:
+                Toast.makeText(getActivity(), "Sort rating", Toast.LENGTH_SHORT).show();
+                onSortByRating();
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    public void onSortByTitle() {
+        gameSorter.sortGamesByTitle(gamesList);
+        gamesAdapter.updateList(gamesList);
+    }
+
+    @Override
+    public void onSortByPlatform() {
+        gameSorter.sortGamesByPlatform(gamesList);
+        gamesAdapter.updateList(gamesList);
+    }
+
+    @Override
+    public void onSortByRating() {
+        gameSorter.sortGamesByRating(gamesList);
+        gamesAdapter.updateList(gamesList);
+    }
+}

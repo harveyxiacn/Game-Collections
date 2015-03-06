@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,9 @@ import android.widget.LinearLayout;
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
 import com.itgarage.harvey.gamecollections.adapters.ImageSlideAdapter;
+import com.itgarage.harvey.gamecollections.adapters.TabViewPagerAdapter;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
-import com.itgarage.harvey.gamecollections.models.Game;
-
-import java.util.List;
+import com.itgarage.harvey.gamecollections.tabs.SlidingTabLayout;
 
 //import cn.trinea.android.view.autoscrollviewpager.AutoScrollViewPager;
 
@@ -23,11 +23,15 @@ import java.util.List;
  * Created by harvey on 2015/2/16.
  */
 public class HomeFragment extends Fragment {
-    static int focusedPage;
-    public static NaviDrawerActivity activity;
-    public static ImageSlideAdapter imageSlideAdapter;
-    public static ViewPager viewPager;
-    public static LinearLayout noResultLinearLayout;
+    ImageSlideAdapter imageSlideAdapter;
+    ViewPager viewPager;
+    LinearLayout noResultLinearLayout;
+    ViewPager tabViewPager;
+    TabViewPagerAdapter tabViewPagerAdapter;
+    SlidingTabLayout tabs;
+    CharSequence Titles[] = {"All", "Like", "Lend", "Wish"};
+    int numberOfTabs = Titles.length;
+    GamesDataSource dataSource;
     /**
      * Returns a new instance of this fragment for the given section number.
      */
@@ -44,42 +48,46 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container,
                 false);
-        //final AutoScrollViewPager viewPager = (AutoScrollViewPager) rootView.findViewById(R.id.homeSlider);
-        viewPager = (ViewPager) rootView.findViewById(R.id.homeSlider);
-        GamesDataSource dataSource = new GamesDataSource(rootView.getContext());
+        // Creating The ViewPagerAdapter and Passing Fragment Manager, Titles fot the Tabs and Number Of Tabs.
+        tabViewPagerAdapter = new TabViewPagerAdapter(getActivity().getSupportFragmentManager(), Titles, numberOfTabs, getActivity());
+        // Assigning ViewPager View and setting the adapter
+        tabViewPager = (ViewPager) rootView.findViewById(R.id.tabPager);
+        tabViewPager.setAdapter(tabViewPagerAdapter);
+        // Assiging the Sliding Tab Layout View
+        tabs = (SlidingTabLayout) rootView.findViewById(R.id.tabs);
+        tabs.setDistributeEvenly(true);// To make the Tabs Fixed set this true, This makes the tabs Space Evenly in Available width
+
+        // Setting Custom Color for the Scroll bar indicator of the Tab View
+        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+            @Override
+            public int getIndicatorColor(int position) {
+                return getResources().getColor(R.color.tabsScrollColor);
+            }
+        });
+
+        // Setting the ViewPager For the SlidingTabsLayout
+        tabs.setViewPager(tabViewPager);
+        // Setup home slide box
+        /*viewPager = (ViewPager) rootView.findViewById(R.id.homeSlider);
+        dataSource = new GamesDataSource(rootView.getContext());
         dataSource.open();
         List<Game> gameList = dataSource.getAllGames();
         dataSource.close();
-        imageSlideAdapter = new ImageSlideAdapter(rootView.getContext(), gameList, viewPager);
+        imageSlideAdapter = new ImageSlideAdapter(getActivity(), gameList, viewPager);
         noResultLinearLayout = (LinearLayout) rootView.findViewById(R.id.noGameInDataBaseLinearLayout);
         if(gameList!=null){
             changeUIsWhenDataSetChange(true);
         }else {
             changeUIsWhenDataSetChange(false);
-        }
-        //viewPager.setAdapter(adapter);
-        //viewPager.setCurrentItem(0);
-
-        //viewPager.startAutoScroll(1000);
-        /*viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                focusedPage = position;
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                //viewPager.setCurrentItem(0, false);
-            }
-        });*/
+        }*/
         return rootView;
     }
 
-    public static void changeUIsWhenDataSetChange(boolean hasData){
+    /**
+     * Change the visibility of no result layout and view pager by the data set is empty or not.
+     * @param hasData Boolean variable describes has data in data set or not.
+     */
+    public void changeUIsWhenDataSetChange(boolean hasData){
         if(hasData){
             noResultLinearLayout.setVisibility(View.GONE);
             viewPager.setVisibility(View.VISIBLE);
@@ -93,7 +101,20 @@ public class HomeFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         ((NaviDrawerActivity) activity).onSectionAttached(1);
-        this.activity = (NaviDrawerActivity) activity;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("HomeFragment", "onResume");
+        /*dataSource.open();
+        List<Game> gameList = dataSource.getAllGames();
+        dataSource.close();
+        imageSlideAdapter = new ImageSlideAdapter(getActivity(), gameList, viewPager);
+        if(gameList!=null){
+            changeUIsWhenDataSetChange(true);
+        }else {
+            changeUIsWhenDataSetChange(false);
+        }*/
+    }
 }

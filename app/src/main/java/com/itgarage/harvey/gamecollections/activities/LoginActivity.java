@@ -95,7 +95,10 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
         facebookLoginButton = (LoginButton) findViewById(R.id.btn_facebook_login);
         // update UIs
         String fb_or_google = preferences.getString("is fb or google", "");
-        Log.i(TAG, fb_or_google);
+        //Log.i(TAG, fb_or_google);
+        if(!mGoogleApiClient.isConnected()){
+            fb_or_google = "";
+        }
         updateButtonsVisibilityOnCreateOrResume(fb_or_google);
         // Start app button
         appStart.setOnClickListener(this);
@@ -104,6 +107,11 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
     private void updateButtonsVisibilityOnCreateOrResume(String fb_or_google) {
         switch (fb_or_google) {
             case "facebook":
+                final Session session = Session
+                        .openActiveSessionFromCache(this);
+                if (session != null) {
+                    setFacebookSession(session);
+                }
                 googleLoginButton.setVisibility(View.GONE);
                 googleLogoutButton.setVisibility(View.GONE);
                 appStart.setVisibility(View.VISIBLE);
@@ -176,7 +184,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
                 }
             }).executeAsync();
         } else if (session.isClosed()) {
-            Log.i(TAG, "facebook session is closed");
+            //Log.i(TAG, "facebook session is closed");
             signedOutUIsUpdate("facebook");
         }
     }
@@ -196,13 +204,13 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
     @Override
     public void onResume() {
         super.onResume();
-        final Session session = Session
+/*        final Session session = Session
                 .openActiveSessionFromCache(this);
         if (session != null) {
             setFacebookSession(session);
-        }
+        }*/
         uiHelper.onResume();
-        Log.i(TAG, "onResume " + preferences.getString("is fb or google", ""));
+        //Log.i(TAG, "onResume " + preferences.getString("is fb or google", ""));
         updateButtonsVisibilityOnCreateOrResume(preferences.getString("is fb or google", ""));
     }
 
@@ -284,8 +292,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
             Account[] accounts = accountManager.getAccountsByType(GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
             try {
                 googleToken = GoogleAuthUtil.getToken(getApplicationContext(), accounts[0].name,
-                        "audience:server:client_id:google_service_client_id");
-
+                        "audience:server:client_id:GOOGLE_SERVICE_CLIENT_ID");
             } catch (IOException | GoogleAuthException e) {
                 e.printStackTrace();
             }
@@ -294,7 +301,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Log.i(TAG, "googleToken "+googleToken);
+            //Log.i(TAG, "googleToken "+googleToken);
             CognitoSyncClientManager.addLogins("accounts.google.com", googleToken);
         }
     }
@@ -417,6 +424,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
                     break;
                 case R.id.btn_google_logout:
                     // Signout button clicked
+                    Log.i(TAG, "signout google onClick");
                     signOutFromGplus();
                     break;
                 case R.id.btn_app_start:
@@ -446,10 +454,17 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
      */
     private void signOutFromGplus() {
         if (mGoogleApiClient.isConnected()) {
+            Log.i(TAG, "signout google");
             Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             mGoogleApiClient.disconnect();
             mGoogleApiClient.connect();
             signedOutUIsUpdate("google");
         }
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        signOutFromGplus();
     }
 }

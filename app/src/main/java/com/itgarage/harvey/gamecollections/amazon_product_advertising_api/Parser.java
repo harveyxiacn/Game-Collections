@@ -69,9 +69,9 @@ public class Parser {
                 Element element = (Element) items.item(0);// <Request>
                 if (isResponceValid(element)) {
                     //if(doc.getElementsByTagName(KEY_ITEM)!=null)
-                    Log.i("before get item","");
+                    //Log.i("before get item","");
                     items = doc.getElementsByTagName(KEY_ITEM);//<Item>
-                    Log.i("after get item", "");
+                    //Log.i("after get item", "");
                 }else {
                     return null;
                 }
@@ -102,7 +102,7 @@ public class Parser {
         game.setPublicationDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_PUBLICATION_DATE));
         game.setReleaseDate(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_RELEASE_DATE));
         game.setUpcCode(this.getValue((Element) (e.getElementsByTagName(KEY_ITEM_ATTRIBUTES).item(0)), KEY_UPC_CODE));
-        Log.i("UPC", ""+game.getUpcCode());
+        //Log.i("UPC", ""+game.getUpcCode());
         game.setSmallImage(this.getValue((Element) (e.getElementsByTagName(KEY_SAMLL_IMAGE).item(0))
                 , KEY_IMAGE_CONTAINER));
         game.setMediumImage(this.getValue((Element) (e.getElementsByTagName(KEY_MEDIUM_IMAGE).item(0))
@@ -115,13 +115,13 @@ public class Parser {
     public boolean isResponceValid(Element element) {
         NodeList nList = element.getElementsByTagName(KEY_REQUEST_ROOT);
         Element isValid = (Element) nList.item(0);//<IsValid>
-        Log.i("IsValid", ""+getValue(isValid, KEY_REQUEST_CONTAINER));
+        //Log.i("IsValid", ""+getValue(isValid, KEY_REQUEST_CONTAINER));
         boolean hasErrorCode = false;
         try{
             NodeList errorList = element.getElementsByTagName(KEY_ERROR);
             Element code = (Element) errorList.item(0);//<Code>
             if(code!=null) {
-                Log.i("Error code", "" + getValue(code, KEY_CODE));
+                //Log.i("Error code", "" + getValue(code, KEY_CODE));
                 hasErrorCode = true;
             }
         }catch (Exception e){

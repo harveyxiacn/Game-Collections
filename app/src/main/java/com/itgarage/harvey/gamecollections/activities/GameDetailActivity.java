@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,12 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
-import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
-import com.itgarage.harvey.gamecollections.adapters.ImageSlideAdapter;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
-import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
-import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
 import com.itgarage.harvey.gamecollections.models.Game;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
@@ -48,23 +45,23 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
     TextView genreTextView, hardwarePlatformTextView, manufacturerTextView,
             editionTextView, publicationDateTextView, releaseDateTextView, ratingTextView;
     RatingBar gameRating, gameRatingSmall;
+    CheckBox favouriteCheckBox, wishCheckBox;
+    static final String FAVOURITE = "favourite";
+    static final String WISH = "wish";
     LinearLayout gameAttributesLayout, gameRatingLayout, borrowerInfoLayout;
 
     LinearLayout emailLinearLayout, phoneLinearLayout;
 
-    static final String UPDATE_GAME = "update game";
     static final String DELETE_GAME = "delete game";
     static final String UPDATE_RATING = "update rating";
-    static final String DELETE_RATING = "delete rating";
-    static final String UPDATE_CONTACT = "update contact";
     static final String DELETE_CONTACT = "delete contact";
 
     final String PHONE_TEXTVIEW_TAG = "delete contact";
     int contactId = -1;
-    CardView contactDetailView, gameDetailCardView;
+    CardView gameDetailCardView;
 
-    SubActionButton updateToDBButton, updateContactButton, removeContactButton, updateRaitngButton, deleteFromDBButton;
-    ImageView itemUpdateRatingIcon, itemRemoveContactIcon, itemUpdateContactIcon, itemUpdateToDBIcon, itemDeleteFromDBIcon;
+    SubActionButton removeContactButton, updateRaitngButton, deleteFromDBButton;
+    ImageView itemUpdateRatingIcon, itemRemoveContactIcon, itemDeleteFromDBIcon;
     SubActionButton.Builder itemBuilder;
     FloatingActionMenu updateGameActionMenu;
     public GamesDataSource dataSource;
@@ -80,26 +77,44 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_detail);
+        // set up tool bar
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
         //getSupportActionBar().setHomeButtonEnabled(true);
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        // get intent
         Intent intent = getIntent();
+        // get passed game id from imageSlideAdapter
+        String intentAdapter = intent.getStringExtra("adapter");
+        // get passed position from gameListAdapter
         int postion = intent.getIntExtra("game position", -1);
+
         String intentTitle = intent.getStringExtra("game title");
+        // get pass barcode from navigation activity if the barcode exists in DB
         String intentBarcode = intent.getStringExtra(NaviDrawerActivity.BARCODE_PASS);
+        // set up dataSource to handle DB
         dataSource = new GamesDataSource(this);
         dataSource.open();
+        // get all games from DB
         List<Game> gameList = dataSource.getAllGames();
+        // initialize game
         game = null;
+        // if start this activity from gameListAdapter
         if (postion != -1) {
             game = gameList.get(postion);
         }
+        // if start this activity from imageSlideAdapter
+        if(intent.getStringExtra("adapter")!=null) {
+            if (intent.getStringExtra("adapter").equals("slideAdapter")) {
+                int id = intent.getIntExtra("game id", -1);
+                game = dataSource.getGame(id);
+            }
+        }
+        // ???
         if (intentTitle != null) {
-            String gameTitle = "";
+            String gameTitle;
             int position = 0;
-            Game gameTemp = null;
+            Game gameTemp;
             do {
                 gameTemp = gameList.get(position);
                 gameTitle = gameTemp.getTitle();
@@ -109,37 +124,43 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             } while (position < gameList.size());
             game = gameTemp;
         }
+        // if start this activity from naviActivity
         if (intentBarcode != null) {
             game = dataSource.getGameByUPC(intentBarcode);
         }
+
         dataSource.close();
+        // set up UIs in this activity
         String title;
         gameDetailCardView = (CardView) findViewById(R.id.card_view);
         titleTextView = (TextView) findViewById(R.id.textViewGameTitle);
         platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
         gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
         gameAttributesLayout = (LinearLayout) findViewById(R.id.gameAttributesLayout);
-
         gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
         ratingTextView = (TextView) findViewById(R.id.gameRatingText);
         gameRatingSmall = (RatingBar) findViewById(R.id.gameRatingBarSmall);
+        favouriteCheckBox = (CheckBox) findViewById(R.id.favouriteCheckBox);
+        favouriteCheckBox.setOnClickListener(this);
+        favouriteCheckBox.setTag(FAVOURITE);
+        wishCheckBox = (CheckBox) findViewById(R.id.wishCheckBox);
+        wishCheckBox.setOnClickListener(this);
+        wishCheckBox.setTag(WISH);
         if (game != null) {
+            // set up the title
             title = game.getTitle();
             getSupportActionBar().setTitle(title);
-
             titleTextView.setText(title);
+            // set up the platform
             String platform = game.getPlatform();
             if (platform != null) {
-
                 platformTextview.setText(game.getPlatform());
                 platformTextview.setText(platform);
             }
-
+            // download the image
             String mediumImage = game.getMediumImage();
-
             gameImage.setImageFromUri(mediumImage);
-
-
+            // set up the genre
             String genre = game.getGenre();
             if (genre != null) {
                 genreTextView = new TextView(this);
@@ -148,7 +169,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 genreTextView.setText("Genre: " + genre);
                 genreTextView.setVisibility(View.VISIBLE);
             }
-
+            // set up the hardware platform
             String hardwarePlatform = game.getHardwarePlatform();
             if (hardwarePlatform != null) {
                 hardwarePlatformTextView = new TextView(this);
@@ -157,34 +178,37 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 hardwarePlatformTextView.setText("Hardware Platform: " + hardwarePlatform);
                 hardwarePlatformTextView.setVisibility(View.VISIBLE);
             }
-
+            // set up the edition
             String edition = game.getEdition();
             if (edition != null) {
+                Log.i("Edition", edition);
                 editionTextView = new TextView(this);
                 editionTextView.setTextSize(20);
                 gameAttributesLayout.addView(editionTextView);
                 editionTextView.setText("Edition: " + edition);
                 editionTextView.setVisibility(View.VISIBLE);
             }
-
+            // set up the manufacturer
             String manufacturer = game.getManufacturer();
             if (manufacturer != null) {
+                Log.i("Manu", manufacturer);
                 manufacturerTextView = new TextView(this);
                 manufacturerTextView.setTextSize(20);
                 gameAttributesLayout.addView(manufacturerTextView);
                 manufacturerTextView.setText("Manufacturer: " + manufacturer);
                 manufacturerTextView.setVisibility(View.VISIBLE);
             }
-
+            // set up the publication date
             String publicationDate = game.getPublicationDate();
             if (publicationDate != null) {
+                Log.i("Public", publicationDate);
                 publicationDateTextView = new TextView(this);
                 publicationDateTextView.setTextSize(20);
                 gameAttributesLayout.addView(publicationDateTextView);
                 publicationDateTextView.setText("Publication Date: " + publicationDate);
                 publicationDateTextView.setVisibility(View.VISIBLE);
             }
-
+            // set up the release date
             String releaseDate = game.getReleaseDate();
             if (releaseDate != null) {
                 releaseDateTextView = new TextView(this);
@@ -193,6 +217,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 releaseDateTextView.setText("Release Date: " + releaseDate);
                 releaseDateTextView.setVisibility(View.VISIBLE);
             }
+            // set up the editable rating bar
             gameRatingLayout = (LinearLayout) findViewById(R.id.gameRatingLayout);
 
             int rating = game.getRating();
@@ -208,7 +233,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 gameRatingSmall.setRating((float) rating);
                 gameRatingSmall.setVisibility(View.VISIBLE);
             }
-
+            // set up borrower info layout
             borrowerInfoLayout = (LinearLayout) findViewById(R.id.gameBorrowerInfoLayout);
             contactId = game.getContactId();
             emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
@@ -221,15 +246,32 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 borrowerInfoLayout.setVisibility(View.GONE);
             }
 
+            // check the checkbox if the game is marked as favourite
+            int favourite = game.getFavourite();
+            if(favourite == 0){
+                favouriteCheckBox.setChecked(false);
+            }else {
+                favouriteCheckBox.setChecked(true);
+            }
+            // check the checkbox if the game is marked as wish
+            int wish = game.getWish();
+            if(wish == 0){
+                wishCheckBox.setChecked(false);
+            }else {
+                wishCheckBox.setChecked(true);
+            }
             createGameUpdateFloatingActionButtons();
 
         } else {
             titleTextView.setText(getString(R.string.null_game_title));
         }
-        // sync stuff
+        // initialize the sync instance
         cognitoSyncGames = new CognitoSyncGames(this);
     }
 
+    /**
+     * Create floating action button for updating game with rating/contact/delete
+     */
     public void createGameUpdateFloatingActionButtons() {
         ImageView floatingActionButtonIcon = new ImageView(this);
         floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
@@ -241,19 +283,13 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         // Create menu items:
         itemBuilder = new SubActionButton.Builder(this);
         itemBuilder.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.selector_button_cyan));
-        // repeat many times:
-        itemUpdateToDBIcon = new ImageView(this);
-        itemUpdateToDBIcon.setImageResource(R.drawable.ic_update_game);
-        updateToDBButton = itemBuilder.setContentView(itemUpdateToDBIcon).build();
-        updateToDBButton.setOnClickListener(this);
-        updateToDBButton.setTag(UPDATE_GAME);
-
+        // delete button
         itemDeleteFromDBIcon = new ImageView(this);
         itemDeleteFromDBIcon.setImageResource(R.drawable.ic_delete_game);
         deleteFromDBButton = itemBuilder.setContentView(itemDeleteFromDBIcon).build();
         deleteFromDBButton.setOnClickListener(this);
         deleteFromDBButton.setTag(DELETE_GAME);
-
+        // remove/add contact button
         itemRemoveContactIcon = new ImageView(this);
         if (borrowerInfoLayout.getVisibility() == View.VISIBLE)
             itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
@@ -263,7 +299,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         removeContactButton = itemBuilder.setContentView(itemRemoveContactIcon).build();
         removeContactButton.setOnClickListener(this);
         removeContactButton.setTag(DELETE_CONTACT);
-
+        // update rating button
         itemUpdateRatingIcon = new ImageView(this);
         itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
         updateRaitngButton = itemBuilder.setContentView(itemUpdateRatingIcon).build();
@@ -271,7 +307,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         updateRaitngButton.setTag(UPDATE_RATING);
         // Create the menu with the items:
         updateGameActionMenu = new FloatingActionMenu.Builder(this)
-                //.addSubActionView(updateToDBButton)
                 .addSubActionView(deleteFromDBButton)
                 .addSubActionView(removeContactButton)
                 .addSubActionView(updateRaitngButton)
@@ -285,55 +320,60 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         if (v.getTag().equals(UPDATE_RATING)) {
             if (gameRatingSmall.getVisibility() == View.VISIBLE) {
                 if (game.getRating() != -1) {
-                    Log.i("rating bar", "show large hide small");
+                    //Log.i("rating bar", "show large hide small");
                     gameRatingSmall.setVisibility(View.GONE);
                     gameRatingLayout.setVisibility(View.VISIBLE);
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
                 }
             } else {
                 if (game.getRating() == -1) {
-                    Log.i("rating bar", "show large");
+                    //Log.i("rating bar", "show large");
                     gameRatingLayout.setVisibility(View.VISIBLE);
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
                     game.setRating((int) gameRating.getRating());
-                    cognitoSyncGames.updateRating(game);
-                    updateFragmentUIsByUpdateDatabase();
+                    dataSource.open();
+                    dataSource.updateGame(game);
+                    dataSource.close();
+                    cognitoSyncGames.updateGame(game);
                 } else {
-                    Log.i("rating bar", "show small hide large");
+                    //Log.i("rating bar", "show small hide large");
                     gameRatingSmall.setVisibility(View.VISIBLE);
                     gameRatingLayout.setVisibility(View.GONE);
                     itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
                     gameRatingSmall.setRating(gameRating.getRating());
                     game.setRating((int) gameRating.getRating());
-                    cognitoSyncGames.updateRating(game);
-                    updateFragmentUIsByUpdateDatabase();
+                    dataSource.open();
+                    dataSource.updateGame(game);
+                    dataSource.close();
+                    cognitoSyncGames.updateGame(game);
                 }
                 updateGameActionMenu.close(true);
             }
-            //updateGameActionMenu.close(true);
         }
         /*delete the contact/borrower*/
         if (v.getTag().equals(DELETE_CONTACT)) {
             if (borrowerInfoLayout.getVisibility() == View.VISIBLE) {
-                Log.i("contact", "remove");
+                //Log.i("contact", "remove");
                 borrowerInfoLayout.setVisibility(View.GONE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
                 game.setContactId(-1);
-                cognitoSyncGames.updateContactId(game);
-                updateFragmentUIsByUpdateDatabase();
+                dataSource.open();
+                dataSource.updateGame(game);
+                dataSource.close();
+                cognitoSyncGames.updateGame(game);
                 TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
                 nameTextView.setText("Name");
                 phoneLinearLayout.removeAllViews();
                 emailLinearLayout.removeAllViews();
                 Toast.makeText(this, "Removed contact from this game.", Toast.LENGTH_SHORT).show();
             } else {
-                Log.i("contact", "picker launch");
-                doLaunchContactPicker(v);
+                //Log.i("contact", "picker launch");
+                doLaunchContactPicker();
                 borrowerInfoLayout.setVisibility(View.VISIBLE);
                 itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
             }
-            //updateGameActionMenu.close(true);
+            updateGameActionMenu.close(true);
         }
         /*Delete the game*/
         if (v.getTag().equals(DELETE_GAME)) {
@@ -348,24 +388,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                             dataSource.open();
                             dataSource.deleteGame(game.getId());
                             cognitoSyncGames.deleteRecord(game.getUpcCode());
-                            List<Game> gameList = dataSource.getAllGames();
                             dataSource.close();
                             Toast.makeText(context, game.getTitle() + " deleted.", Toast.LENGTH_SHORT).show();
-                            if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
-                                if (HomeFragment.imageSlideAdapter != null) {
-                                    HomeFragment.imageSlideAdapter.updateList(gameList);
-                                    if (gameList == null) {
-                                        HomeFragment.changeUIsWhenDataSetChange(false);
-                                    }
-                                }
-                            } else if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
-                                if (GamesFragment.gamesAdapter != null) {
-                                    GamesFragment.gamesAdapter.updateList(gameList);
-                                    if (gameList == null) {
-                                        GamesFragment.changeUIsWhenDataSetChange(false);
-                                    }
-                                }
-                            }
                             ((GameDetailActivity) context).finish();
                         }
                     })
@@ -377,42 +401,47 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     });
             AlertDialog dialog = builder.create();
             dialog.show();
-
+        }
+        /*Mark as favourite game*/
+        if(v.getTag().equals(FAVOURITE)){
+            if(favouriteCheckBox.isChecked()){
+                game.setFavourite(1);
+            }else{
+                game.setFavourite(0);
+            }
+            dataSource.open();
+            dataSource.updateGame(game);
+            dataSource.close();
+            cognitoSyncGames.updateGame(game);
+        }
+        /*Mark as wish game*/
+        if(v.getTag().equals(WISH)){
+            if(wishCheckBox.isChecked()){
+                game.setWish(1);
+            }else{
+                game.setWish(0);
+            }
+            dataSource.open();
+            dataSource.updateGame(game);
+            dataSource.close();
+            cognitoSyncGames.updateGame(game);
         }
     }
 
-    public void updateFragmentUIsByUpdateDatabase() {
-        dataSource.open();
-        dataSource.updateGame(game);
-        List<Game> gamesList = dataSource.getAllGames();
-        dataSource.close();
-        if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
-            if (GamesFragment.gamesAdapter != null) {
-                GamesFragment.gamesAdapter.updateList(gamesList);
-                GamesFragment.changeUIsWhenDataSetChange(true);
-            } else {
-                GamesFragment.gamesAdapter = new GameListAdapter(gamesList, GamesFragment.naviDrawerActivity);
-                GamesFragment.changeUIsWhenDataSetChange(true);
-            }
-        } else if (NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
-            if (HomeFragment.imageSlideAdapter != null) {
-                Log.i("imageSlideAdapter", "not null, update list");
-                HomeFragment.imageSlideAdapter.updateList(gamesList);
-                HomeFragment.changeUIsWhenDataSetChange(true);
-            } else {
-                Log.i("imageSlideAdapter", "null, create, update list");
-                HomeFragment.imageSlideAdapter = new ImageSlideAdapter(HomeFragment.activity.getContext(), gamesList, HomeFragment.viewPager);
-                HomeFragment.changeUIsWhenDataSetChange(true);
-            }
-        }
-    }
-
-    public void doLaunchContactPicker(View view) {
+    /**
+     * Launch contact picker when add contact action button is clicked.
+     */
+    public void doLaunchContactPicker() {
         Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
         startActivityForResult(contactPickerIntent, CONTACT_PICKER_RESULT);
     }
 
+    /**
+     * Get the contact that is picked by user in contact picker
+     * or get the contact from contact DB when user picked contact previously.
+     * @param id Contact ID from contact picker.
+     */
     public void getContact(String id) {
         if (id.equals("")) {
             // get contact by the contactId from SQLite database
@@ -561,9 +590,11 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     contactId = Integer.parseInt(id);
                     getContact(id);
                     game.setContactId(contactId);
-                    cognitoSyncGames.updateContactId(game);
+                    dataSource.open();
+                    dataSource.updateGame(game);
+                    dataSource.close();
+                    cognitoSyncGames.updateGame(game);
                     Toast.makeText(this, "Added contact to this game.", Toast.LENGTH_SHORT).show();
-                    updateFragmentUIsByUpdateDatabase();
                     break;
             }
         } else {

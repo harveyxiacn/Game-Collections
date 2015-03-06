@@ -18,4 +18,8 @@
         <item name="android:textColorSecondary">@color/ColorTextIcon</item>
     </style>
 
+    <style name="CustomPopupTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:background">@color/ColorPrimary</item>
+    </style>
+
 </resources>

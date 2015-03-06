@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".NaviDrawerActivity">
+    <item
+        android:id="@+id/action_switch_layout"
+        android:orderInCategory="100"
+        android:title="Switch List and Grid"
+        android:icon="@drawable/gridview"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_sort_title"
+        android:orderInCategory="200"
+        android:title="Sort title"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_sort_platform"
+        android:orderInCategory="300"
+        android:title="Sort platform"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_sort_rating"
+        android:orderInCategory="400"
+        android:title="Sort rating"
+        app:showAsAction="never"/>
+</menu>

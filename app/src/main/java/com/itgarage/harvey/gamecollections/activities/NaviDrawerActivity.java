@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -17,8 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -26,18 +25,18 @@ import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.adapters.DrawerListAdapter;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncClientManager;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
-import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
-import com.itgarage.harvey.gamecollections.fragments.SearchFragment;
 import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
 import com.itgarage.harvey.gamecollections.models.DrawerListItems;
 import com.itgarage.harvey.gamecollections.models.Game;
 
 
-public class NaviDrawerActivity extends ActionBarActivity {
+public class NaviDrawerActivity extends ActionBarActivity{
 
     private Toolbar toolbar;
-    private String NAME;
+    private SearchView mSearchView;
+
+    private String username;
     //private String EMAIL = "harvey1991cn@gmail.com";
     private String PROFILE;
     private String FB_OR_GOOGLE;
@@ -59,7 +58,11 @@ public class NaviDrawerActivity extends ActionBarActivity {
     public final static String TOOL_BAR_TITLE_SAVED_TAG = "Tool Bar Title Saved";
     public final static String FRAGMENT_ID_SAVED_TAG = "Fragment id Saved";
     public static String CURRENT_FRAGMENT = "";
+    public static String CURRENT_TAB = "";
     public static boolean LOCAL_GAME = false;
+
+    public static final String SCAN_CONTINUOUS = "scan continuous";
+    boolean isScanContinuous = false;
 
     SharedPreferences sharedPreferences;
 
@@ -90,20 +93,20 @@ public class NaviDrawerActivity extends ActionBarActivity {
         // get drawer list items' names and icons from DrawerListItems
         ITEM_NAMES = DrawerListItems.ITEM_NAMES;
         ITEM_ICONS = DrawerListItems.ITEM_ICONS;
-        // setup recyclerview
+        // setup recyclerview of drawer layout
         mRecyclerView = (RecyclerView) findViewById(R.id.drawer_list);
         mRecyclerView.setHasFixedSize(true);
+        // get saved shred preferences
         sharedPreferences = getSharedPreferences("userInfo", MODE_PRIVATE);
-        NAME = sharedPreferences.getString("username", "");
-        if(NAME.equals("")){
-            NAME = "Welcome, please login from settings.";
-        }
+        // get saved username
+        username = sharedPreferences.getString("username", "");
+        // get saved profile id to get profile image
         PROFILE = sharedPreferences.getString("profileId", "");
+        // get save status that describes login with facebook or google
         FB_OR_GOOGLE = sharedPreferences.getString("is fb or google", "");
-
-        mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, NAME, PROFILE, FB_OR_GOOGLE, NaviDrawerActivity.this, NaviDrawerActivity.this);
+        // set up the adapter of Drawer list
+        mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, username, PROFILE, FB_OR_GOOGLE, NaviDrawerActivity.this, NaviDrawerActivity.this);
         mRecyclerView.setAdapter(mAdapter);
-
         // create a GestureDetector object to detect SingleTapUp touch
         // can be later called to verify if the touch event is a SingleTapUp type of touch or some other type of touch (swipe touch, long touch)
         final GestureDetector mGestureDetector = new GestureDetector(NaviDrawerActivity.this, new GestureDetector.SimpleOnGestureListener() {
@@ -113,45 +116,32 @@ public class NaviDrawerActivity extends ActionBarActivity {
             }
 
         });
-
-
+        // add touch listener to deal with touch events
         mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
                 View child = recyclerView.findChildViewUnder(motionEvent.getX(),motionEvent.getY());
 
-
-
                 if(child!=null && mGestureDetector.onTouchEvent(motionEvent)){
                     mDrawer.closeDrawers();
-                    Toast.makeText(NaviDrawerActivity.this, "The Item Clicked is: " + recyclerView.getChildPosition(child), Toast.LENGTH_SHORT).show();
                     int position = recyclerView.getChildPosition(child);
                     FragmentManager fragmentManager = getSupportFragmentManager();
-                    if(position==1){
-                        Log.i("On attach", "mTitle:" + mTitle);
+                    if(position==1){// get home page fragment
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
                         CURRENT_FRAGMENT = "home";
-                    }else if(position==2){
-                        Log.i("On attach", "mTitle:" + mTitle);
-                        toolbar.setTitle(mTitle);
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, GamesFragment.newInstance()).commit();
-                        CURRENT_FRAGMENT = "games";
-                    }else if(position==3){
-                        Log.i("On attach", "mTitle:" + mTitle);
-                        toolbar.setTitle(mTitle);
-                        fragmentManager.beginTransaction().replace(R.id.fragment_container, SearchFragment.newInstance()).commit();
-                        CURRENT_FRAGMENT = "search";
-                    }else if(position==4){
-                        Log.i("On attach", "mTitle:" + mTitle);
+                        mSearchView.setVisibility(View.GONE);
+                    }else if(position==2){// start online keyword search activity
+                        Intent intent = new Intent(NaviDrawerActivity.this, SearchKeywordActivity.class);
+                        startActivity(intent);
+                    }else if(position==3){// get setting fragment
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment.newInstance()).commit();
                         CURRENT_FRAGMENT = "settings";
+                        mSearchView.setVisibility(View.GONE);
                     }
                     return true;
-
                 }
-
                 return false;
             }
 
@@ -160,12 +150,12 @@ public class NaviDrawerActivity extends ActionBarActivity {
 
             }
         });
-
+        // set up layout manager of drawer list recycler view
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-
+        // get drawer layout instance
         mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        mDrawer.setStatusBarBackground(R.color.ColorPrimaryDark);
+        // set up toggle
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.drawer_open, R.string.drawer_close){
             @Override
             public void onDrawerOpened(View drawerView) {
@@ -181,38 +171,45 @@ public class NaviDrawerActivity extends ActionBarActivity {
         };
         mDrawer.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
-
+        // open database
         onCreateDB();
-
+        // initialize Amazon client before use.
         CognitoSyncClientManager.init(this);
 
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putCharSequence(TOOL_BAR_TITLE_SAVED_TAG, mTitle);
-        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
-
-        //outState.putInt(FRAGMENT_ID_SAVED_TAG, );
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+        setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_navi_drawer, menu);
-        // Associate searchable configuration with the SearchView
-        /*SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));*/
+
+        /*SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final MenuItem searchActionBarItem = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchActionBarItem);
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setIconifiedByDefault(true);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                searchActionBarItem.collapseActionView();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                *//*List<Game> gamesResult = dataSource.searchKeyword(s);
+                if(s.isEmpty())
+                    gamesResult = dataSource.getAllGames();
+                switch (CURRENT_TAB) {
+                    case "All":
+                        AllGameTab.gamesAdapter.updateList(gamesResult);
+                        break;
+                }*//*
+
+                return false;
+            }
+        });*/
         return true;
     }
 
@@ -223,40 +220,40 @@ public class NaviDrawerActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
         // Camera button to start barcode scanner and go to result activity
         if(id == R.id.action_camera){
-            IntentIntegrator integrator = new IntentIntegrator(NaviDrawerActivity.this);
+            isScanContinuous = false;
+            IntentIntegrator integrator = new IntentIntegrator(this);
+            integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
             integrator.initiateScan();
         }
         // Search button to start search view
-        if (id == R.id.action_search) {
-            Intent intent = new Intent(this, SearchKeywordActivity.class);
-            startActivity(intent);
-        }
-
+        /*if (id == R.id.action_search) {
+            //onSearchRequested();
+        }*/
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
+            // Barcode scan result
             IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             if (scanResult != null) {
                 String resultStr = scanResult.getContents();
                 Log.d("code", resultStr);
                 Game game = dataSource.getGameByUPC(resultStr);
-                if (game == null) {
+                if (game == null) {// not found in local DB, search on Amazon
                     Intent intent = new Intent(this, BarcodeResultActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString(BARCODE_SCAN_RESULT, resultStr);
                     bundle.putString("operation", "Barcode Scan");
+                    if(isScanContinuous){
+                        bundle.putString(SCAN_CONTINUOUS, "true");
+                    }
                     intent.putExtras(bundle);
                     startActivity(intent);
-                } else {
+                } else {// found in local DB, show game detail
                     Intent intent = new Intent(this, GameDetailActivity.class);
                     intent.putExtra(BARCODE_PASS, resultStr);
                     startActivity(intent);
@@ -268,26 +265,24 @@ public class NaviDrawerActivity extends ActionBarActivity {
         }
     }
 
-    // set mTitle and change title in toolbar when fragment attach
+    /**
+     * Set mTitle and change title in toolbar when fragment attach.
+     * @param number Position that touched.
+     */
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
                 mTitle = getString(R.string.home_page_text);
                 break;
-            case 2:
-                mTitle = getString(R.string.games_list_text);
-                break;
-            case 3:
-                mTitle = getString(R.string.search_page_text);
-                break;
             case 4:
                 mTitle = getString(R.string.settings_page_text);
                 break;
-            /*default:
-                mTitle = getString(R.string.default_mtitle);*/
         }
     }
 
+    /**
+     * Open DB.
+     */
     public void onCreateDB() {
         try {
             dataSource = new GamesDataSource(this);
@@ -310,23 +305,28 @@ public class NaviDrawerActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         dataSource.close();
-        Log.i("Navi", "onDestroy");
+        //Log.i("Navi", "onDestroy");
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
         Log.i("Navi", "onResume");
-        NAME = sharedPreferences.getString("username", "");
+        /*username = sharedPreferences.getString("username", "");
         PROFILE = sharedPreferences.getString("profileId", "");
-        mAdapter.update(NAME, PROFILE);
-
+        mAdapter.update(username, PROFILE);*/
+        //updateDateSet();
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        Log.i("Navi", "onPause");
+        //Log.i("Navi", "onPause");
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

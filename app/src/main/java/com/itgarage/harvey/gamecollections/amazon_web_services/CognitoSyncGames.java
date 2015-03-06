@@ -95,6 +95,8 @@ public class CognitoSyncGames {
                 try {
                     value.put("contactID", game.getContactId());
                     value.put("rating", game.getRating());
+                    value.put("favourite", game.getFavourite());
+                    value.put("wish", game.getWish());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -146,6 +148,8 @@ public class CognitoSyncGames {
             try {
                 value.put("contactID", game.getContactId());
                 value.put("rating", game.getRating());
+                value.put("favourite", game.getFavourite());
+                value.put("wish", game.getWish());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -198,25 +202,11 @@ public class CognitoSyncGames {
             try {
                 value = new JSONObject(record.getValue());
 
-                //int contactId = value.getInt("contactID");
                 Game game = dataSource.getGameByUPC(upcCode);
-                //if (game.getContactId() != contactId) {
-                // if the contact id is not the same, put the local new contact id into values to update
                 value.put("contactID", game.getContactId());
-                //Log.i(TAG, "different contact id");
-                //}
-                //int rating = value.getInt("rating");
-                //if(game.getRating() !=rating){
-                // if the rating is not the same, put the local new contact id into values to update
                 value.put("rating", game.getRating());
-                //    Log.i(TAG, "different rating");
-                //}
-                /*boolean favourite = value.getBoolean("favourite");
-                if(game.getFavourite() != favourite){
-                    // if the favourite is not the same, put the local new contact id into values to update
-                    value.put("favourite", game.getFavourite());
-                    Log.i(TAG, "different favourite");
-                }*/
+                value.put("favourite", game.getFavourite());
+                value.put("wish", game.getWish());
                 values.put(upcCode, value.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -237,11 +227,14 @@ public class CognitoSyncGames {
             if(i==notExistedInDB.size()-1){
                 lastOne = true;
             }
+            Log.i(TAG, record.getValue());
             try {
                 JSONObject value = new JSONObject(record.getValue());
                 int downloadContactID = value.getInt("contactID");
                 int downloadRating = value.getInt("rating");
-                new SearchAmazonTask().execute(record.getKey(), String.valueOf(downloadContactID), String.valueOf(downloadRating), String.valueOf(lastOne));
+                int downloadFavourite = value.getInt("favourite");
+                int downloadWish = value.getInt("wish");
+                new SearchAmazonTask().execute(record.getKey(), String.valueOf(downloadContactID), String.valueOf(downloadRating), String.valueOf(downloadFavourite), String.valueOf(downloadWish), String.valueOf(lastOne));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -274,7 +267,8 @@ public class CognitoSyncGames {
         try {
             value.put("contactID", game.getContactId());
             value.put("rating", game.getRating());
-            //value.put("favourite", game.getFavourite());
+            value.put("favourite", game.getFavourite());
+            value.put("wish", game.getWish());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -285,86 +279,22 @@ public class CognitoSyncGames {
             dialog.dismiss();
     }
 
-    // update contactID when update contact id in game detail page
-    public void updateContactId(Game game) {
-        dataset = client.openOrCreateDataset("games");
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
-        String valueData = dataset.get(game.getUpcCode());
-        JSONObject Jvalue;
-        int contactID = 0;
-        try {
-            Jvalue = new JSONObject(valueData);
-            contactID = Jvalue.getInt("contactID");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Log.i(TAG, "update contact id " + contactID + "->" + game.getContactId());
-        JSONObject value = new JSONObject();
-        Map<String, String> values = new HashMap<String, String>();
-        try {
-            value.put("contactID", game.getContactId());
-            value.put("rating", game.getRating());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        values.put(game.getUpcCode(), value.toString());
-        dataset.putAll(values);
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
-    }
-
-    // update rating when update rating in game detail page
-    public void updateRating(Game game) {
-        Log.i(TAG, "update game rating" + game.getTitle());
-        dataset = client.openOrCreateDataset("games");
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
-        String valueData = dataset.get(game.getUpcCode());
-        Log.i(TAG, "value data " + valueData);
-        JSONObject Jvalue;
-        int rating = 0;
-        try {
-            Jvalue = new JSONObject(valueData);
-            rating = Jvalue.getInt("rating");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        Log.i(TAG, "update rating " + rating + "->" + game.getRating());
-        JSONObject value = new JSONObject();
-        Map<String, String> values = new HashMap<String, String>();
-        try {
-            value.put("contactID", game.getContactId());
-            value.put("rating", game.getRating());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        values.put(game.getUpcCode(), value.toString());
-        dataset.putAll(values);
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
-    }
-
-    // update favourite when update favourite in game detail page
-    public void updateFavourite(Game game) {
+    // sync game when update game in game detail page
+    public void updateGame(Game game) {
         dataset = client.openOrCreateDataset("games");
         synchronize();
         if (dialog.isShowing())
             dialog.dismiss();
         JSONObject value = new JSONObject();
         Map<String, String> values = new HashMap<String, String>();
-        /*try {
+        try {
             value.put("contactID", game.getContactId());
             value.put("rating", game.getRating());
-            //value.put("favourite", game.getFavourite());
+            value.put("favourite", game.getFavourite());
+            value.put("wish", game.getWish());
         } catch (JSONException e) {
             e.printStackTrace();
-        }*/
+        }
         values.put(game.getUpcCode(), value.toString());
         dataset.putAll(values);
         synchronize();
@@ -829,14 +759,14 @@ public class CognitoSyncGames {
             pd.setTitle("One Sec...");
             pd.setMessage("Loading...");
             pd.show();
-            Log.i(TAG, "pre execute");
+            //Log.i(TAG, "pre execute");
         }
 
         @Override
         protected Game doInBackground(String... params) {
-            Log.i(TAG, "executing");
+            //Log.i(TAG, "executing");
             ItemLookupArgs.ITEM_ID = params[0];
-            boolean lastOne = Boolean.parseBoolean(params[3]);
+            boolean lastOne = Boolean.parseBoolean(params[5]);
             Game downloadGame = getGame();
             if (downloadGame != null) {
                 Log.i(TAG, "download game: " + downloadGame.getTitle());
@@ -845,6 +775,8 @@ public class CognitoSyncGames {
                 }
                 downloadGame.setContactId(Integer.parseInt(params[1]));
                 downloadGame.setRating(Integer.parseInt(params[2]));
+                downloadGame.setFavourite(Integer.parseInt(params[3]));
+                downloadGame.setWish(Integer.parseInt(params[4]));
             }
             if(lastOne){
                 intentNavi = new Intent(activity, NaviDrawerActivity.class);

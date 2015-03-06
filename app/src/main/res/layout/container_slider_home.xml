@@ -2,22 +2,64 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
     tools:context=".NaviDrawerActivity">
 
-    <me.xiaopan.android.spear.SpearImageView
-        android:id="@+id/imageViewGameImageSlide"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <TextView
-        android:id="@+id/image_description_slide"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/firstLinearLayout"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="5dp"
-        android:gravity="center"
-        android:textStyle="bold" />
+        android:orientation="vertical"
+        android:layout_margin="5dp">
+
+        <me.xiaopan.android.spear.SpearImageView
+            android:id="@+id/imageViewGameImageSlide1"
+            android:layout_width="114dp"
+            android:layout_height="160dp" />
+
+        <TextView
+            android:id="@+id/gameIdTv1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/secondLinearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="5dp">
+
+        <me.xiaopan.android.spear.SpearImageView
+            android:id="@+id/imageViewGameImageSlide2"
+            android:layout_width="114dp"
+            android:layout_height="160dp" />
+
+        <TextView
+            android:id="@+id/gameIdTv2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/thirdLinearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="5dp">
+
+        <me.xiaopan.android.spear.SpearImageView
+            android:id="@+id/imageViewGameImageSlide3"
+            android:layout_width="114dp"
+            android:layout_height="160dp" />
+
+        <TextView
+            android:id="@+id/gameIdTv3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </LinearLayout>
+
 
 </LinearLayout>

@@ -26,6 +26,8 @@ public class MyDBHandler extends SQLiteOpenHelper {
     public static final String COLUMN_GAME_RATING = "rating";
     public static final String COLUMN_GAME_UPC_CODE = "upcCode";
     public static final String COLUMN_CONTACT_ID = "contactId";
+    public static final String COLUMN_FAVOURITE = "favourite";
+    public static final String COLUMN_WISH = "wish";
 
     public static final String CREATE_GAMES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_GAMES + "("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -42,7 +44,9 @@ public class MyDBHandler extends SQLiteOpenHelper {
             + COLUMN_GAME_LARGE_IMAGE + " TEXT,"
             + COLUMN_GAME_RATING + " INTEGER,"
             + COLUMN_GAME_UPC_CODE + " TEXT,"
-            + COLUMN_CONTACT_ID + " INTEGER);";
+            + COLUMN_CONTACT_ID + " INTEGER,"
+            + COLUMN_FAVOURITE + " INTEGER,"
+            + COLUMN_WISH + " INTEGER);";
 
     public MyDBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

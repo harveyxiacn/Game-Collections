@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:facebook="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="178dp"
+    android:orientation="horizontal"
     android:background="@color/ColorPrimary">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="150dp"
         android:orientation="vertical"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_marginTop="24dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp">
@@ -39,4 +37,40 @@
             android:textSize="14sp"
             android:textStyle="bold"/>
     </LinearLayout>
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/allGameTotalTv"
+            android:text="@string/all_game_total_tv"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/ColorTextIcon"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/FavouriteGameTotalTv"
+            android:text="@string/favourite_game_total_tv"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/ColorTextIcon"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/lendGameTotalTv"
+            android:text="@string/lend_game_total_tv"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/ColorTextIcon"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wishGameTotalTv"
+            android:text="@string/wish_game_total_tv"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/ColorTextIcon"/>
+        </LinearLayout>
+</LinearLayout>

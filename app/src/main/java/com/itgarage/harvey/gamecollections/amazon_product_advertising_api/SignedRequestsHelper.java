@@ -61,11 +61,11 @@ public class SignedRequestsHelper {
                         + endpoint + "\n"
                         + REQUEST_URI + "\n"
                         + canonicalQS;
-        Log.i("url", "toSign: " + toSign);
+        //Log.i("url", "toSign: " + toSign);
         String hmac = hmac(toSign);
-        Log.i("signature", ""+hmac);
+        //Log.i("signature", ""+hmac);
         String sig = percentEncodeRfc3986(hmac);
-        Log.i("encoded signature", ""+sig);
+        //Log.i("encoded signature", ""+sig);
         String url = "http://" + endpoint + REQUEST_URI + "?" +
                 canonicalQS + "&Signature=" + sig;
 

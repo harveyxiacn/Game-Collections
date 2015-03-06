@@ -6,7 +6,7 @@
     android:background="@color/ColorPrimary"
     android:theme="@style/CustomToolBarTheme"
     android:minHeight="@dimen/abc_action_bar_default_height_material"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+    app:popupTheme="@style/CustomPopupTheme"
     android:paddingTop="@dimen/tool_bar_top_padding">
 
 </android.support.v7.widget.Toolbar>

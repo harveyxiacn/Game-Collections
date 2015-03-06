@@ -58,5 +58,11 @@
     <string name="keyword_input_hint">Input the keyword of the game</string>
     <string name="btn_search_keyword_desc">searchButton</string>
     <string name="login_title">login title</string>
-
+    <string name="result_game_detail_title">Result game detail</string>
+    <string name="wish_game_total_tv">Wish Games: </string>
+    <string name="lend_game_total_tv">Lend Games: </string>
+    <string name="favourite_game_total_tv">Favourite Games: </string>
+    <string name="all_game_total_tv">All Games: </string>
+    <string name="option_menu_search_title">Search</string>
+    <string name="option_menu_scan_title">Scan</string>
 </resources>

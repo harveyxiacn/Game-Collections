@@ -13,8 +13,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,16 +21,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
-import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
-import com.itgarage.harvey.gamecollections.adapters.ImageSlideAdapter;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLookupArgs;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.UrlParameterHandler;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
-import com.itgarage.harvey.gamecollections.fragments.GamesFragment;
-import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
 import com.itgarage.harvey.gamecollections.models.Game;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
@@ -58,9 +52,6 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     public static final String BARCODE_SCAN_RESULT_SAVED_TAG = "BARCODE_SCAN_RESULT";
     Toolbar toolbar;
     CardView gamesCardListView;
-    //RecyclerView gamesCardListView;
-    //OnlineResultGameListAdapter gamesAdapter;
-    //RecyclerView.LayoutManager gamesCardListLayoutManager;
 
     SpearImageView gameImage;
     TextView titleTextView, platformTextview;
@@ -78,7 +69,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
     private static final String TAG_ADD_RATING = "TAG_ADD_RATING";
 
-    public Game game;
+    public Game downloadGame;
     public Context context = this;
 
     List<Game> gamesList;
@@ -96,86 +87,110 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
 
     String operation;
 
+    boolean isScanContinuous = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // pass activity?
         passActivity = this;
         setContentView(R.layout.activity_barcode_result);
+        // tool bar set up
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.barcode_scan_result_activity_title));
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        // initialize games list
         gamesList = new ArrayList<Game>();
-
+        // get instances
         resultTextView = (TextView) findViewById(R.id.barcodeScanResultTextView);
         noResultTextView = (TextView) findViewById(R.id.noResultSearchTextView);
+        // get intent
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         operation = extras.getString("operation");
 
-        if(operation.equals("Keyword Search")){
+        isScanContinuous = Boolean.parseBoolean(extras.getString(NaviDrawerActivity.SCAN_CONTINUOUS));
+
+        if(operation.equals("Keyword Search")){// if start this activity from keyword search
             operationKeywordSearch(extras);
-        }else if(operation.equals("Barcode Scan")){
+            getSupportActionBar().setTitle(getString(R.string.result_game_detail_title));
+        }else if(operation.equals("Barcode Scan")){// if start this activity from barcode scan
             operationBarcodeScan(extras);
+            getSupportActionBar().setTitle(getString(R.string.barcode_scan_result_activity_title));
         }
     }
 
+    /**
+     * Operations of keyword search result game details.
+     * @param extras Extras include all information of the game need to display details.
+     */
     public void operationKeywordSearch(Bundle extras){
-        game = new Game();
-        game.setUpcCode(extras.getString("upc"));
-
-
-        game.setTitle(extras.getString("title"));
-        game.setPlatform(extras.getString("platform"));
-        game.setHardwarePlatform(extras.getString("hardPlatform"));
-        game.setGenre(extras.getString("genre"));
-        game.setMediumImage(extras.getString("mediumImage"));
-        game.setEdition(extras.getString("edition"));
-        game.setManufacturer(extras.getString("manufacturer"));
-        game.setPublicationDate(extras.getString("publicationDate"));
-        game.setReleaseDate(extras.getString("releaseDate"));
-        game.setRating(extras.getInt("rating"));
-        game.setSmallImage(extras.getString("smallImage"));
-        game.setLargeImage(extras.getString("largeImage"));
-
+        // set up the game with extras
+        downloadGame = new Game();
+        downloadGame.setUpcCode(extras.getString("upc"));
+        downloadGame.setTitle(extras.getString("title"));
+        downloadGame.setPlatform(extras.getString("platform"));
+        downloadGame.setHardwarePlatform(extras.getString("hardPlatform"));
+        downloadGame.setGenre(extras.getString("genre"));
+        downloadGame.setMediumImage(extras.getString("mediumImage"));
+        downloadGame.setEdition(extras.getString("edition"));
+        downloadGame.setManufacturer(extras.getString("manufacturer"));
+        downloadGame.setPublicationDate(extras.getString("publicationDate"));
+        downloadGame.setReleaseDate(extras.getString("releaseDate"));
+        downloadGame.setRating(extras.getInt("rating"));
+        downloadGame.setSmallImage(extras.getString("smallImage"));
+        downloadGame.setLargeImage(extras.getString("largeImage"));
+        // create the display UIs
         createDisplayUIs();
+        // remove no result text view
         noResultTextView.setVisibility(View.GONE);
+        // remove the barcode scan result text view
         resultTextView.setVisibility(View.GONE);
     }
 
+    /**
+     * Operations of barcode search result, display result game.
+     * @param extras Extras include all information of the game need to display details.
+     */
     public void operationBarcodeScan(Bundle extras){
+        // get barcode
         resultStr = extras.getString(NaviDrawerActivity.BARCODE_SCAN_RESULT);
+        // set barcode textView
         resultTextView.setText(resultStr);
+        // set global variable
         UPC_CODE = resultStr;
-
+        // set item id to search through Amazon Product Advertising API
         ItemLookupArgs.ITEM_ID = resultStr;
-
+        // get instances card view
         gamesCardListView = (CardView) findViewById(R.id.card_view);
+        // remove the no result text view
         noResultTextView.setVisibility(View.GONE);
         /*start to search on Amazon Product Advertising API*/
         new SearchAmazonTask().execute();
     }
 
+    /**
+     * Create display UIs to display the game details.
+     */
     public void createDisplayUIs(){
         titleTextView = (TextView)findViewById(R.id.textViewGameTitle);
-        title = game.getTitle();
+        title = downloadGame.getTitle();
         titleTextView.setText(title);
-        String platform = game.getPlatform();
+        String platform = downloadGame.getPlatform();
         if (!platform.equals("")) {
             platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
-            platformTextview.setText(game.getPlatform());
+            platformTextview.setText(downloadGame.getPlatform());
             platformTextview.setText(platform);
         }
 
-        String mediumImage = game.getMediumImage();
+        String mediumImage = downloadGame.getMediumImage();
         gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
         gameImage.setImageFromUri(mediumImage);
 
         gameAttributesLayout = (LinearLayout) findViewById(R.id.gameAttributesLayout);
 
-        String genre = game.getGenre();
+        String genre = downloadGame.getGenre();
         if (!genre.equals("")) {
             genreTextView = new TextView(this);
             genreTextView.setTextSize(20);
@@ -184,7 +199,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             genreTextView.setVisibility(View.VISIBLE);
         }
 
-        String hardwarePlatform = game.getHardwarePlatform();
+        String hardwarePlatform = downloadGame.getHardwarePlatform();
         if (!hardwarePlatform.equals("")) {
             hardwarePlatformTextView = new TextView(this);
             hardwarePlatformTextView.setTextSize(20);
@@ -193,7 +208,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             hardwarePlatformTextView.setVisibility(View.VISIBLE);
         }
 
-        String edition = game.getEdition();
+        String edition = downloadGame.getEdition();
         if (!edition.equals("")) {
             editionTextView = new TextView(this);
             editionTextView.setTextSize(20);
@@ -202,7 +217,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             editionTextView.setVisibility(View.VISIBLE);
         }
 
-        String manufacturer = game.getManufacturer();
+        String manufacturer = downloadGame.getManufacturer();
         if (!manufacturer.equals("")) {
             manufacturerTextView = new TextView(this);
             manufacturerTextView.setTextSize(20);
@@ -211,7 +226,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             manufacturerTextView.setVisibility(View.VISIBLE);
         }
 
-        String publicationDate = game.getPublicationDate();
+        String publicationDate = downloadGame.getPublicationDate();
         if (!publicationDate.equals("")) {
             publicationDateTextView = new TextView(this);
             publicationDateTextView.setTextSize(20);
@@ -220,7 +235,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             publicationDateTextView.setVisibility(View.VISIBLE);
         }
 
-        String releaseDate = game.getReleaseDate();
+        String releaseDate = downloadGame.getReleaseDate();
         if (!releaseDate.equals("")) {
             releaseDateTextView = new TextView(this);
             releaseDateTextView.setTextSize(20);
@@ -246,6 +261,9 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         createGameDetailFloatingActionButtons();
     }
 
+    /**
+     * Create the floating action button to deal with operations of adding to DB, adding contact
+     */
     public void createGameDetailFloatingActionButtons() {
         ImageView floatingActionButtonIcon = new ImageView(this);
         floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
@@ -257,61 +275,30 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         // Create menu items:
         itemBuilder = new SubActionButton.Builder(this);
         itemBuilder.setBackgroundDrawable(getResources().getDrawable(R.drawable.selector_button_cyan));
-        // repeat many times:
+        // add the game to DB
         itemAddToDBIcon = new ImageView(this);
         itemAddToDBIcon.setImageResource(R.drawable.ic_add_to_db);
         addToDBButton = itemBuilder.setContentView(itemAddToDBIcon).build();
         addToDBButton.setOnClickListener(this);
         addToDBButton.setTag(TAG_ADD_TO_DB);
-
+        // add/remove contact
         itemAddContactIcon = new ImageView(this);
         itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
         addContactButton = itemBuilder.setContentView(itemAddContactIcon).build();
         addContactButton.setOnClickListener(this);
         addContactButton.setTag(TAG_ADD_BORROWER);
 
-        /*itemAddRatingIcon = new ImageView(this);
-        itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
-        addRatingButton = itemBuilder.setContentView(itemAddRatingIcon).build();
-        addRatingButton.setOnClickListener(this);
-        addRatingButton.setTag(TAG_ADD_RATING);*/
         // Create the menu with the items:
         addGameActionMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(addToDBButton)
                 .addSubActionView(addContactButton)
-                //.addSubActionView(addRatingButton)
                 .attachTo(addGameActionButton)
                 .build();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(BARCODE_SCAN_RESULT_SAVED_TAG, resultStr);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_barcode_result, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
+    /**
+     * Get game list from result from Amazon
+     */
     public void getGameList() {
         UrlParameterHandler urlParameterHandler = UrlParameterHandler.getInstance();
         Map<String, String> myparams = urlParameterHandler.buildMapForItemLookUp();
@@ -327,11 +314,9 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             NodeList nodeList = parser.getResponseNodeList(signedUrl);
             if (nodeList != null) {
                 int position = 0;
-                Game game = parser.getSearchObject(nodeList, position);
-                Log.i("add Game", "" + game.getTitle());
-                gamesList.add(game);
+                downloadGame = parser.getSearchObject(nodeList, position);
             } else {
-                gamesList = null;
+                downloadGame = null;
             }
         }
     }
@@ -341,46 +326,41 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         /* Add game to database*/
         if (v.getTag().equals(TAG_ADD_TO_DB)) {
             Toast.makeText(this, "Add to DB", Toast.LENGTH_SHORT).show();
-            /*if(operation.equals("Barcode Scan")) {
-                game = gamesList.get(0);
-            }else if(operation.equals("Keyword Search")){
-
-            }*/
             if (gameRatingLayout.getVisibility() == View.VISIBLE) {
                 RatingBar ratingBar = (RatingBar) findViewById(R.id.gameRatingBar);
-                game.setRating((int) ratingBar.getRating());
+                downloadGame.setRating((int) ratingBar.getRating());
             }
             GamesDataSource dataSource = new GamesDataSource(this);
             dataSource.open();
-            Log.i("DB operation", "DB opened.");
+            //Log.i("DB operation", "DB opened.");
             if(BarcodeResultActivity.UPC_CODE!=null){
-                game.setUpcCode(BarcodeResultActivity.UPC_CODE);
+                downloadGame.setUpcCode(BarcodeResultActivity.UPC_CODE);
             }
-            long insertId = dataSource.addGame(game);
+            long insertId = dataSource.addGame(downloadGame);
             if(insertId != -1){
                 CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
-                cognitoSyncGames.addRecord(game);
+                cognitoSyncGames.addRecord(downloadGame);
                 gamesList = dataSource.getAllGames();
                 Toast.makeText(this, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
-                if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
+                /*if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
                     if (GamesFragment.gamesAdapter != null) {
                         GamesFragment.gamesAdapter.updateList(gamesList);
                         GamesFragment.changeUIsWhenDataSetChange(true);
                     } else {
-                        GamesFragment.gamesAdapter = new GameListAdapter(gamesList, GamesFragment.naviDrawerActivity);
+                        GamesFragment.gamesAdapter = new GameListAdapter(gamesList, GamesFragment.naviDrawerActivity, false);
                         GamesFragment.changeUIsWhenDataSetChange(true);
                     }
                 }else if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
                     if (HomeFragment.imageSlideAdapter != null) {
-                        Log.i("imageSlideAdapter", "not null, update list");
+                        //Log.i("imageSlideAdapter", "not null, update list");
                         HomeFragment.imageSlideAdapter.updateList(gamesList);
                         HomeFragment.changeUIsWhenDataSetChange(true);
                     } else {
-                        Log.i("imageSlideAdapter", "null, create, update list");
+                        //Log.i("imageSlideAdapter", "null, create, update list");
                         HomeFragment.imageSlideAdapter = new ImageSlideAdapter(HomeFragment.activity.getContext(), gamesList, HomeFragment.viewPager);
                         HomeFragment.changeUIsWhenDataSetChange(true);
                     }
-                }
+                }*/
                 finish();
             }
             dataSource.close();
@@ -397,7 +377,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             }else {
                 Toast.makeText(this, "hide Borrower layout", Toast.LENGTH_SHORT).show();
                 addGameActionMenu.close(true);
-                game.setContactId(-1);
+                downloadGame.setContactId(-1);
                 TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
                 nameTextView.setText("Name");
                 phoneLinearLayout.removeAllViews();
@@ -405,21 +385,11 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
                 itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
             }
         }
-            /* add rating*/
-        if (v.getTag().equals(TAG_ADD_RATING)) {
-            if(gameRatingLayout.getVisibility() == View.GONE) {
-                Toast.makeText(this, "Add Rating", Toast.LENGTH_SHORT).show();
-                gameRatingLayout.setVisibility(View.VISIBLE);
-                itemAddRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
-            }else if(gameRatingLayout.getVisibility() == View.VISIBLE){
-                Toast.makeText(this, "Remove Rating", Toast.LENGTH_SHORT).show();
-                gameRatingLayout.setVisibility(View.GONE);
-                itemAddRatingIcon.setImageResource(R.drawable.ic_add_rating);
-            }
-            //addGameActionMenu.close(true);
-        }
     }
 
+    /**
+     * Task to do search through Amazon Product Advertising API.
+     */
     private class SearchAmazonTask extends AsyncTask<Void, Void, Void> {
         ProgressDialog pd;
 
@@ -430,32 +400,33 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             pd.setTitle("One Sec...");
             pd.setMessage("Loading...");
             pd.show();
-            Log.i("pre", "pre execute");
+            //Log.i("pre", "pre execute");
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.i("exe", "executing");
+            //Log.i("exe", "executing");
             getGameList();
-            Log.i("gameList", "" + gamesList);
+            //Log.i("gameList", "" + gamesList);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            //gamesAdapter = new OnlineResultGameListAdapter(gamesList, passActivity);
-            //gamesCardListView.setAdapter(gamesAdapter);
-            //Log.i("RecyclerView", "setting adapter");
-            //if (gamesAdapter.getItemCount() == 0) {
-            if (gamesList!=null){
+            if (downloadGame!=null){
+                /*if(isScanContinuous){
+
+                }*/
                 gamesCardListView.setVisibility(View.VISIBLE);
                 noResultTextView.setVisibility(View.GONE);
-                game = gamesList.get(0);
                 createDisplayUIs();
             } else {
                 gamesCardListView.setVisibility(View.GONE);
                 noResultTextView.setVisibility(View.VISIBLE);
+                Intent intent = new Intent(BarcodeResultActivity.this, SearchKeywordActivity.class);
+                startActivity(intent);
+                finish();
             }
 
             if (pd != null) {
@@ -464,19 +435,20 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        //dataSource.close();
-        Log.i("database operation", "db close");
-        super.onDestroy();
-    }
-
+    /**
+     * Launch contact picker for user to pick a contact.
+     * @param view
+     */
     public void doLaunchContactPicker(View view) {
         Intent contactPickerIntent = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
         startActivityForResult(contactPickerIntent, CONTACT_PICKER_RESULT);
     }
 
+    /**
+     * Get contact from contact DB by contact id.
+     * @param id Contact id.
+     */
     public void getContact(String id){
         if(id.equals("")){
             // get contact by the contactId from SQLite database
@@ -572,7 +544,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
                     String id = result.getLastPathSegment();
                     contactId = Integer.parseInt(id);
                     getContact(id);
-                    game.setContactId(contactId);
+                    downloadGame.setContactId(contactId);
                     break;
             }
         } else {

@@ -4,41 +4,48 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!--<cn.trinea.android.view.autoscrollviewpager.AutoScrollViewPager
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/homeSlider"/>-->
-    <LinearLayout
+    <!--<LinearLayout
+        android:id="@+id/noGameInDataBaseLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:id="@+id/noGameInDataBaseLinearLayout">
+        android:orientation="horizontal">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/no_game_in_database_please_use_text"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
+
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_camera"
-            android:background="@color/ColorPrimaryDark"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"/>
+            android:layout_marginRight="5dp"
+            android:background="@color/ColorPrimaryDark"
+            android:src="@drawable/ic_camera" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/append_please_use_no_game_in_database"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textStyle="bold"/>
-    </LinearLayout>
-    <android.support.v4.view.ViewPager
+            android:textStyle="bold" />
+    </LinearLayout>-->
+    <!--<android.support.v4.view.ViewPager
+        android:id="@+id/homeSlider"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/homeSlider"/>
-
-
-
-
+        android:layout_height="160dp"
+        android:layout_gravity="center"/>-->
+    <com.itgarage.harvey.gamecollections.tabs.SlidingTabLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tabs"
+        android:elevation="2dp"
+        android:background="@color/ColorPrimary"/>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/tabPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 </LinearLayout>
