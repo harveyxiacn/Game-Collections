@@ -3,10 +3,10 @@ package com.itgarage.harvey.gamecollections.adapters;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -70,6 +70,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         Game game = gamesList.get(position);
         this.holder = holder;
         this.adapter = this;
+        holder.gameIdTv.setText(String.valueOf(game.getId()));
         // bind title text view with the game title
         holder.titleTextView.setText(game.getTitle());
         // bind platform text view with the game platform
@@ -88,6 +89,8 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         // bind image view with the medium image url
         mediumImage = game.getMediumImage();
         holder.imageView.setImageFromUri(mediumImage);
+        holder.favourite.setChecked(game.getFavourite()==1);
+        holder.wish.setChecked(game.getWish()==1);
         updateVisibilityByLayoutChange(isGridLayout);
         holder.gamesList = gamesList;
     }
@@ -104,10 +107,12 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         protected SpearImageView imageView;
         protected TextView titleTextView, platformTextView;
         protected RatingBar gameRatingSmall;
+        TextView gameIdTv;
         Activity activity;
-
+        public static final String GAME_ID_EXTRA = "game id";
         static final String TAG_VIEW = "TAG_VIEW";
         List<Game> gamesList;
+        CheckBox favourite, wish;
 
         public GameListViewHolder(View view, final Activity activity) {
             super(view);
@@ -125,6 +130,11 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             platformTextView = (TextView) view.findViewById(R.id.textViewGamePlatform);
             gameRatingSmall = (RatingBar) view.findViewById(R.id.gameRatingBarSmall);
             gameRatingSmall.setVisibility(View.VISIBLE);
+
+            gameIdTv = (TextView) view.findViewById(R.id.gameId);
+
+            favourite = (CheckBox) view.findViewById(R.id.favouriteCheckBox);
+            wish = (CheckBox) view.findViewById(R.id.wishCheckBox);
         }
 
         @Override
@@ -133,8 +143,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
             if (v.getTag().equals(TAG_VIEW)) {
                 if (activity.getClass() == NaviDrawerActivity.class) {
                     Intent intent = new Intent(activity, GameDetailActivity.class);
-                    intent.putExtra("game position", getPosition());
-                    Log.i("position", "" + getPosition());
+                    intent.putExtra(GAME_ID_EXTRA, gameIdTv.getText());
                     activity.startActivity(intent);
                 }
             }

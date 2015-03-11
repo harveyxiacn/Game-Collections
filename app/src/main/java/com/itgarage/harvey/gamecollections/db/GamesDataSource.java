@@ -418,6 +418,62 @@ public class GamesDataSource {
     }
 
     /**
+     * Local search favourite game by keyword of title
+     * @param queryText Title keywords
+     * @return game if found, null if not found
+     */
+    public List<Game> searchKeywordFavourite(String queryText){
+        Cursor cursor = db.rawQuery("SELECT * FROM "+MyDBHandler.TABLE_GAMES+" WHERE " + MyDBHandler.COLUMN_FAVOURITE + " = 1 AND "+MyDBHandler.COLUMN_GAME_TITLE+" LIKE '%"+queryText+"%'", null);
+        int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
+        int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);
+        int genreColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_GENRE);
+        int platformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PLATFORM);
+        int hardwarePlatformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM);
+        int manufacturerColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MANUFACTURER);
+        int editionColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_EDITION);
+        int publicationDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE);
+        int releaseDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RELEASE_DATE);
+        int smallImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_SMALL_IMAGE);
+        int mediumImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE);
+        int largeImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_LARGE_IMAGE);
+        int ratingColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RATING);
+        int upcCodeColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_UPC_CODE);
+        int contactIdColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_CONTACT_ID);
+        int favouriteColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_FAVOURITE);
+        int wishColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_WISH);
+
+        cursor.moveToFirst();
+        ArrayList<Game> gamesList = new ArrayList<Game>();
+        if ((cursor.getCount() > 0)) {
+            do {
+                int id = cursor.getInt(idColumn);
+                String title = cursor.getString(titleColumn);
+                String genre = cursor.getString(genreColumn);
+                String platform = cursor.getString(platformColumn);
+                String hardwarePlatform = cursor.getString(hardwarePlatformColumn);
+                String manufacturer = cursor.getString(manufacturerColumn);
+                String edition = cursor.getString(editionColumn);
+                String publicationDate = cursor.getString(publicationDateColumn);
+                String releaseDate = cursor.getString(releaseDateColumn);
+                String smallImage = cursor.getString(smallImageColumn);
+                String mediumImage = cursor.getString(mediumImageColumn);
+                String largeImage = cursor.getString(largeImageColumn);
+                int rating = cursor.getInt(ratingColumn);
+                String upcCode = cursor.getString(upcCodeColumn);
+                int contactId = cursor.getInt(contactIdColumn);
+                int favourite = cursor.getInt(favouriteColumn);
+                int wish = cursor.getInt(wishColumn);
+                Game game = new Game(id, title, platform, genre, hardwarePlatform, edition, publicationDate, releaseDate, manufacturer, smallImage, mediumImage, largeImage, rating, upcCode, contactId, favourite, wish);
+                gamesList.add(game);
+            } while (cursor.moveToNext());
+            cursor.close();
+        } else {
+            gamesList = null;
+        }
+        return gamesList;
+    }
+
+    /**
      * Fetch all lend games from DB.
      * @return ArrayList contain games if found, null if not found.
      */
@@ -476,6 +532,62 @@ public class GamesDataSource {
     }
 
     /**
+     * Local search lend game by keyword of title
+     * @param queryText Title keywords
+     * @return game if found, null if not found
+     */
+    public List<Game> searchKeywordLend(String queryText){
+        Cursor cursor = db.rawQuery("SELECT * FROM "+MyDBHandler.TABLE_GAMES+" WHERE " + MyDBHandler.COLUMN_CONTACT_ID + " > -1 AND "+MyDBHandler.COLUMN_GAME_TITLE+" LIKE '%"+queryText+"%'", null);
+        int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
+        int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);
+        int genreColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_GENRE);
+        int platformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PLATFORM);
+        int hardwarePlatformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM);
+        int manufacturerColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MANUFACTURER);
+        int editionColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_EDITION);
+        int publicationDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE);
+        int releaseDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RELEASE_DATE);
+        int smallImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_SMALL_IMAGE);
+        int mediumImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE);
+        int largeImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_LARGE_IMAGE);
+        int ratingColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RATING);
+        int upcCodeColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_UPC_CODE);
+        int contactIdColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_CONTACT_ID);
+        int favouriteColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_FAVOURITE);
+        int wishColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_WISH);
+
+        cursor.moveToFirst();
+        ArrayList<Game> gamesList = new ArrayList<Game>();
+        if ((cursor.getCount() > 0)) {
+            do {
+                int id = cursor.getInt(idColumn);
+                String title = cursor.getString(titleColumn);
+                String genre = cursor.getString(genreColumn);
+                String platform = cursor.getString(platformColumn);
+                String hardwarePlatform = cursor.getString(hardwarePlatformColumn);
+                String manufacturer = cursor.getString(manufacturerColumn);
+                String edition = cursor.getString(editionColumn);
+                String publicationDate = cursor.getString(publicationDateColumn);
+                String releaseDate = cursor.getString(releaseDateColumn);
+                String smallImage = cursor.getString(smallImageColumn);
+                String mediumImage = cursor.getString(mediumImageColumn);
+                String largeImage = cursor.getString(largeImageColumn);
+                int rating = cursor.getInt(ratingColumn);
+                String upcCode = cursor.getString(upcCodeColumn);
+                int contactId = cursor.getInt(contactIdColumn);
+                int favourite = cursor.getInt(favouriteColumn);
+                int wish = cursor.getInt(wishColumn);
+                Game game = new Game(id, title, platform, genre, hardwarePlatform, edition, publicationDate, releaseDate, manufacturer, smallImage, mediumImage, largeImage, rating, upcCode, contactId, favourite, wish);
+                gamesList.add(game);
+            } while (cursor.moveToNext());
+            cursor.close();
+        } else {
+            gamesList = null;
+        }
+        return gamesList;
+    }
+
+    /**
      * Fetch all wish games from DB.
      * @return ArrayList contain games if found, null if not found.
      */
@@ -504,6 +616,62 @@ public class GamesDataSource {
 
         ArrayList<Game> gamesList = new ArrayList<Game>();
 
+        if ((cursor.getCount() > 0)) {
+            do {
+                int id = cursor.getInt(idColumn);
+                String title = cursor.getString(titleColumn);
+                String genre = cursor.getString(genreColumn);
+                String platform = cursor.getString(platformColumn);
+                String hardwarePlatform = cursor.getString(hardwarePlatformColumn);
+                String manufacturer = cursor.getString(manufacturerColumn);
+                String edition = cursor.getString(editionColumn);
+                String publicationDate = cursor.getString(publicationDateColumn);
+                String releaseDate = cursor.getString(releaseDateColumn);
+                String smallImage = cursor.getString(smallImageColumn);
+                String mediumImage = cursor.getString(mediumImageColumn);
+                String largeImage = cursor.getString(largeImageColumn);
+                int rating = cursor.getInt(ratingColumn);
+                String upcCode = cursor.getString(upcCodeColumn);
+                int contactId = cursor.getInt(contactIdColumn);
+                int favourite = cursor.getInt(favouriteColumn);
+                int wish = cursor.getInt(wishColumn);
+                Game game = new Game(id, title, platform, genre, hardwarePlatform, edition, publicationDate, releaseDate, manufacturer, smallImage, mediumImage, largeImage, rating, upcCode, contactId, favourite, wish);
+                gamesList.add(game);
+            } while (cursor.moveToNext());
+            cursor.close();
+        } else {
+            gamesList = null;
+        }
+        return gamesList;
+    }
+
+    /**
+     * Local search wish game by keyword of title
+     * @param queryText Title keywords
+     * @return game if found, null if not found
+     */
+    public List<Game> searchKeywordWish(String queryText){
+        Cursor cursor = db.rawQuery("SELECT * FROM "+MyDBHandler.TABLE_GAMES+" WHERE " + MyDBHandler.COLUMN_WISH + " = 1 AND "+MyDBHandler.COLUMN_GAME_TITLE+" LIKE '%"+queryText+"%'", null);
+        int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
+        int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);
+        int genreColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_GENRE);
+        int platformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PLATFORM);
+        int hardwarePlatformColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM);
+        int manufacturerColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MANUFACTURER);
+        int editionColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_EDITION);
+        int publicationDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE);
+        int releaseDateColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RELEASE_DATE);
+        int smallImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_SMALL_IMAGE);
+        int mediumImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE);
+        int largeImageColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_LARGE_IMAGE);
+        int ratingColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_RATING);
+        int upcCodeColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_UPC_CODE);
+        int contactIdColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_CONTACT_ID);
+        int favouriteColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_FAVOURITE);
+        int wishColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_WISH);
+
+        cursor.moveToFirst();
+        ArrayList<Game> gamesList = new ArrayList<Game>();
         if ((cursor.getCount() > 0)) {
             do {
                 int id = cursor.getInt(idColumn);

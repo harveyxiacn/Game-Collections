@@ -84,7 +84,6 @@ public class GamesFragment extends Fragment implements View.OnClickListener{
         }else {
             changeUIsWhenDataSetChange(true);
         }
-        createGameListFloatingActionButton();
         return rootView;
     }
 
@@ -105,61 +104,6 @@ public class GamesFragment extends Fragment implements View.OnClickListener{
         }
     }
 
-    /**
-     * Create floating action button.
-     */
-    public void createGameListFloatingActionButton(){
-        ImageView floatingActionButtonIcon = new ImageView(naviDrawerActivity);
-        floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
-        // Create a button to attach the menu:
-        gameListActionButton = new FloatingActionButton.Builder(naviDrawerActivity)
-                .setContentView(floatingActionButtonIcon)
-                .setBackgroundDrawable(R.drawable.selector_button_cyan)
-                .build();
-        // Create menu items:
-        itemBuilder = new SubActionButton.Builder(naviDrawerActivity);
-        itemBuilder.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.selector_button_cyan));
-
-        itemLayoutChangeIcon = new ImageView(naviDrawerActivity);
-        itemLayoutChangeIcon.setImageResource(R.drawable.ic_layout_change);
-        layoutChangeButton = itemBuilder.setContentView(itemLayoutChangeIcon).build();
-        layoutChangeButton.setOnClickListener(this);
-        layoutChangeButton.setTag(CHANGE_LAYOUT);
-
-        itemSortByTitletIcon = new ImageView(naviDrawerActivity);
-        itemSortByTitletIcon.setImageResource(R.drawable.ic_sort_title);
-        sortByTitleButton = itemBuilder.setContentView(itemSortByTitletIcon).build();
-        sortByTitleButton.setOnClickListener(this);
-        sortByTitleButton.setTag(SORT_TITLE);
-
-        itemSortByPlatformIcon = new ImageView(naviDrawerActivity);
-        itemSortByPlatformIcon.setImageResource(R.drawable.ic_sort_platform);
-        sortByPlatformButton = itemBuilder.setContentView(itemSortByPlatformIcon).build();
-        sortByPlatformButton.setOnClickListener(this);
-        sortByPlatformButton.setTag(SORT_PLATFORM);
-
-        itemSortByRatingIcon = new ImageView(naviDrawerActivity);
-        itemSortByRatingIcon.setImageResource(R.drawable.ic_sort_rating);
-        sortByRatingButton = itemBuilder.setContentView(itemSortByRatingIcon).build();
-        sortByRatingButton.setOnClickListener(this);
-        sortByRatingButton.setTag(SORT_RATING);
-
-        itemSortByFavourtiteIcon = new ImageView(naviDrawerActivity);
-        itemSortByFavourtiteIcon.setImageResource(R.drawable.ic_sort_favourite);
-        sortByFavouriteButton = itemBuilder.setContentView(itemSortByFavourtiteIcon).build();
-        sortByFavouriteButton.setOnClickListener(this);
-        sortByFavouriteButton.setTag(SORT_FAVOURITE);
-
-        // Create the menu with the items:
-        gameListActionMenu = new FloatingActionMenu.Builder(naviDrawerActivity)
-                .addSubActionView(layoutChangeButton)
-                .addSubActionView(sortByTitleButton)
-                .addSubActionView(sortByPlatformButton)
-                .addSubActionView(sortByRatingButton)
-                .addSubActionView(sortByFavouriteButton)
-                .attachTo(gameListActionButton)
-                .build();
-    }
 
     @Override
     public void onAttach(Activity activity) {

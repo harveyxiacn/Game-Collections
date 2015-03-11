@@ -74,14 +74,199 @@ public class Game {
     }
 
     public void setTitle(String title) {
-        if(!title.contains("\n")) {
+        /*filter for remove platform name from title*/
+        if (title.toLowerCase().contains("wiiu")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("wiiu");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("wiiu"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("wiiu");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("wiiu"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("wiiu"));
+        }
+        if (title.toLowerCase().contains("wii")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("wii");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("wii"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("wii");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("wii"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("wii"));
+        }
+        if (title.toLowerCase().contains("xbox")) {
+            Log.i("game title", "contain xbox");
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("xbox");
+                Log.i("game title", "- is infron of platform at "+(platformIndex-hIndex));
+                if (platformIndex - hIndex <= 2) {
+                    Log.i("game title", "- in front of platform "+hIndex+" "+platformIndex);
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, platformIndex);
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("xbox");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("xbox"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("xbox"));
+        }
+        if (title.toLowerCase().contains("playstation")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("playstation");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("playstation"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("playstation");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("playstation"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("playstation"));
+        }
+        if (title.toLowerCase().contains("pc")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("pc");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("pc"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("pc");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("pc"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("pc"));
+        }
+        if (title.toLowerCase().contains("mac")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("mac");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("mac"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("mac");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("mac"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("mac"));
+        }
+        /*filter for title length*/
+        if (!title.contains("\n")) {
             if (title.length() > 20) {
                 Log.i("Title length", "" + title.length());
                 int index = 20;
                 do {
                     index--;
                 } while (title.charAt(index) != ' ');
-                String preSpaceTitle = title.substring(0, index - 1);
+                String preSpaceTitle = title.substring(0, index);
                 String postSpaceTitle = title.substring(index + 1);
                 title = preSpaceTitle + "\n" + postSpaceTitle;
                 Log.i("New title", title);

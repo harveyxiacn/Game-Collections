@@ -10,7 +10,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -18,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -26,29 +26,17 @@ import com.itgarage.harvey.gamecollections.adapters.DrawerListAdapter;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncClientManager;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.fragments.HomeFragment;
-import com.itgarage.harvey.gamecollections.fragments.SettingsFragment;
 import com.itgarage.harvey.gamecollections.models.DrawerListItems;
 import com.itgarage.harvey.gamecollections.models.Game;
+import com.itgarage.harvey.gamecollections.utils.NetworkStatus;
 
 
 public class NaviDrawerActivity extends ActionBarActivity{
 
     private Toolbar toolbar;
-    private SearchView mSearchView;
 
-    private String username;
-    //private String EMAIL = "harvey1991cn@gmail.com";
-    private String PROFILE;
-    private String FB_OR_GOOGLE;
-    private String[] ITEM_NAMES;
-    private int[] ITEM_ICONS;
-
-    private RecyclerView mRecyclerView;
     public DrawerListAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private DrawerLayout mDrawer;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private FragmentManager fragmentManager;
     private CharSequence mTitle;
 
     private GamesDataSource dataSource;
@@ -56,15 +44,12 @@ public class NaviDrawerActivity extends ActionBarActivity{
     public final static String BARCODE_SCAN_RESULT = "Barcode Scan Result";
     public final static String BARCODE_PASS = "pass barcode to game detail";
     public final static String TOOL_BAR_TITLE_SAVED_TAG = "Tool Bar Title Saved";
-    public final static String FRAGMENT_ID_SAVED_TAG = "Fragment id Saved";
     public static String CURRENT_FRAGMENT = "";
     public static String CURRENT_TAB = "";
-    public static boolean LOCAL_GAME = false;
-
-    public static final String SCAN_CONTINUOUS = "scan continuous";
-    boolean isScanContinuous = false;
 
     SharedPreferences sharedPreferences;
+
+    final String TAG = "Navi";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +67,7 @@ public class NaviDrawerActivity extends ActionBarActivity{
             Log.i("toolbar", "get toolbar title:"+toolbar.getTitle());*/
         }else {
             // set default fragment to home page
-            fragmentManager = getSupportFragmentManager();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
             mTitle = getString(R.string.home_page_text);
             getSupportActionBar().setTitle(mTitle);
@@ -91,19 +76,26 @@ public class NaviDrawerActivity extends ActionBarActivity{
         }
 
         // get drawer list items' names and icons from DrawerListItems
-        ITEM_NAMES = DrawerListItems.ITEM_NAMES;
-        ITEM_ICONS = DrawerListItems.ITEM_ICONS;
+        String[] ITEM_NAMES;
+        int[] ITEM_ICONS;
+        if(NetworkStatus.isNetworkAvailable(this)) {
+            ITEM_NAMES = DrawerListItems.ITEM_NAMES_ONLINE;
+            ITEM_ICONS = DrawerListItems.ITEM_ICONS_ONLINE;
+        }else {
+            ITEM_NAMES = DrawerListItems.ITEM_NAMES_OFFLINE;
+            ITEM_ICONS = DrawerListItems.ITEM_ICONS_OFFLINE;
+        }
         // setup recyclerview of drawer layout
-        mRecyclerView = (RecyclerView) findViewById(R.id.drawer_list);
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.drawer_list);
         mRecyclerView.setHasFixedSize(true);
         // get saved shred preferences
         sharedPreferences = getSharedPreferences("userInfo", MODE_PRIVATE);
         // get saved username
-        username = sharedPreferences.getString("username", "");
+        String username = sharedPreferences.getString("username", "");
         // get saved profile id to get profile image
-        PROFILE = sharedPreferences.getString("profileId", "");
+        String PROFILE = sharedPreferences.getString("profileId", "");
         // get save status that describes login with facebook or google
-        FB_OR_GOOGLE = sharedPreferences.getString("is fb or google", "");
+        String FB_OR_GOOGLE = sharedPreferences.getString("is fb or google", "");
         // set up the adapter of Drawer list
         mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, username, PROFILE, FB_OR_GOOGLE, NaviDrawerActivity.this, NaviDrawerActivity.this);
         mRecyclerView.setAdapter(mAdapter);
@@ -120,26 +112,27 @@ public class NaviDrawerActivity extends ActionBarActivity{
         mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-                View child = recyclerView.findChildViewUnder(motionEvent.getX(),motionEvent.getY());
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
 
-                if(child!=null && mGestureDetector.onTouchEvent(motionEvent)){
+                if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
                     mDrawer.closeDrawers();
                     int position = recyclerView.getChildPosition(child);
                     FragmentManager fragmentManager = getSupportFragmentManager();
-                    if(position==1){// get home page fragment
+                    if (position == 1) {// get home page fragment
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
                         CURRENT_FRAGMENT = "home";
-                        mSearchView.setVisibility(View.GONE);
-                    }else if(position==2){// start online keyword search activity
+                    } else if (position == 2) {// start online keyword search activity
                         Intent intent = new Intent(NaviDrawerActivity.this, SearchKeywordActivity.class);
                         startActivity(intent);
-                    }else if(position==3){// get setting fragment
+                        /*toolbar.setTitle(mTitle);
+                        fragmentManager.beginTransaction().replace(R.id.fragment_container, SearchFragment.newInstance()).commit();
+                        CURRENT_FRAGMENT = "search";*/
+                    }/* else if (position == 3) {// get setting fragment
                         toolbar.setTitle(mTitle);
                         fragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment.newInstance()).commit();
                         CURRENT_FRAGMENT = "settings";
-                        mSearchView.setVisibility(View.GONE);
-                    }
+                    }*/
                     return true;
                 }
                 return false;
@@ -151,12 +144,12 @@ public class NaviDrawerActivity extends ActionBarActivity{
             }
         });
         // set up layout manager of drawer list recycler view
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         // get drawer layout instance
         mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         // set up toggle
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.drawer_open, R.string.drawer_close){
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.drawer_open, R.string.drawer_close) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -183,33 +176,6 @@ public class NaviDrawerActivity extends ActionBarActivity{
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_navi_drawer, menu);
-
-        /*SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        final MenuItem searchActionBarItem = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(searchActionBarItem);
-        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        mSearchView.setIconifiedByDefault(true);
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                searchActionBarItem.collapseActionView();
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                *//*List<Game> gamesResult = dataSource.searchKeyword(s);
-                if(s.isEmpty())
-                    gamesResult = dataSource.getAllGames();
-                switch (CURRENT_TAB) {
-                    case "All":
-                        AllGameTab.gamesAdapter.updateList(gamesResult);
-                        break;
-                }*//*
-
-                return false;
-            }
-        });*/
         return true;
     }
 
@@ -222,7 +188,6 @@ public class NaviDrawerActivity extends ActionBarActivity{
 
         // Camera button to start barcode scanner and go to result activity
         if(id == R.id.action_camera){
-            isScanContinuous = false;
             IntentIntegrator integrator = new IntentIntegrator(this);
             integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
             integrator.initiateScan();
@@ -244,15 +209,17 @@ public class NaviDrawerActivity extends ActionBarActivity{
                 Log.d("code", resultStr);
                 Game game = dataSource.getGameByUPC(resultStr);
                 if (game == null) {// not found in local DB, search on Amazon
-                    Intent intent = new Intent(this, BarcodeResultActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString(BARCODE_SCAN_RESULT, resultStr);
-                    bundle.putString("operation", "Barcode Scan");
-                    if(isScanContinuous){
-                        bundle.putString(SCAN_CONTINUOUS, "true");
+                    if(NetworkStatus.isNetworkAvailable(this)) {
+                        Intent intent = new Intent(this, BarcodeResultActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString(BARCODE_SCAN_RESULT, resultStr);
+                        bundle.putString("operation", "Barcode Scan");
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                    }else {
+                        Toast.makeText(this, "Can not find the game in local database. You do not connect to Internet so " +
+                                "you can not search it online.", Toast.LENGTH_SHORT).show();
                     }
-                    intent.putExtras(bundle);
-                    startActivity(intent);
                 } else {// found in local DB, show game detail
                     Intent intent = new Intent(this, GameDetailActivity.class);
                     intent.putExtra(BARCODE_PASS, resultStr);
@@ -305,13 +272,15 @@ public class NaviDrawerActivity extends ActionBarActivity{
     @Override
     protected void onDestroy() {
         dataSource.close();
-        //Log.i("Navi", "onDestroy");
+        //Log.i(TAG, "onDestroy");
         super.onDestroy();
     }
 
+
+
     @Override
     protected void onResume() {
-        Log.i("Navi", "onResume");
+        Log.i(TAG, "onResume");
         /*username = sharedPreferences.getString("username", "");
         PROFILE = sharedPreferences.getString("profileId", "");
         mAdapter.update(username, PROFILE);*/
@@ -321,12 +290,23 @@ public class NaviDrawerActivity extends ActionBarActivity{
 
     @Override
     protected void onPause() {
-        //Log.i("Navi", "onPause");
+        //Log.i(TAG, "onPause");
         super.onPause();
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    public void finish() {
+        super.finish();
+        SharedPreferences preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(LoginActivity.LOGIN_ACTIVITY_KEY, false);
+        editor.apply();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop");
+
     }
 }

@@ -164,9 +164,31 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
             GamesDataSource dataSource = new GamesDataSource(holder.activity);
             dataSource.open();
             List<Game> gameList = dataSource.getAllGames();
+            List<Game> favouriteList = dataSource.getAllFavouriteGames();
+            List<Game> wishList = dataSource.getAllWishGames();
+            List<Game> lendList = dataSource.getAllLendGames();
             dataSource.close();
             // calculate how many games are in DB
-            holder.allGameTotalTv.setText(holder.allGameTotalTv.getText()+String.valueOf(gameList.size()));
+            if(gameList == null){
+                holder.allGameTotalTv.setText(holder.allGameTotalTv.getText()+"\t\t"+String.valueOf(0));
+            }else {
+                holder.allGameTotalTv.setText(holder.allGameTotalTv.getText() + "\t\t" + String.valueOf(gameList.size()));
+            }
+            if(favouriteList == null){
+                holder.favouriteGameTotalTv.setText(holder.favouriteGameTotalTv.getText()+"\t"+String.valueOf(0));
+            }else {
+                holder.favouriteGameTotalTv.setText(holder.favouriteGameTotalTv.getText() + "\t" + String.valueOf(favouriteList.size()));
+            }
+            if(wishList == null){
+                holder.wishGameTotalTv.setText(holder.wishGameTotalTv.getText()+"\t"+String.valueOf(0));
+            }else {
+                holder.wishGameTotalTv.setText(holder.wishGameTotalTv.getText() + "\t" + String.valueOf(wishList.size()));
+            }
+            if(lendList == null) {
+                holder.lendGameTotalTv.setText(holder.lendGameTotalTv.getText() + "\t" + String.valueOf(0));
+            }else {
+                holder.lendGameTotalTv.setText(holder.lendGameTotalTv.getText() + "\t" + String.valueOf(lendList.size()));
+            }
         }
     }
 

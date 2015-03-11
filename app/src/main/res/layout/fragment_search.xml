@@ -3,9 +3,38 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/SearchInputLayout"
+        android:padding="10dp"
+        android:orientation="horizontal">
+
+        <android.support.v7.widget.SearchView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/keyWordInput"/>
+        <!--<ImageButton
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/dark48x_scanner"
+            android:id="@+id/cameraScan"
+            android:contentDescription="Scan" />-->
+    </LinearLayout>
+
     <TextView
+        android:id="@+id/noResultSearchTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/search_page_text"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+        android:layout_gravity="center_horizontal"
+        android:text="@string/no_result_from_searching_text"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:padding="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rvContainer"
+        android:orientation="vertical"
+        android:padding="10dp"/>
 </LinearLayout>

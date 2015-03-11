@@ -7,8 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,15 +41,18 @@ import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncClientManager;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 import com.itgarage.harvey.gamecollections.models.User;
+import com.itgarage.harvey.gamecollections.utils.NetworkStatus;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class LoginActivity extends Activity implements Session.StatusCallback, ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
 
 
     SharedPreferences preferences;
     LoginButton facebookLoginButton;
-    Button appStart;
+    Button appStart, connectMobileInternet, connectWIFIInternet;
     TextView welcomeTv;
     static final String TAG = "LoginActivity";
     private UiLifecycleHelper uiHelper;
@@ -69,6 +77,11 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
     SignInButton googleLoginButton;
     Button googleLogoutButton;
     public String googleToken;
+    
+    static final String USERNAME_KEY = "username";
+    static final String PROFILE_ID_KEY = "profileId";
+    static final String IS_FB_OR_GOOGLE = "is fb or google";
+    static final String LOGIN_ACTIVITY_KEY = "login activity";
 
     private static final int DIALOG_PLAY_SERVICES_ERROR = 0;
 
@@ -78,6 +91,23 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
         setContentView(R.layout.activity_login);
 
         preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(LOGIN_ACTIVITY_KEY, true);
+        editor.apply();
+
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.itgarage.harvey.gamecollections",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
         // AWS client
         CognitoSyncClientManager.init(this);
         // Google
@@ -89,22 +119,43 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
         // common
         welcomeTv = (TextView) findViewById(R.id.welcomeTextView);
         appStart = (Button) findViewById(R.id.btn_app_start);
+        // Start app button
+        appStart.setOnClickListener(this);
+        connectMobileInternet = (Button) findViewById(R.id.btn_connect_mobile);
+        connectMobileInternet.setOnClickListener(this);
+        connectWIFIInternet = (Button) findViewById(R.id.btn_connect_wifi);
+        connectWIFIInternet.setOnClickListener(this);
         // Facebook
         uiHelper = new UiLifecycleHelper(this, this);
         uiHelper.onCreate(savedInstanceState);
         facebookLoginButton = (LoginButton) findViewById(R.id.btn_facebook_login);
+        facebookLoginButton.setOnClickListener(this);
         // update UIs
-        String fb_or_google = preferences.getString("is fb or google", "");
+        String fb_or_google = preferences.getString(IS_FB_OR_GOOGLE, "");
         //Log.i(TAG, fb_or_google);
         if(!mGoogleApiClient.isConnected()){
             fb_or_google = "";
         }
-        updateButtonsVisibilityOnCreateOrResume(fb_or_google);
+        if(!NetworkStatus.isNetworkAvailable(this)){
+            facebookLoginButton.setVisibility(View.GONE);
+            googleLoginButton.setVisibility(View.GONE);
+            welcomeTv.setText("You don't connect to Internet, please check network, quit and restart the app again or use offline mode.");
+            appStart.setText("Use Offline Mode");
+            appStart.setVisibility(View.VISIBLE);
+            connectMobileInternet.setVisibility(View.VISIBLE);
+            connectWIFIInternet.setVisibility(View.VISIBLE);
+        }else {
+            updateButtonsVisibilityOnCreateOrResume(fb_or_google);
+            connectMobileInternet.setVisibility(View.GONE);
+            connectWIFIInternet.setVisibility(View.GONE);
+        }
         // Start app button
         appStart.setOnClickListener(this);
+
     }
 
     private void updateButtonsVisibilityOnCreateOrResume(String fb_or_google) {
+        appStart.setText("App start");
         switch (fb_or_google) {
             case "facebook":
                 final Session session = Session
@@ -116,7 +167,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
                 googleLogoutButton.setVisibility(View.GONE);
                 appStart.setVisibility(View.VISIBLE);
                 appStart.setBackgroundColor(getResources().getColor(R.color.ColorFb));
-                welcomeTv.setText("Welcome " + preferences.getString("username", ""));
+                welcomeTv.setText("Welcome " + preferences.getString(USERNAME_KEY, ""));
                 break;
             case "google":
                 facebookLoginButton.setVisibility(View.GONE);
@@ -124,7 +175,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
                 googleLogoutButton.setVisibility(View.VISIBLE);
                 appStart.setVisibility(View.VISIBLE);
                 appStart.setBackgroundColor(getResources().getColor(R.color.ColorGp));
-                welcomeTv.setText("Welcome " + preferences.getString("username", ""));
+                welcomeTv.setText("Welcome " + preferences.getString(USERNAME_KEY, ""));
                 break;
             case "":
                 facebookLoginButton.setVisibility(View.VISIBLE);
@@ -204,14 +255,14 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
     @Override
     public void onResume() {
         super.onResume();
-/*        final Session session = Session
-                .openActiveSessionFromCache(this);
-        if (session != null) {
-            setFacebookSession(session);
-        }*/
         uiHelper.onResume();
-        //Log.i(TAG, "onResume " + preferences.getString("is fb or google", ""));
-        updateButtonsVisibilityOnCreateOrResume(preferences.getString("is fb or google", ""));
+        //Log.i(TAG, "onResume " + preferences.getString(IS_FB_OR_GOOGLE, ""));
+        //updateButtonsVisibilityOnCreateOrResume(preferences.getString(IS_FB_OR_GOOGLE, ""));
+        if(NetworkStatus.isNetworkAvailable(this)){
+            connectMobileInternet.setVisibility(View.GONE);
+            connectWIFIInternet.setVisibility(View.GONE);
+            updateButtonsVisibilityOnCreateOrResume(preferences.getString(IS_FB_OR_GOOGLE, ""));
+        }
     }
 
     @Override
@@ -292,7 +343,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
             Account[] accounts = accountManager.getAccountsByType(GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
             try {
                 googleToken = GoogleAuthUtil.getToken(getApplicationContext(), accounts[0].name,
-                        "audience:server:client_id:GOOGLE_SERVICE_CLIENT_ID");
+                        "audience:server:client_id:457905976296-1fllhsb87geles3bqli2sueakrp4nbqc.apps.googleusercontent.com");
             } catch (IOException | GoogleAuthException e) {
                 e.printStackTrace();
             }
@@ -349,12 +400,12 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
                 appStart.setVisibility(View.VISIBLE);
                 appStart.setBackgroundColor(getResources().getColor(R.color.ColorFb));
                 welcomeTv.setText("Welcome " + user.getUsername());
-                Toast.makeText(LoginActivity.this,
+                /*Toast.makeText(LoginActivity.this,
                         "Login facebook", Toast.LENGTH_SHORT)
-                        .show();
-                editor.putString("username", user.getUsername());
-                editor.putString("profileId", user.getProfileID());
-                editor.putString("is fb or google", user.getFb_or_google());
+                        .show();*/
+                editor.putString(USERNAME_KEY, user.getUsername());
+                editor.putString(PROFILE_ID_KEY, user.getProfileID());
+                editor.putString(IS_FB_OR_GOOGLE, user.getFb_or_google());
                 editor.apply();
                 break;
             case "google":
@@ -365,16 +416,23 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
                 appStart.setBackgroundColor(getResources().getColor(R.color.ColorGp));
                 welcomeTv.setText("Welcome " + user.getUsername());
 
-                Toast.makeText(LoginActivity.this,
+                /*Toast.makeText(LoginActivity.this,
                         "Login google", Toast.LENGTH_SHORT)
-                        .show();
+                        .show();*/
                 preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                 editor = preferences.edit();
-                editor.putString("username", user.getUsername());
-                editor.putString("profileId", user.getProfileID());
-                editor.putString("is fb or google", user.getFb_or_google());
+                editor.putString(USERNAME_KEY, user.getUsername());
+                editor.putString(PROFILE_ID_KEY, user.getProfileID());
+                editor.putString(IS_FB_OR_GOOGLE, user.getFb_or_google());
                 editor.apply();
                 break;
+        }
+        Log.i(TAG, String.valueOf(preferences.getBoolean(LOGIN_ACTIVITY_KEY, false)));
+        if(preferences.getBoolean(LOGIN_ACTIVITY_KEY, false)) {
+            CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
+            cognitoSyncGames.refreshDatasetMetadata(this);
+            editor.putBoolean(LOGIN_ACTIVITY_KEY, true);
+            editor.apply();
         }
     }
 
@@ -385,14 +443,14 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
         facebookLoginButton.setVisibility(View.VISIBLE);
         googleLogoutButton.setVisibility(View.GONE);
         appStart.setVisibility(View.GONE);
-        Toast.makeText(LoginActivity.this,
+        /*Toast.makeText(LoginActivity.this,
                 "You logged out. " + fb_or_google, Toast.LENGTH_SHORT)
-                .show();
+                .show();*/
         welcomeTv.setText("You are not logged in.");
 
-        editor.putString("username", "");
-        editor.putString("profileId", "");
-        editor.putString("is fb or google", "");
+        editor.putString(USERNAME_KEY, "");
+        editor.putString(PROFILE_ID_KEY, "");
+        editor.putString(IS_FB_OR_GOOGLE, "");
         editor.apply();
     }
 
@@ -417,23 +475,45 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
         if (!mGoogleApiClient.isConnecting()) {
             // We only process button clicks when GoogleApiClient is not transitioning
             // between connected and not connected.
+            SharedPreferences.Editor editor = preferences.edit();
             switch (v.getId()) {
                 case R.id.btn_google_login:
-                    // Signin button clicked
-                    signInWithGplus();
+                    if(NetworkStatus.isNetworkAvailable(this)) {
+                        // Signin button clicked
+                        editor.putBoolean(LOGIN_ACTIVITY_KEY, true);
+                        editor.apply();
+                        signInWithGplus();
+                    }else {
+                        Toast.makeText(this, "You are offline. Please check network.", Toast.LENGTH_SHORT).show();
+                    }
                     break;
                 case R.id.btn_google_logout:
                     // Signout button clicked
-                    Log.i(TAG, "signout google onClick");
                     signOutFromGplus();
                     break;
                 case R.id.btn_app_start:
-                    // Sync the game data
-                    CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
-                    cognitoSyncGames.refreshDatasetMetadata(this);
-                    // start the app, go to home page
-                    /*Intent intent = new Intent(this, NaviDrawerActivity.class);
-                    startActivity(intent);*/
+                    if(NetworkStatus.isNetworkAvailable(this)) {
+                        // Sync the game data
+                        CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
+                        cognitoSyncGames.refreshDatasetMetadata(this);
+                    }else {
+                        Intent intent = new Intent(this, NaviDrawerActivity.class);
+                        startActivity(intent);
+                    }
+                    break;
+                case R.id.btn_facebook_login:
+                    if(NetworkStatus.isNetworkAvailable(this)) {
+                        editor.putBoolean(LOGIN_ACTIVITY_KEY, true);
+                        editor.apply();
+                    }else {
+                        Toast.makeText(this, "You are offline. Please check network.", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.btn_connect_mobile:
+                    startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+                    break;
+                case R.id.btn_connect_wifi:
+                    startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
                     break;
             }
         }
@@ -457,7 +537,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
             Log.i(TAG, "signout google");
             Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             mGoogleApiClient.disconnect();
-            mGoogleApiClient.connect();
+            //mGoogleApiClient.connect();
             signedOutUIsUpdate("google");
         }
     }
@@ -466,5 +546,8 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
     public void finish() {
         super.finish();
         signOutFromGplus();
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(LOGIN_ACTIVITY_KEY, true);
+        editor.apply();
     }
 }

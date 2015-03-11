@@ -15,22 +15,19 @@
         android:layout_below="@+id/tool_bar"
         android:id="@+id/SearchInputLayout"
         android:padding="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="end">
 
-        <EditText
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/keywordInput"
-            android:hint="@string/keyword_input_hint"
-            android:ems="10"
-            android:inputType="text"/>
-        <ImageButton
-            android:id="@+id/btnSearch"
+        <android.support.v7.widget.SearchView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_search_database"
-            android:background="@color/zxing_transparent"
-            android:contentDescription="@string/btn_search_keyword_desc"/>
+            android:id="@+id/keyWordInput"/>
+        <!--<ImageButton
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_camera"
+            android:id="@+id/cameraScan"
+            android:contentDescription="Scan" />-->
         </LinearLayout>
 
     <TextView
@@ -40,14 +37,16 @@
         android:layout_gravity="center_horizontal"
         android:text="@string/no_result_from_searching_text"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_below="@+id/SearchInputLayout"/>
+        android:layout_below="@+id/SearchInputLayout"
+        android:padding="10dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/rvContainer"
         android:orientation="vertical"
-        android:layout_below="@id/SearchInputLayout"/>
+        android:layout_below="@id/SearchInputLayout"
+        android:padding="10dp"/>
 
     <!--<android.support.v7.widget.RecyclerView
         android:id="@+id/gameResultCardList"

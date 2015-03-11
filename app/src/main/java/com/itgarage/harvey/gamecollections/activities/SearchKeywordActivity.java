@@ -2,28 +2,31 @@ package com.itgarage.harvey.gamecollections.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.adapters.OnlineResultGameListAdapter;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemSearchArgs;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
 import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.UrlParameterHandler;
+import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
 
 import org.w3c.dom.NodeList;
@@ -37,13 +40,13 @@ import java.util.Map;
 
 
 public class SearchKeywordActivity extends ActionBarActivity {
-    EditText keywordInput;
-    ImageButton btnSearch;
+    SearchView keywordInput;
     RecyclerView gamesCardListView;
     OnlineResultGameListAdapter gamesAdapter;
     RecyclerView.LayoutManager gamesCardListLayoutManager;
     List<Game> gamesList;
     TextView noResultTextView;
+    GamesDataSource dataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,32 +57,32 @@ public class SearchKeywordActivity extends ActionBarActivity {
         getSupportActionBar().setTitle("Search by keyword");
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        dataSource = new GamesDataSource(this);
         noResultTextView = (TextView) findViewById(R.id.noResultSearchTextView);
         noResultTextView.setVisibility(View.GONE);
 
-        keywordInput = (EditText) findViewById(R.id.keywordInput);
-        ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE))
-                .showSoftInput(keywordInput, InputMethodManager.SHOW_FORCED);
-        keywordInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        keywordInput = (SearchView) findViewById(R.id.keyWordInput);
+        keywordInput.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_DONE){
-                    doSearch();
-                }
+            public boolean onQueryTextSubmit(String s) {
+                doSearch(s);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
                 return false;
             }
         });
-        //keywordInput.requestFocus();
-        //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        btnSearch = (ImageButton) findViewById(R.id.btnSearch);
-        btnSearch.setOnClickListener(new View.OnClickListener() {
+        /*btnScan = (ImageButton) findViewById(R.id.cameraScan);
+        btnScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                doSearch();
+                IntentIntegrator integrator = new IntentIntegrator(SearchKeywordActivity.this);
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+                integrator.initiateScan();
             }
-        });
+        });*/
         gamesList = new ArrayList<>();
         gamesCardListView = new RecyclerView(SearchKeywordActivity.this);
         gamesCardListLayoutManager = new LinearLayoutManager(SearchKeywordActivity.this);
@@ -91,11 +94,11 @@ public class SearchKeywordActivity extends ActionBarActivity {
         container.addView(gamesCardListView);
     }
 
-    private void doSearch(){
+    private void doSearch(String s){
         Log.i("SearchKeyword", "onSearchKeyword");
-        ItemSearchArgs.KEYWORDS = keywordInput.getText().toString();
+        ItemSearchArgs.KEYWORDS = s;
         new SearchAmazonTask().execute();
-        hideKeyboard();
+        //hideKeyboard();
     }
 
     public void hideKeyboard() {
@@ -121,6 +124,9 @@ public class SearchKeywordActivity extends ActionBarActivity {
             Parser parser = new Parser();
             NodeList nodeList = parser.getResponseNodeList(signedUrl);
             if (nodeList != null) {
+                if(gamesList == null){
+                    gamesList = new ArrayList<>();
+                }
                 gamesList.clear();
                 for(int position=0; position<nodeList.getLength(); position++) {
                     Game game = parser.getSearchObject(nodeList, position);
@@ -170,5 +176,55 @@ public class SearchKeywordActivity extends ActionBarActivity {
                 pd.dismiss();
             }
         }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            // Barcode scan result
+            IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (scanResult != null) {
+                String resultStr = scanResult.getContents();
+                Log.d("code", resultStr);
+                dataSource.open();
+                Game game = dataSource.getGameByUPC(resultStr);
+                dataSource.close();
+                if (game == null) {// not found in local DB, search on Amazon
+                    Intent intent = new Intent(this, BarcodeResultActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(NaviDrawerActivity.BARCODE_SCAN_RESULT, resultStr);
+                    bundle.putString("operation", "Barcode Scan");
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                    finish();
+                } else {// found in local DB, show game detail
+                    Intent intent = new Intent(this, GameDetailActivity.class);
+                    intent.putExtra(NaviDrawerActivity.BARCODE_PASS, resultStr);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        } else {
+            // gracefully handle failure
+            Log.w("Debug", "Warning: activity result not ok");
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_navi_drawer, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        // Camera button to start barcode scanner and go to result activity
+        if(id == R.id.action_camera){
+            IntentIntegrator integrator = new IntentIntegrator(this);
+            integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
+            integrator.initiateScan();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

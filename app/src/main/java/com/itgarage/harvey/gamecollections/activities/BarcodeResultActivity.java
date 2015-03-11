@@ -28,6 +28,7 @@ import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.UrlPar
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
+import com.itgarage.harvey.gamecollections.utils.NetworkStatus;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -60,14 +61,13 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     RatingBar gameRating;
     LinearLayout gameAttributesLayout, gameRatingLayout, borrowerInfoLayout;
 
-    SubActionButton addToDBButton, addContactButton, addRatingButton;
-    ImageView itemAddToDBIcon, itemAddContactIcon, itemAddRatingIcon;
+    SubActionButton addToDBButton, addContactButton;
+    ImageView itemAddToDBIcon, itemAddContactIcon;
     SubActionButton.Builder itemBuilder;
     FloatingActionMenu addGameActionMenu;
     FloatingActionButton addGameActionButton;
     private static final String TAG_ADD_TO_DB = "TAG_ADD_TO_DB";
     private static final String TAG_ADD_BORROWER = "TAG_ADD_BORROWER";
-    private static final String TAG_ADD_RATING = "TAG_ADD_RATING";
 
     public Game downloadGame;
     public Context context = this;
@@ -75,8 +75,6 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     List<Game> gamesList;
     TextView noResultTextView;
     Activity passActivity;
-    public static boolean LOCAL_GAME = false;
-    GamesDataSource dataSource;
     String title;
 
     private static final int CONTACT_PICKER_RESULT = 1;
@@ -86,8 +84,6 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     static final String DEBUG_TAG = "DEBUG_TAG";
 
     String operation;
-
-    boolean isScanContinuous = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,8 +105,6 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         operation = extras.getString("operation");
-
-        isScanContinuous = Boolean.parseBoolean(extras.getString(NaviDrawerActivity.SCAN_CONTINUOUS));
 
         if(operation.equals("Keyword Search")){// if start this activity from keyword search
             operationKeywordSearch(extras);
@@ -266,7 +260,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
      */
     public void createGameDetailFloatingActionButtons() {
         ImageView floatingActionButtonIcon = new ImageView(this);
-        floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
+        floatingActionButtonIcon.setImageResource(R.drawable.ic_game);
         // Create a button to attach the menu:
         addGameActionButton = new FloatingActionButton.Builder(this)
                 .setContentView(floatingActionButtonIcon)
@@ -283,7 +277,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         addToDBButton.setTag(TAG_ADD_TO_DB);
         // add/remove contact
         itemAddContactIcon = new ImageView(this);
-        itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
+        itemAddContactIcon.setImageResource(R.drawable.ic_add_contact);
         addContactButton = itemBuilder.setContentView(itemAddContactIcon).build();
         addContactButton.setOnClickListener(this);
         addContactButton.setTag(TAG_ADD_BORROWER);
@@ -338,29 +332,12 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             }
             long insertId = dataSource.addGame(downloadGame);
             if(insertId != -1){
-                CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
-                cognitoSyncGames.addRecord(downloadGame);
+                if(NetworkStatus.isNetworkAvailable(this)) {
+                    CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
+                    cognitoSyncGames.addRecord(downloadGame);
+                }
                 gamesList = dataSource.getAllGames();
                 Toast.makeText(this, "Successfully Add to DB", Toast.LENGTH_SHORT).show();
-                /*if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("games")) {
-                    if (GamesFragment.gamesAdapter != null) {
-                        GamesFragment.gamesAdapter.updateList(gamesList);
-                        GamesFragment.changeUIsWhenDataSetChange(true);
-                    } else {
-                        GamesFragment.gamesAdapter = new GameListAdapter(gamesList, GamesFragment.naviDrawerActivity, false);
-                        GamesFragment.changeUIsWhenDataSetChange(true);
-                    }
-                }else if(NaviDrawerActivity.CURRENT_FRAGMENT.equals("home")) {
-                    if (HomeFragment.imageSlideAdapter != null) {
-                        //Log.i("imageSlideAdapter", "not null, update list");
-                        HomeFragment.imageSlideAdapter.updateList(gamesList);
-                        HomeFragment.changeUIsWhenDataSetChange(true);
-                    } else {
-                        //Log.i("imageSlideAdapter", "null, create, update list");
-                        HomeFragment.imageSlideAdapter = new ImageSlideAdapter(HomeFragment.activity.getContext(), gamesList, HomeFragment.viewPager);
-                        HomeFragment.changeUIsWhenDataSetChange(true);
-                    }
-                }*/
                 finish();
             }
             dataSource.close();
@@ -382,7 +359,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
                 nameTextView.setText("Name");
                 phoneLinearLayout.removeAllViews();
                 emailLinearLayout.removeAllViews();
-                itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
+                itemAddContactIcon.setImageResource(R.drawable.ic_add_contact);
             }
         }
     }
@@ -553,7 +530,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             switch (requestCode) {
                 case CONTACT_PICKER_RESULT:
                     borrowerInfoLayout.setVisibility(View.GONE);
-                    itemAddContactIcon.setImageResource(R.drawable.ic_add_borrower);
+                    itemAddContactIcon.setImageResource(R.drawable.ic_add_contact);
                     break;
             }
         }

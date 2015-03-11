@@ -25,9 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
+import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
 import com.itgarage.harvey.gamecollections.amazon_web_services.CognitoSyncGames;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
+import com.itgarage.harvey.gamecollections.utils.NetworkStatus;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
@@ -80,14 +82,20 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         // set up tool bar
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
-        //getSupportActionBar().setHomeButtonEnabled(true);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // get intent
         Intent intent = getIntent();
         // get passed game id from imageSlideAdapter
         String intentAdapter = intent.getStringExtra("adapter");
         // get passed position from gameListAdapter
-        int postion = intent.getIntExtra("game position", -1);
+        String strId = intent.getStringExtra(GameListAdapter.GameListViewHolder.GAME_ID_EXTRA);
+        int id;
+        if(strId==null) {
+            id = -1;
+        }else {
+            id = Integer.parseInt(strId);
+        }
 
         String intentTitle = intent.getStringExtra("game title");
         // get pass barcode from navigation activity if the barcode exists in DB
@@ -100,13 +108,13 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         // initialize game
         game = null;
         // if start this activity from gameListAdapter
-        if (postion != -1) {
-            game = gameList.get(postion);
+        if (id != -1) {
+            game = dataSource.getGame(id);
         }
         // if start this activity from imageSlideAdapter
         if(intent.getStringExtra("adapter")!=null) {
             if (intent.getStringExtra("adapter").equals("slideAdapter")) {
-                int id = intent.getIntExtra("game id", -1);
+                id = intent.getIntExtra("game id", -1);
                 game = dataSource.getGame(id);
             }
         }
@@ -137,8 +145,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
         gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
         gameAttributesLayout = (LinearLayout) findViewById(R.id.gameAttributesLayout);
-        gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
-        ratingTextView = (TextView) findViewById(R.id.gameRatingText);
+        /*gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
+        ratingTextView = (TextView) findViewById(R.id.gameRatingText);*/
         gameRatingSmall = (RatingBar) findViewById(R.id.gameRatingBarSmall);
         favouriteCheckBox = (CheckBox) findViewById(R.id.favouriteCheckBox);
         favouriteCheckBox.setOnClickListener(this);
@@ -218,10 +226,10 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 releaseDateTextView.setVisibility(View.VISIBLE);
             }
             // set up the editable rating bar
-            gameRatingLayout = (LinearLayout) findViewById(R.id.gameRatingLayout);
+            //gameRatingLayout = (LinearLayout) findViewById(R.id.gameRatingLayout);
 
             int rating = game.getRating();
-            if (rating != -1) {
+            /*if (rating != -1) {
 
                 gameRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
@@ -232,7 +240,18 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 gameRating.setRating((float) rating);
                 gameRatingSmall.setRating((float) rating);
                 gameRatingSmall.setVisibility(View.VISIBLE);
-            }
+            }*/
+            gameRatingSmall.setRating((float) rating);
+            gameRatingSmall.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                @Override
+                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                    game.setRating((int) rating);
+                    dataSource.open();
+                    dataSource.updateGame(game);
+                    dataSource.close();
+                    cognitoSyncGames.updateGame(game);
+                }
+            });
             // set up borrower info layout
             borrowerInfoLayout = (LinearLayout) findViewById(R.id.gameBorrowerInfoLayout);
             contactId = game.getContactId();
@@ -274,7 +293,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
      */
     public void createGameUpdateFloatingActionButtons() {
         ImageView floatingActionButtonIcon = new ImageView(this);
-        floatingActionButtonIcon.setImageResource(R.drawable.ic_action_game);
+        floatingActionButtonIcon.setImageResource(R.drawable.ic_game);
         // Create a button to attach the menu:
         FloatingActionButton updateGameActionButton = new FloatingActionButton.Builder(this)
                 .setContentView(floatingActionButtonIcon)
@@ -294,22 +313,22 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         if (borrowerInfoLayout.getVisibility() == View.VISIBLE)
             itemRemoveContactIcon.setImageResource(R.drawable.ic_remove_contact);
         else {
-            itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
+            itemRemoveContactIcon.setImageResource(R.drawable.ic_add_contact);
         }
         removeContactButton = itemBuilder.setContentView(itemRemoveContactIcon).build();
         removeContactButton.setOnClickListener(this);
         removeContactButton.setTag(DELETE_CONTACT);
         // update rating button
-        itemUpdateRatingIcon = new ImageView(this);
+        /*itemUpdateRatingIcon = new ImageView(this);
         itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
         updateRaitngButton = itemBuilder.setContentView(itemUpdateRatingIcon).build();
         updateRaitngButton.setOnClickListener(this);
-        updateRaitngButton.setTag(UPDATE_RATING);
+        updateRaitngButton.setTag(UPDATE_RATING);*/
         // Create the menu with the items:
         updateGameActionMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(deleteFromDBButton)
                 .addSubActionView(removeContactButton)
-                .addSubActionView(updateRaitngButton)
+                //.addSubActionView(updateRaitngButton)
                 .attachTo(updateGameActionButton)
                 .build();
     }
@@ -317,7 +336,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         /*update the rating of the game*/
-        if (v.getTag().equals(UPDATE_RATING)) {
+        /*if (v.getTag().equals(UPDATE_RATING)) {
             if (gameRatingSmall.getVisibility() == View.VISIBLE) {
                 if (game.getRating() != -1) {
                     //Log.i("rating bar", "show large hide small");
@@ -350,18 +369,20 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 }
                 updateGameActionMenu.close(true);
             }
-        }
+        }*/
         /*delete the contact/borrower*/
         if (v.getTag().equals(DELETE_CONTACT)) {
             if (borrowerInfoLayout.getVisibility() == View.VISIBLE) {
                 //Log.i("contact", "remove");
                 borrowerInfoLayout.setVisibility(View.GONE);
-                itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
+                itemRemoveContactIcon.setImageResource(R.drawable.ic_add_contact);
                 game.setContactId(-1);
                 dataSource.open();
                 dataSource.updateGame(game);
                 dataSource.close();
-                cognitoSyncGames.updateGame(game);
+                if(NetworkStatus.isNetworkAvailable(this)) {
+                    cognitoSyncGames.updateGame(game);
+                }
                 TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
                 nameTextView.setText("Name");
                 phoneLinearLayout.removeAllViews();
@@ -387,7 +408,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                             dialog.dismiss();
                             dataSource.open();
                             dataSource.deleteGame(game.getId());
-                            cognitoSyncGames.deleteRecord(game.getUpcCode());
+                            if (NetworkStatus.isNetworkAvailable(GameDetailActivity.this)) {
+                                cognitoSyncGames.deleteRecord(game.getUpcCode());
+                            }
                             dataSource.close();
                             Toast.makeText(context, game.getTitle() + " deleted.", Toast.LENGTH_SHORT).show();
                             ((GameDetailActivity) context).finish();
@@ -412,7 +435,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             dataSource.open();
             dataSource.updateGame(game);
             dataSource.close();
-            cognitoSyncGames.updateGame(game);
+            if(NetworkStatus.isNetworkAvailable(this)) {
+                cognitoSyncGames.updateGame(game);
+            }
         }
         /*Mark as wish game*/
         if(v.getTag().equals(WISH)){
@@ -424,7 +449,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             dataSource.open();
             dataSource.updateGame(game);
             dataSource.close();
-            cognitoSyncGames.updateGame(game);
+            if(NetworkStatus.isNetworkAvailable(this)) {
+                cognitoSyncGames.updateGame(game);
+            }
         }
     }
 
@@ -593,7 +620,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     dataSource.open();
                     dataSource.updateGame(game);
                     dataSource.close();
-                    cognitoSyncGames.updateGame(game);
+                    if(NetworkStatus.isNetworkAvailable(this)) {
+                        cognitoSyncGames.updateGame(game);
+                    }
                     Toast.makeText(this, "Added contact to this game.", Toast.LENGTH_SHORT).show();
                     break;
             }
@@ -603,7 +632,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             switch (requestCode) {
                 case CONTACT_PICKER_RESULT:
                     borrowerInfoLayout.setVisibility(View.GONE);
-                    itemRemoveContactIcon.setImageResource(R.drawable.ic_add_borrower);
+                    itemRemoveContactIcon.setImageResource(R.drawable.ic_add_contact);
                     break;
             }
         }

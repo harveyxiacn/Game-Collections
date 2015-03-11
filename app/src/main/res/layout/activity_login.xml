@@ -20,7 +20,7 @@
         android:layout_marginTop="47dp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/welcomeTextView"
@@ -53,7 +53,8 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="39dp"
         android:background="@color/ColorGp"
-        android:textColor="@color/ColorTextIcon"/>
+        android:textColor="@color/ColorTextIcon"
+        android:visibility="gone"/>
 
     <Button
         android:layout_width="300dp"
@@ -62,5 +63,28 @@
         android:id="@+id/btn_app_start"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="39dp"
-        android:textColor="@color/ColorTextIcon"/>
+        android:textColor="@color/ColorTextIcon"
+        android:background="@color/ColorPrimaryDark"
+        android:elevation="5dp"/>
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Connect Mobile Internet"
+        android:id="@+id/btn_connect_mobile"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="39dp"
+        android:textColor="@color/ColorTextIcon"
+        android:background="@color/ColorPrimaryDark"
+        android:elevation="5dp"/>
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Connect WIFI Internet"
+        android:id="@+id/btn_connect_wifi"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="39dp"
+        android:textColor="@color/ColorTextIcon"
+        android:background="@color/ColorPrimaryDark"
+        android:elevation="5dp"/>
 </LinearLayout>

@@ -11,14 +11,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.adapters.GameListAdapter;
@@ -26,9 +21,7 @@ import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
 import com.itgarage.harvey.gamecollections.utils.GameSorter;
 import com.itgarage.harvey.gamecollections.utils.SortListener;
-import com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton;
-import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
-import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
+import com.itgarage.harvey.gamecollections.utils.UpdateListListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,24 +29,13 @@ import java.util.List;
 /**
  * Created by harvey on 2015-03-05.
  */
-public class AllGameTab extends Fragment implements SortListener{
+public class AllGameTab extends Fragment implements SortListener, UpdateListListener{
     RecyclerView gamesCardListView;
     GameListAdapter gamesAdapter;
     RecyclerView.LayoutManager gamesCardListLayoutManager;
     RecyclerView.LayoutManager gamesCardGridLayoutManager;
     LinearLayout noResultLinearLayout;
     boolean isGridLayout;
-
-    SubActionButton layoutChangeButton, sortByTitleButton, sortByPlatformButton, sortByRatingButton, sortByFavouriteButton;
-    ImageView itemLayoutChangeIcon, itemSortByTitletIcon, itemSortByPlatformIcon, itemSortByRatingIcon, itemSortByFavourtiteIcon;
-    SubActionButton.Builder itemBuilder;
-    FloatingActionMenu gameListActionMenu;
-    FloatingActionButton gameListActionButton;
-    static final String CHANGE_LAYOUT = "change layout";
-    static final String SORT_TITLE = "sort title";
-    static final String SORT_PLATFORM = "sort platform";
-    static final String SORT_RATING = "sort rating";
-    static final String SORT_FAVOURITE = "sort favourite";
 
     SharedPreferences preferences;
     GamesDataSource dataSource;
@@ -65,7 +47,7 @@ public class AllGameTab extends Fragment implements SortListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        //setHasOptionsMenu(true);
     }
 
     @Override
@@ -116,6 +98,7 @@ public class AllGameTab extends Fragment implements SortListener{
         }else {
             changeUIsWhenDataSetChange(true);
         }
+
         return rootView;
     }
     /**
@@ -148,72 +131,56 @@ public class AllGameTab extends Fragment implements SortListener{
     public void onResume() {
         super.onResume();
         Log.i("All game tab", "onResume");
-        dataSource.open();
-        gamesList = dataSource.getAllGames();
-        dataSource.close();
+        getGameList();
         gamesAdapter.updateList(gamesList);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_game_list, menu);
-        MenuItem switchLayout = menu.findItem(R.id.action_switch_layout);
-        if(isGridLayout){
-            switchLayout.setIcon(R.drawable.listview);
+        if(gamesAdapter.getItemCount()>0){
+            changeUIsWhenDataSetChange(true);
         }else {
-            switchLayout.setIcon(R.drawable.gridview);
+            changeUIsWhenDataSetChange(false);
         }
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_switch_layout:
-                isGridLayout = !isGridLayout;
-                gamesAdapter.setGridLayout(isGridLayout);
-                if(isGridLayout){
-                    gamesCardListView.setLayoutManager(gamesCardGridLayoutManager);
-                    item.setIcon(R.drawable.listview);
-                }else {
-                    gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
-                    item.setIcon(R.drawable.gridview);
-                }
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("isGameListLayout", isGridLayout);
-                editor.apply();
-                break;
-            case R.id.action_sort_title:
-                Toast.makeText(getActivity(), "Sort title", Toast.LENGTH_SHORT).show();
-                onSortByTitle();
-                break;
-            case R.id.action_sort_platform:
-                Toast.makeText(getActivity(), "Sort platform", Toast.LENGTH_SHORT).show();
-                onSortByPlatform();
-                break;
-            case R.id.action_sort_rating:
-                Toast.makeText(getActivity(), "Sort rating", Toast.LENGTH_SHORT).show();
-                onSortByRating();
-                break;
-        }
-        return true;
     }
 
     @Override
     public void onSortByTitle() {
-        gameSorter.sortGamesByTitle(gamesList);
-        gamesAdapter.updateList(gamesList);
+        if(gamesList!=null) {
+            gameSorter.sortGamesByTitle(gamesList);
+            gamesAdapter.updateList(gamesList);
+        }
     }
 
     @Override
     public void onSortByPlatform() {
-        gameSorter.sortGamesByPlatform(gamesList);
-        gamesAdapter.updateList(gamesList);
+        if(gamesList!=null) {
+            gameSorter.sortGamesByPlatform(gamesList);
+            gamesAdapter.updateList(gamesList);
+        }
     }
 
     @Override
     public void onSortByRating() {
-        gameSorter.sortGamesByRating(gamesList);
-        gamesAdapter.updateList(gamesList);
+        if(gamesList!=null) {
+            gameSorter.sortGamesByRating(gamesList);
+            gamesAdapter.updateList(gamesList);
+        }
+    }
+
+    @Override
+    public void updateAdapterList(GamesDataSource dataSource) {
+        gamesAdapter.updateList(dataSource.getAllGames());
+        if(gamesAdapter.getItemCount()>0){
+            gamesCardListView.setVisibility(View.VISIBLE);
+            noResultLinearLayout.setVisibility(View.GONE);
+        }else {
+            gamesCardListView.setVisibility(View.GONE);
+            noResultLinearLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void updateLayoutManager(RecyclerView.LayoutManager layoutManager, boolean isGridLayout) {
+        if(gamesAdapter.getItemCount()>0) {
+            gamesAdapter.setGridLayout(isGridLayout);
+            gamesCardListView.setLayoutManager(layoutManager);
+        }
     }
 }
