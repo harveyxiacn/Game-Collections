@@ -21,6 +21,9 @@ import com.itgarage.harvey.gamecollections.models.Game;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * This class is used to create the items in navigate drawer list.
+ */
 public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;  // Declaring Variable to Understand which View is being worked on
@@ -36,15 +39,14 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     private NaviDrawerActivity activity;
     private String FB_OR_GOOGLE;
     private static final String TAG = "DrawerListAdapter";
+    ViewHolder holder;
+    GamesDataSource dataSource;
+    List<Game> gameList, favouriteList, lendList, wishList;
 
-    // Creating a ViewHolder which extends the RecyclerView View Holder
-    // ViewHolder are used to to store the inflated views in order to recycle them
-
-    public void update(String username, String profile){
-        this.name = username;
-        this.profile = profile;
-        notifyDataSetChanged();
-    }
+    /**
+     * Creating a ViewHolder which extends the RecyclerView View Holder
+     * ViewHolder are used to to store the inflated views in order to recycle them
+     */
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         int Holderid;
@@ -87,7 +89,16 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         }
     }
 
-
+    /**
+     * Constructor for DrawerListAdapter.
+     * @param Titles Array contains titles.
+     * @param Icons Array contains icons.
+     * @param Name User name.
+     * @param Profile Facebook profile id or Google+ profile image URL.
+     * @param FB_OR_GOOGLE Login with Facebook or Google+.
+     * @param passedContext Context passed in.
+     * @param activity The navi activity.
+     */
     public DrawerListAdapter(String Titles[], int Icons[], String Name, String Profile, String FB_OR_GOOGLE, Context passedContext, NaviDrawerActivity activity) { // DrawerListAdapter Constructor with titles and icons parameter
         // titles, icons, name, email, profile_fb pic are passed from the main activity as we
         mNavTitles = Titles;                //have seen earlier
@@ -98,6 +109,13 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         this.context = passedContext;
         this.activity = activity;
         this.FB_OR_GOOGLE = FB_OR_GOOGLE;
+        dataSource = new GamesDataSource(activity);
+        dataSource.open();
+        gameList = dataSource.getAllGames();
+        favouriteList = dataSource.getAllFavouriteGames();
+        wishList = dataSource.getAllWishGames();
+        lendList = dataSource.getAllLendGames();
+        dataSource.close();
         //in adapter
     }
     //Below first we override the method onCreateViewHolder which is called when the ViewHolder is
@@ -136,6 +154,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
     // which view type is being created 1 for item row
     @Override
     public void onBindViewHolder(DrawerListAdapter.ViewHolder holder, int position) {
+        this.holder = holder;
         if (holder.Holderid == 1) {                              // as the list view is going to be called after the header view so we decrement the
             // position by 1 and pass it to the holder while setting the text and image
             holder.textView.setText(mNavTitles[position - 1]); // Setting the Text with the array of our Titles
@@ -161,33 +180,32 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
                     break;
             }
             holder.Name.setText(name);
-            GamesDataSource dataSource = new GamesDataSource(holder.activity);
             dataSource.open();
-            List<Game> gameList = dataSource.getAllGames();
-            List<Game> favouriteList = dataSource.getAllFavouriteGames();
-            List<Game> wishList = dataSource.getAllWishGames();
-            List<Game> lendList = dataSource.getAllLendGames();
+            gameList = dataSource.getAllGames();
+            favouriteList = dataSource.getAllFavouriteGames();
+            wishList = dataSource.getAllWishGames();
+            lendList = dataSource.getAllLendGames();
             dataSource.close();
             // calculate how many games are in DB
             if(gameList == null){
-                holder.allGameTotalTv.setText(holder.allGameTotalTv.getText()+"\t\t"+String.valueOf(0));
+                holder.allGameTotalTv.setText(activity.getString(R.string.all_game_total_tv)+"\t\t"+String.valueOf(0));
             }else {
-                holder.allGameTotalTv.setText(holder.allGameTotalTv.getText() + "\t\t" + String.valueOf(gameList.size()));
+                holder.allGameTotalTv.setText(activity.getString(R.string.all_game_total_tv) + "\t\t" + String.valueOf(gameList.size()));
             }
             if(favouriteList == null){
-                holder.favouriteGameTotalTv.setText(holder.favouriteGameTotalTv.getText()+"\t"+String.valueOf(0));
+                holder.favouriteGameTotalTv.setText(activity.getString(R.string.favourite_game_total_tv)+"\t"+String.valueOf(0));
             }else {
-                holder.favouriteGameTotalTv.setText(holder.favouriteGameTotalTv.getText() + "\t" + String.valueOf(favouriteList.size()));
+                holder.favouriteGameTotalTv.setText(activity.getString(R.string.favourite_game_total_tv) + "\t" + String.valueOf(favouriteList.size()));
             }
             if(wishList == null){
-                holder.wishGameTotalTv.setText(holder.wishGameTotalTv.getText()+"\t"+String.valueOf(0));
+                holder.wishGameTotalTv.setText(activity.getString(R.string.wish_game_total_tv)+"\t"+String.valueOf(0));
             }else {
-                holder.wishGameTotalTv.setText(holder.wishGameTotalTv.getText() + "\t" + String.valueOf(wishList.size()));
+                holder.wishGameTotalTv.setText(activity.getString(R.string.wish_game_total_tv) + "\t" + String.valueOf(wishList.size()));
             }
             if(lendList == null) {
-                holder.lendGameTotalTv.setText(holder.lendGameTotalTv.getText() + "\t" + String.valueOf(0));
+                holder.lendGameTotalTv.setText(activity.getString(R.string.lend_game_total_tv) + "\t" + String.valueOf(0));
             }else {
-                holder.lendGameTotalTv.setText(holder.lendGameTotalTv.getText() + "\t" + String.valueOf(lendList.size()));
+                holder.lendGameTotalTv.setText(activity.getString(R.string.lend_game_total_tv) + "\t" + String.valueOf(lendList.size()));
             }
         }
     }
@@ -214,7 +232,7 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
 
     /**
      * Background Async task to load user profile picture from url
-     * */
+     */
     private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
@@ -238,5 +256,18 @@ public class DrawerListAdapter extends RecyclerView.Adapter<DrawerListAdapter.Vi
         protected void onPostExecute(Bitmap result) {
             bmImage.setImageBitmap(result);
         }
+    }
+
+    /**
+     * Update numbers those indicate the numbers of different kind of games.
+     */
+    public void updateNumberCalculate(){
+        dataSource.open();
+        gameList = dataSource.getAllGames();
+        favouriteList = dataSource.getAllFavouriteGames();
+        wishList = dataSource.getAllWishGames();
+        lendList = dataSource.getAllLendGames();
+        dataSource.close();
+        notifyDataSetChanged();
     }
 }

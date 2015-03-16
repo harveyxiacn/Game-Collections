@@ -51,7 +51,7 @@ public class AmazonSharedPreferencesWrapper {
             SharedPreferences sharedPreferences, String key, String value) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     protected static String getValueFromSharedPreferences(

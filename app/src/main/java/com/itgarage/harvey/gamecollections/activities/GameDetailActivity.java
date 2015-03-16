@@ -38,32 +38,33 @@ import java.util.List;
 
 import me.xiaopan.android.spear.SpearImageView;
 
-;
+/**
+ * This Activity for display local game detail. Game is passed from Navigation Drawer Activity.
+ */
 
 public class GameDetailActivity extends ActionBarActivity implements View.OnClickListener {
     Toolbar toolbar;
     SpearImageView gameImage;
     TextView titleTextView, platformTextview;
     TextView genreTextView, hardwarePlatformTextView, manufacturerTextView,
-            editionTextView, publicationDateTextView, releaseDateTextView, ratingTextView;
-    RatingBar gameRating, gameRatingSmall;
+            editionTextView, publicationDateTextView, releaseDateTextView;
+    RatingBar gameRatingSmall;
     CheckBox favouriteCheckBox, wishCheckBox;
     static final String FAVOURITE = "favourite";
     static final String WISH = "wish";
-    LinearLayout gameAttributesLayout, gameRatingLayout, borrowerInfoLayout;
+    LinearLayout gameAttributesLayout, borrowerInfoLayout;
 
     LinearLayout emailLinearLayout, phoneLinearLayout;
 
     static final String DELETE_GAME = "delete game";
-    static final String UPDATE_RATING = "update rating";
     static final String DELETE_CONTACT = "delete contact";
 
     final String PHONE_TEXTVIEW_TAG = "delete contact";
     int contactId = -1;
     CardView gameDetailCardView;
 
-    SubActionButton removeContactButton, updateRaitngButton, deleteFromDBButton;
-    ImageView itemUpdateRatingIcon, itemRemoveContactIcon, itemDeleteFromDBIcon;
+    SubActionButton removeContactButton, deleteFromDBButton;
+    ImageView itemRemoveContactIcon, itemDeleteFromDBIcon;
     SubActionButton.Builder itemBuilder;
     FloatingActionMenu updateGameActionMenu;
     public GamesDataSource dataSource;
@@ -86,8 +87,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // get intent
         Intent intent = getIntent();
-        // get passed game id from imageSlideAdapter
-        String intentAdapter = intent.getStringExtra("adapter");
         // get passed position from gameListAdapter
         String strId = intent.getStringExtra(GameListAdapter.GameListViewHolder.GAME_ID_EXTRA);
         int id;
@@ -145,8 +144,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
         gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
         gameAttributesLayout = (LinearLayout) findViewById(R.id.gameAttributesLayout);
-        /*gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
-        ratingTextView = (TextView) findViewById(R.id.gameRatingText);*/
         gameRatingSmall = (RatingBar) findViewById(R.id.gameRatingBarSmall);
         favouriteCheckBox = (CheckBox) findViewById(R.id.favouriteCheckBox);
         favouriteCheckBox.setOnClickListener(this);
@@ -249,7 +246,8 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     dataSource.open();
                     dataSource.updateGame(game);
                     dataSource.close();
-                    cognitoSyncGames.updateGame(game);
+                    if(NetworkStatus.isNetworkAvailable(GameDetailActivity.this))
+                        cognitoSyncGames.updateGame(game);
                 }
             });
             // set up borrower info layout
@@ -284,8 +282,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         } else {
             titleTextView.setText(getString(R.string.null_game_title));
         }
-        // initialize the sync instance
-        cognitoSyncGames = new CognitoSyncGames(this);
+        if(NetworkStatus.isNetworkAvailable(this))
+            // initialize the sync instance
+            cognitoSyncGames = new CognitoSyncGames(this);
     }
 
     /**
@@ -318,12 +317,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         removeContactButton = itemBuilder.setContentView(itemRemoveContactIcon).build();
         removeContactButton.setOnClickListener(this);
         removeContactButton.setTag(DELETE_CONTACT);
-        // update rating button
-        /*itemUpdateRatingIcon = new ImageView(this);
-        itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
-        updateRaitngButton = itemBuilder.setContentView(itemUpdateRatingIcon).build();
-        updateRaitngButton.setOnClickListener(this);
-        updateRaitngButton.setTag(UPDATE_RATING);*/
         // Create the menu with the items:
         updateGameActionMenu = new FloatingActionMenu.Builder(this)
                 .addSubActionView(deleteFromDBButton)
@@ -335,41 +328,6 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        /*update the rating of the game*/
-        /*if (v.getTag().equals(UPDATE_RATING)) {
-            if (gameRatingSmall.getVisibility() == View.VISIBLE) {
-                if (game.getRating() != -1) {
-                    //Log.i("rating bar", "show large hide small");
-                    gameRatingSmall.setVisibility(View.GONE);
-                    gameRatingLayout.setVisibility(View.VISIBLE);
-                    itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
-                }
-            } else {
-                if (game.getRating() == -1) {
-                    //Log.i("rating bar", "show large");
-                    gameRatingLayout.setVisibility(View.VISIBLE);
-                    itemUpdateRatingIcon.setImageResource(R.drawable.ic_hide_rating_bar);
-                    gameRatingSmall.setRating(gameRating.getRating());
-                    game.setRating((int) gameRating.getRating());
-                    dataSource.open();
-                    dataSource.updateGame(game);
-                    dataSource.close();
-                    cognitoSyncGames.updateGame(game);
-                } else {
-                    //Log.i("rating bar", "show small hide large");
-                    gameRatingSmall.setVisibility(View.VISIBLE);
-                    gameRatingLayout.setVisibility(View.GONE);
-                    itemUpdateRatingIcon.setImageResource(R.drawable.ic_add_rating_bar);
-                    gameRatingSmall.setRating(gameRating.getRating());
-                    game.setRating((int) gameRating.getRating());
-                    dataSource.open();
-                    dataSource.updateGame(game);
-                    dataSource.close();
-                    cognitoSyncGames.updateGame(game);
-                }
-                updateGameActionMenu.close(true);
-            }
-        }*/
         /*delete the contact/borrower*/
         if (v.getTag().equals(DELETE_CONTACT)) {
             if (borrowerInfoLayout.getVisibility() == View.VISIBLE) {

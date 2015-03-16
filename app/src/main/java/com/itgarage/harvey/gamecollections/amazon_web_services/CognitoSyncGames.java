@@ -1,9 +1,7 @@
 package com.itgarage.harvey.gamecollections.amazon_web_services;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -16,28 +14,22 @@ import com.amazonaws.mobileconnectors.cognito.Record;
 import com.amazonaws.mobileconnectors.cognito.SyncConflict;
 import com.amazonaws.mobileconnectors.cognito.exceptions.DataStorageException;
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException;
-import com.itgarage.harvey.gamecollections.activities.LoginActivity;
-import com.itgarage.harvey.gamecollections.activities.LoginTestActivity;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
-import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.ItemLookupArgs;
-import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.Parser;
-import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.SignedRequestsHelper;
-import com.itgarage.harvey.gamecollections.amazon_product_advertising_api.UrlParameterHandler;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
+import com.itgarage.harvey.gamecollections.db.MyDBHandler;
 import com.itgarage.harvey.gamecollections.models.Game;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.NodeList;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class for sync the games with Amazon Cognito web service.
+ */
 public class CognitoSyncGames {
     CognitoSyncManager client;
     private static final String TAG = "CognitoSyncGames";
@@ -53,6 +45,10 @@ public class CognitoSyncGames {
     Intent intentNavi;
     boolean onDownloadGame;// state for on create data set or not
 
+    /**
+     * Constructor for this class.
+     * @param activity Current activity, for start new activity and create/dismiss dialog.
+     */
     public CognitoSyncGames(Activity activity) {
         // initialize the client to prepare to use
         client = CognitoSyncClientManager.getInstance();
@@ -65,22 +61,19 @@ public class CognitoSyncGames {
         onDownloadGame = false;
     }
 
-    public Dataset getDataset() {
-        return dataset;
-    }
-
-    public void setDataset(Dataset dataset) {
-        this.dataset = dataset;
-    }
-
-    // create dataset when first time use the app, i.e. no dataset in cognito pool
+    /**
+     * Create dataset when first time use the app, i.e. no data set in cognito pool
+     */
     private void createDataset() {
         dataset = client.openOrCreateDataset("games");
         Log.i(TAG, "create dataset");
         uploadGamesToDataset();
     }
 
-    // upload games those in local database to cognito pool
+    /**
+     * upload games those in local database to cognito pool
+     * (will only happen if the user is offline while first time use the app.)
+     */
     private void uploadGamesToDataset() {
         Log.i(TAG, "upload games to data set");
         Map<String, String> values = new HashMap<String, String>();
@@ -93,10 +86,21 @@ public class CognitoSyncGames {
                 String key = game.getUpcCode();
                 JSONObject value = new JSONObject();
                 try {
-                    value.put("contactID", game.getContactId());
-                    value.put("rating", game.getRating());
-                    value.put("favourite", game.getFavourite());
-                    value.put("wish", game.getWish());
+                    value.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
+                    value.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
+                    value.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
+                    value.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
+                    value.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
+                    value.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
+                    value.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
+                    value.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
+                    value.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
+                    value.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
+                    value.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
+                    value.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
+                    value.put(MyDBHandler.COLUMN_CONTACT_ID, game.getContactId());
+                    value.put(MyDBHandler.COLUMN_FAVOURITE, game.getFavourite());
+                    value.put(MyDBHandler.COLUMN_WISH, game.getWish());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -111,18 +115,17 @@ public class CognitoSyncGames {
             dialog.dismiss();
     }
 
-    // not first time use app, has synced dataset in cognito pool
+    /**
+     * User has data set by the identity. Open the data set.
+     */
     public void openDataset() {
         Log.i(TAG, "open dataset");
         dataset = client.openOrCreateDataset("games");
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
         isGameExistOrNotExistInPool();
         Log.i(TAG, "define operation for exist or not");
         if (existedInPool.size() != 0) {
             Log.i(TAG, "existed in pool and db");
-            compareDifferences();
+            fixDifferences();
         }
         if (notExistedInDB.size() != 0) {
             Log.i(TAG, "not exist in db, gonna download");
@@ -140,16 +143,31 @@ public class CognitoSyncGames {
             dialog.dismiss();
     }
 
+    /**
+     * If the games exist in local DB but not in pool, upload them.
+     * @param notExistedInPool Contains games are not in pool.
+     */
     private void uploadLackGamesToPool(List<Game> notExistedInPool) {
         Map<String, String> values = new HashMap<String, String>();
         for (Game game : notExistedInPool) {
             String key = game.getUpcCode();
             JSONObject value = new JSONObject();
             try {
-                value.put("contactID", game.getContactId());
-                value.put("rating", game.getRating());
-                value.put("favourite", game.getFavourite());
-                value.put("wish", game.getWish());
+                value.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
+                value.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
+                value.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
+                value.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
+                value.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
+                value.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
+                value.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
+                value.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
+                value.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
+                value.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
+                value.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
+                value.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
+                value.put(MyDBHandler.COLUMN_CONTACT_ID, game.getContactId());
+                value.put(MyDBHandler.COLUMN_FAVOURITE, game.getFavourite());
+                value.put(MyDBHandler.COLUMN_WISH, game.getWish());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -159,7 +177,9 @@ public class CognitoSyncGames {
         Log.i(TAG, "put all values");
     }
 
-    // get list of upc codes of the games exist in pool or not
+    /**
+     * Get list of upc codes of the games exist in pool or not
+     */
     public void isGameExistOrNotExistInPool() {
         Log.i(TAG, "is exist?");
         dataSource.open();
@@ -190,9 +210,12 @@ public class CognitoSyncGames {
         dataSource.close();
     }
 
-    // if the game exists in both local DB and cognito pool
-    // compare the differences in contact id, rating, favourite to see if they are different;
-    public void compareDifferences() {
+    /**
+     * if the game exists in both local DB and cognito pool
+     * fix the differences in contact id, rating, favourite
+     * if they are different, use local data.
+     */
+    public void fixDifferences() {
         Log.i(TAG, "gonna compare contact id");
         Map<String, String> values = new HashMap<String, String>();
         dataSource.open();
@@ -203,10 +226,21 @@ public class CognitoSyncGames {
                 value = new JSONObject(record.getValue());
 
                 Game game = dataSource.getGameByUPC(upcCode);
-                value.put("contactID", game.getContactId());
-                value.put("rating", game.getRating());
-                value.put("favourite", game.getFavourite());
-                value.put("wish", game.getWish());
+                value.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
+                value.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
+                value.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
+                value.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
+                value.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
+                value.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
+                value.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
+                value.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
+                value.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
+                value.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
+                value.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
+                value.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
+                value.put(MyDBHandler.COLUMN_CONTACT_ID, game.getContactId());
+                value.put(MyDBHandler.COLUMN_FAVOURITE, game.getFavourite());
+                value.put(MyDBHandler.COLUMN_WISH, game.getWish());
                 values.put(upcCode, value.toString());
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -218,90 +252,134 @@ public class CognitoSyncGames {
         dataSource.close();
     }
 
-    // download the games are not in local DB
+    /**
+     * Download the games are not in local DB
+     */
     public void downloadGamesFromPool() {
         Log.i(TAG, "gonna download");
+        dataSource.open();
         for (int i = 0; i < notExistedInDB.size(); i++) {
             Record record = notExistedInDB.get(i);
-            boolean lastOne = false;
-            if(i==notExistedInDB.size()-1){
-                lastOne = true;
-            }
             Log.i(TAG, record.getValue());
             try {
                 JSONObject value = new JSONObject(record.getValue());
-                int downloadContactID = value.getInt("contactID");
-                int downloadRating = value.getInt("rating");
-                int downloadFavourite = value.getInt("favourite");
-                int downloadWish = value.getInt("wish");
-                new SearchAmazonTask().execute(record.getKey(), String.valueOf(downloadContactID), String.valueOf(downloadRating), String.valueOf(downloadFavourite), String.valueOf(downloadWish), String.valueOf(lastOne));
+                Game game = new Game();
+                game.setTitle(value.getString(MyDBHandler.COLUMN_GAME_TITLE));
+                if(value.has(MyDBHandler.COLUMN_GAME_PLATFORM))
+                    game.setPlatform(value.getString(MyDBHandler.COLUMN_GAME_PLATFORM));
+                if(value.has(MyDBHandler.COLUMN_GAME_GENRE))
+                    game.setGenre(value.getString(MyDBHandler.COLUMN_GAME_GENRE));
+                if(value.has(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM))
+                    game.setHardwarePlatform(value.getString(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM));
+                if(value.has(MyDBHandler.COLUMN_GAME_MANUFACTURER))
+                    game.setManufacturer(value.getString(MyDBHandler.COLUMN_GAME_MANUFACTURER));
+                if(value.has(MyDBHandler.COLUMN_GAME_EDITION))
+                    game.setEdition(value.getString(MyDBHandler.COLUMN_GAME_EDITION));
+                if(value.has(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE))
+                game.setPublicationDate(value.getString(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE));
+                if(value.has(MyDBHandler.COLUMN_GAME_RELEASE_DATE))
+                    game.setReleaseDate(value.getString(MyDBHandler.COLUMN_GAME_RELEASE_DATE));
+                if(value.has(MyDBHandler.COLUMN_GAME_SMALL_IMAGE))
+                    game.setSmallImage(value.getString(MyDBHandler.COLUMN_GAME_SMALL_IMAGE));
+                if(value.has(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE))
+                    game.setMediumImage(value.getString(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE));
+                if(value.has(MyDBHandler.COLUMN_GAME_LARGE_IMAGE))
+                    game.setLargeImage(value.getString(MyDBHandler.COLUMN_GAME_LARGE_IMAGE));
+                if(value.has(MyDBHandler.COLUMN_GAME_RATING))
+                    game.setRating(value.getInt(MyDBHandler.COLUMN_GAME_RATING));
+                game.setUpcCode(record.getKey());
+                if(value.has(MyDBHandler.COLUMN_CONTACT_ID))
+                    game.setContactId(value.getInt(MyDBHandler.COLUMN_CONTACT_ID));
+                if(value.has(MyDBHandler.COLUMN_FAVOURITE))
+                    game.setFavourite(value.getInt(MyDBHandler.COLUMN_FAVOURITE));
+                if(value.has(MyDBHandler.COLUMN_WISH))
+                    game.setWish(value.getInt(MyDBHandler.COLUMN_WISH));
+                dataSource.addGame(game);
+                Log.i(TAG, "new game: "+game.getTitle());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+        dataSource.close();
         Log.i(TAG, "successfully finish");
     }
 
-    // delete game record when delete game when using delete game in datasource
+    /**
+     * delete game record when delete game when using delete game in datasource
+     * @param key Game's UPC.
+     */
     public void deleteRecord(String key) {
         dataset = client.openOrCreateDataset("games");
-        //synchronize();
-        /*if (dialog.isShowing())
-            dialog.dismiss();*/
         Log.i(TAG, "deleteRecord " + key);
         dataset.remove(key);
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
     }
 
-    // add game record to dataset when add new/reAdd game using insert game in datasourse
+    /**
+     * add game record to dataset when add new/reAdd game using insert game in datasourse
+     * @param game New game to be added to data set.
+     */
     public void addRecord(Game game) {
         Log.i(TAG, "add new game " + game.getTitle());
         dataset = client.openOrCreateDataset("games");
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
         JSONObject value = new JSONObject();
         Map<String, String> values = dataset.getAll();
         try {
-            value.put("contactID", game.getContactId());
-            value.put("rating", game.getRating());
-            value.put("favourite", game.getFavourite());
-            value.put("wish", game.getWish());
+            value.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
+            value.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
+            value.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
+            value.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
+            value.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
+            value.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
+            value.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
+            value.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
+            value.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
+            value.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
+            value.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
+            value.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
+            value.put(MyDBHandler.COLUMN_CONTACT_ID, game.getContactId());
+            value.put(MyDBHandler.COLUMN_FAVOURITE, game.getFavourite());
+            value.put(MyDBHandler.COLUMN_WISH, game.getWish());
         } catch (JSONException e) {
             e.printStackTrace();
         }
         values.put(game.getUpcCode(), value.toString());
         dataset.putAll(values);
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
     }
 
-    // sync game when update game in game detail page
+    /**
+     * Update game in game detail page then update data set.
+     * @param game The game updated in local DB, update in data set.
+     */
     public void updateGame(Game game) {
         dataset = client.openOrCreateDataset("games");
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
         JSONObject value = new JSONObject();
         Map<String, String> values = new HashMap<String, String>();
         try {
-            value.put("contactID", game.getContactId());
-            value.put("rating", game.getRating());
-            value.put("favourite", game.getFavourite());
-            value.put("wish", game.getWish());
+            value.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
+            value.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
+            value.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
+            value.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
+            value.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
+            value.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
+            value.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
+            value.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
+            value.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
+            value.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
+            value.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
+            value.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
+            value.put(MyDBHandler.COLUMN_CONTACT_ID, game.getContactId());
+            value.put(MyDBHandler.COLUMN_FAVOURITE, game.getFavourite());
+            value.put(MyDBHandler.COLUMN_WISH, game.getWish());
         } catch (JSONException e) {
             e.printStackTrace();
         }
         values.put(game.getUpcCode(), value.toString());
         dataset.putAll(values);
-        synchronize();
-        if (dialog.isShowing())
-            dialog.dismiss();
     }
 
+    /**
+     * Refresh data set with Amazon client.
+     */
     public void refreshDatasetMetadata() {
         new RefreshDatasetMetadataTask().execute();
     }
@@ -339,110 +417,20 @@ public class CognitoSyncGames {
                 datasets = client.listDatasets();
                 if (datasets.size() == 0) {// first use app, have not synced ever
                     createDataset();
+                    Intent intent = new Intent(activity, NaviDrawerActivity.class);
+                    activity.startActivity(intent);
                 } else {// not first time use app, has dataset in congnito pool
                     openDataset();
+                    Intent intent = new Intent(activity, NaviDrawerActivity.class);
+                    activity.startActivity(intent);
                 }
-            } else {
-                // Probably an authentication (or lackthereof) error
-                new AlertDialog.Builder(activity)
-                        .setTitle("There was an error")
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setMessage(
-                                "You must be logged in or have allowed access to unauthorized users to browse your data")
-                        .setPositiveButton("Back",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        dialog.dismiss();
-                                        Intent intent = new Intent(
-                                                activity,
-                                                LoginTestActivity.class);
-                                        activity.startActivity(intent);
-                                    }
-                                }).setCancelable(false).show();
             }
         }
     }
 
-    public void refreshDatasetMetadata(Activity activity) {
-        new RefreshDatasetMetadataTaskActivity(activity).execute();
-    }
-
-    public class RefreshDatasetMetadataTaskActivity extends
-            AsyncTask<Void, Void, Void> {
-        ProgressDialog dialog;
-        boolean authError;
-        Activity activity;
-
-        public RefreshDatasetMetadataTaskActivity(Activity activity) {
-            this.activity = activity;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            dialog = ProgressDialog.show(activity, "Syncing",
-                    "Please wait");
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                client.refreshDatasetMetadata();
-            } catch (DataStorageException dse) {
-                Log.e(TAG, "failed to refresh dataset metadata", dse);
-            } catch (NotAuthorizedException e) {
-                Log.e(TAG, "failed to refresh dataset metadata", e);
-                authError = true;
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            dialog.dismiss();
-            if (!authError) {
-                //refreshListData();
-                // if no auth error, get dataset
-                datasets = client.listDatasets();
-                if (datasets.size() == 0) {// first use app, have not synced ever
-                    createDataset();
-                    if(activity.getClass()==LoginActivity.class) {
-                        Intent intent = new Intent(activity, NaviDrawerActivity.class);
-                        activity.startActivity(intent);
-                    }
-                } else {// not first time use app, has dataset in congnito pool
-                    openDataset();
-                    if(!onDownloadGame){
-                        if(activity.getClass()==LoginActivity.class) {
-                            Intent intent = new Intent(activity, NaviDrawerActivity.class);
-                            activity.startActivity(intent);
-                        }
-                    }
-                }
-            } else {
-                // Probably an authentication (or lackthereof) error
-                new AlertDialog.Builder(activity)
-                        .setTitle("There was an error")
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setMessage(
-                                "You must be logged in or have allowed access to unauthorized users to browse your data")
-                        .setPositiveButton("Back",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        dialog.dismiss();
-                                        Intent intent = new Intent(
-                                                activity,
-                                                LoginTestActivity.class);
-                                        activity.startActivity(intent);
-                                    }
-                                }).setCancelable(false).show();
-            }
-        }
-    }
-
+    /**
+     * Sync with Amazon Cognito pool.
+     */
     private void synchronize() {
         dialog = ProgressDialog.show(activity, "Syncing", "Please wait");
         Log.i("Sync", "synchronize");
@@ -722,83 +710,5 @@ public class CognitoSyncGames {
                 return true;
             }
         });
-    }
-
-    // get game from search result
-    public Game getGame() {
-        UrlParameterHandler urlParameterHandler = UrlParameterHandler.getInstance();
-        Map<String, String> myParams = urlParameterHandler.buildMapForItemLookUp();
-        SignedRequestsHelper signedRequestsHelper = null;
-        try {
-            signedRequestsHelper = new SignedRequestsHelper();
-        } catch (UnsupportedEncodingException | InvalidKeyException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        if (signedRequestsHelper != null) {
-            String signedUrl = signedRequestsHelper.sign(myParams);
-            Parser parser = new Parser();
-            NodeList nodeList = parser.getResponseNodeList(signedUrl);
-            if (nodeList != null) {
-                int position = 0;
-                return parser.getSearchObject(nodeList, position);
-            } else {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    // get result from amazon
-    private class SearchAmazonTask extends AsyncTask<String, Void, Game> {
-        ProgressDialog pd;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pd = new ProgressDialog(activity);
-            pd.setTitle("One Sec...");
-            pd.setMessage("Loading...");
-            pd.show();
-            //Log.i(TAG, "pre execute");
-        }
-
-        @Override
-        protected Game doInBackground(String... params) {
-            //Log.i(TAG, "executing");
-            ItemLookupArgs.ITEM_ID = params[0];
-            boolean lastOne = Boolean.parseBoolean(params[5]);
-            Game downloadGame = getGame();
-            if (downloadGame != null) {
-                Log.i(TAG, "download game: " + downloadGame.getTitle());
-                if(!downloadGame.getUpcCode().equals(params[0])){
-                    downloadGame.setUpcCode(params[0]);
-                }
-                downloadGame.setContactId(Integer.parseInt(params[1]));
-                downloadGame.setRating(Integer.parseInt(params[2]));
-                downloadGame.setFavourite(Integer.parseInt(params[3]));
-                downloadGame.setWish(Integer.parseInt(params[4]));
-            }
-            if(lastOne){
-                intentNavi = new Intent(activity, NaviDrawerActivity.class);
-            }
-            return downloadGame;
-        }
-
-        @Override
-        protected void onPostExecute(Game game) {
-            super.onPostExecute(game);
-            if (game != null) {
-                dataSource.open();
-                dataSource.addGame(game);
-                Log.i(TAG, "add game: " + game.getTitle());
-                dataSource.close();
-            }
-            if(intentNavi!=null){
-                activity.startActivity(intentNavi);
-            }
-            if (pd != null) {
-                pd.dismiss();
-            }
-        }
     }
 }

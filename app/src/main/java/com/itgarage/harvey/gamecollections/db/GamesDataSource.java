@@ -10,8 +10,10 @@ import android.util.Log;
 import com.itgarage.harvey.gamecollections.models.Game;
 
 import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * This class holds functions for database operations.
+ */
 public class GamesDataSource {
     private SQLiteDatabase db;
     private MyDBHandler dbHandler;
@@ -47,49 +49,53 @@ public class GamesDataSource {
      * @return A number of the game id if insert successfully.
      */
     public long addGame(Game game) {
-        ContentValues values = new ContentValues();
+        if(getGameByUPC(game.getUpcCode())==null) {
+            ContentValues values = new ContentValues();
 
-        values.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
-        if (!game.getGenre().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
+            values.put(MyDBHandler.COLUMN_GAME_TITLE, game.getTitle());
+            if (game.getGenre() != null && !game.getGenre().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_GENRE, game.getGenre());
+            }
+            if (game.getPlatform() != null && !game.getPlatform().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
+            }
+            if (game.getHardwarePlatform() != null && !game.getHardwarePlatform().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
+            }
+            if (game.getManufacturer() != null && !game.getManufacturer().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
+            }
+            if (game.getEdition() != null && !game.getEdition().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
+            }
+            if (game.getPublicationDate() != null && !game.getPublicationDate().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
+            }
+            if (game.getReleaseDate() != null && !game.getReleaseDate().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
+            }
+            if (game.getSmallImage() != null && !game.getSmallImage().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
+            }
+            if (game.getMediumImage() != null && !game.getMediumImage().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
+            }
+            if (game.getLargeImage() != null && !game.getLargeImage().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
+            }
+            values.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
+            if (game.getUpcCode() != null && !game.getUpcCode().equals("")) {
+                values.put(MyDBHandler.COLUMN_GAME_UPC_CODE, game.getUpcCode());
+            }
+            values.put(MyDBHandler.COLUMN_CONTACT_ID, game.getContactId());
+            values.put(MyDBHandler.COLUMN_FAVOURITE, game.getFavourite());
+            values.put(MyDBHandler.COLUMN_WISH, game.getWish());
+            long insertId = db.insert(MyDBHandler.TABLE_GAMES, null, values);
+            Log.i("DB operation", "inserted " + insertId);
+            return insertId;
+        }else {
+            return -1;
         }
-        if (!game.getPlatform().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_PLATFORM, game.getPlatform());
-        }
-        if (!game.getHardwarePlatform().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_HARDWARE_PLATFORM, game.getHardwarePlatform());
-        }
-        if (!game.getManufacturer().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_MANUFACTURER, game.getManufacturer());
-        }
-        if (!game.getEdition().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_EDITION, game.getEdition());
-        }
-        if (!game.getPublicationDate().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_PUBLICATION_DATE, game.getPublicationDate());
-        }
-        if (!game.getReleaseDate().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_RELEASE_DATE, game.getReleaseDate());
-        }
-        if (!game.getSmallImage().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_SMALL_IMAGE, game.getSmallImage());
-        }
-        if (!game.getMediumImage().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_MEDIUM_IMAGE, game.getMediumImage());
-        }
-        if (!game.getLargeImage().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_LARGE_IMAGE, game.getLargeImage());
-        }
-        values.put(MyDBHandler.COLUMN_GAME_RATING, game.getRating());
-        if (!game.getUpcCode().equals("")) {
-            values.put(MyDBHandler.COLUMN_GAME_UPC_CODE, game.getUpcCode());
-        }
-        values.put(MyDBHandler.COLUMN_CONTACT_ID, game.getContactId());
-        values.put(MyDBHandler.COLUMN_FAVOURITE, game.getFavourite());
-        values.put(MyDBHandler.COLUMN_WISH, game.getWish());
-        long insertId = db.insert(MyDBHandler.TABLE_GAMES, null, values);
-        Log.i("DB operation", "inserted " + insertId);
-        return insertId;
     }
 
     /**
@@ -308,7 +314,7 @@ public class GamesDataSource {
      * @param queryText Title keywords
      * @return game if found, null if not found
      */
-    public List<Game> searchKeyword(String queryText){
+    public ArrayList<Game> searchKeyword(String queryText){
         Cursor cursor = db.rawQuery("SELECT * FROM "+MyDBHandler.TABLE_GAMES+" WHERE "+MyDBHandler.COLUMN_GAME_TITLE+" LIKE '%"+queryText+"%'", null);
         int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
         int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);
@@ -422,7 +428,7 @@ public class GamesDataSource {
      * @param queryText Title keywords
      * @return game if found, null if not found
      */
-    public List<Game> searchKeywordFavourite(String queryText){
+    public ArrayList<Game> searchKeywordFavourite(String queryText){
         Cursor cursor = db.rawQuery("SELECT * FROM "+MyDBHandler.TABLE_GAMES+" WHERE " + MyDBHandler.COLUMN_FAVOURITE + " = 1 AND "+MyDBHandler.COLUMN_GAME_TITLE+" LIKE '%"+queryText+"%'", null);
         int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
         int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);
@@ -536,7 +542,7 @@ public class GamesDataSource {
      * @param queryText Title keywords
      * @return game if found, null if not found
      */
-    public List<Game> searchKeywordLend(String queryText){
+    public ArrayList<Game> searchKeywordLend(String queryText){
         Cursor cursor = db.rawQuery("SELECT * FROM "+MyDBHandler.TABLE_GAMES+" WHERE " + MyDBHandler.COLUMN_CONTACT_ID + " > -1 AND "+MyDBHandler.COLUMN_GAME_TITLE+" LIKE '%"+queryText+"%'", null);
         int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
         int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);
@@ -650,7 +656,7 @@ public class GamesDataSource {
      * @param queryText Title keywords
      * @return game if found, null if not found
      */
-    public List<Game> searchKeywordWish(String queryText){
+    public ArrayList<Game> searchKeywordWish(String queryText){
         Cursor cursor = db.rawQuery("SELECT * FROM "+MyDBHandler.TABLE_GAMES+" WHERE " + MyDBHandler.COLUMN_WISH + " = 1 AND "+MyDBHandler.COLUMN_GAME_TITLE+" LIKE '%"+queryText+"%'", null);
         int idColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_ID);
         int titleColumn = cursor.getColumnIndex(MyDBHandler.COLUMN_GAME_TITLE);

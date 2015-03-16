@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Process;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -30,12 +31,16 @@ import com.itgarage.harvey.gamecollections.models.DrawerListItems;
 import com.itgarage.harvey.gamecollections.models.Game;
 import com.itgarage.harvey.gamecollections.utils.NetworkStatus;
 
-
+/**
+ * NaviDrawerActivity as Main activity
+ *
+ * This activity display navigate drawer and HomeFragment with slide tabs.
+ */
 public class NaviDrawerActivity extends ActionBarActivity{
 
     private Toolbar toolbar;
 
-    public DrawerListAdapter mAdapter;
+    public DrawerListAdapter drawerListAdapter;
     private DrawerLayout mDrawer;
     private CharSequence mTitle;
 
@@ -46,13 +51,18 @@ public class NaviDrawerActivity extends ActionBarActivity{
     public final static String TOOL_BAR_TITLE_SAVED_TAG = "Tool Bar Title Saved";
     public static String CURRENT_FRAGMENT = "";
     public static String CURRENT_TAB = "";
+    public static String NAVI_ACTIVITY_KEY = "navi activity";
 
     SharedPreferences sharedPreferences;
 
     final String TAG = "Navi";
 
+    boolean isOnCreate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        isOnCreate = true;
+        Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navi_drawer_overlay_toolbar); //R.layout.activity_navi_drawer is not overlay the toolbar
         // set up toolbar
@@ -73,6 +83,10 @@ public class NaviDrawerActivity extends ActionBarActivity{
             getSupportActionBar().setTitle(mTitle);
             CURRENT_FRAGMENT = "home";
             //Log.i("toolbar", "toolbar first in:"+mTitle);
+        }
+
+        if(!NetworkStatus.isNetworkAvailable(this)){
+            Toast.makeText(this, "You are in offline mode, we will sync your data when next time you are online!", Toast.LENGTH_LONG).show();
         }
 
         // get drawer list items' names and icons from DrawerListItems
@@ -97,8 +111,8 @@ public class NaviDrawerActivity extends ActionBarActivity{
         // get save status that describes login with facebook or google
         String FB_OR_GOOGLE = sharedPreferences.getString("is fb or google", "");
         // set up the adapter of Drawer list
-        mAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, username, PROFILE, FB_OR_GOOGLE, NaviDrawerActivity.this, NaviDrawerActivity.this);
-        mRecyclerView.setAdapter(mAdapter);
+        drawerListAdapter = new DrawerListAdapter(ITEM_NAMES, ITEM_ICONS, username, PROFILE, FB_OR_GOOGLE, NaviDrawerActivity.this, NaviDrawerActivity.this);
+        mRecyclerView.setAdapter(drawerListAdapter);
         // create a GestureDetector object to detect SingleTapUp touch
         // can be later called to verify if the touch event is a SingleTapUp type of touch or some other type of touch (swipe touch, long touch)
         final GestureDetector mGestureDetector = new GestureDetector(NaviDrawerActivity.this, new GestureDetector.SimpleOnGestureListener() {
@@ -166,10 +180,13 @@ public class NaviDrawerActivity extends ActionBarActivity{
         mDrawerToggle.syncState();
         // open database
         onCreateDB();
-        // initialize Amazon client before use.
-        CognitoSyncClientManager.init(this);
+        if(NetworkStatus.isNetworkAvailable(this)) {
+            // initialize Amazon client before use.
+            CognitoSyncClientManager.init(this);
+        }
 
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
+        isOnCreate = false;
     }
 
     @Override
@@ -210,7 +227,7 @@ public class NaviDrawerActivity extends ActionBarActivity{
                 Game game = dataSource.getGameByUPC(resultStr);
                 if (game == null) {// not found in local DB, search on Amazon
                     if(NetworkStatus.isNetworkAvailable(this)) {
-                        Intent intent = new Intent(this, BarcodeResultActivity.class);
+                        Intent intent = new Intent(this, OnlineGameResultActivity.class);
                         Bundle bundle = new Bundle();
                         bundle.putString(BARCODE_SCAN_RESULT, resultStr);
                         bundle.putString("operation", "Barcode Scan");
@@ -261,52 +278,54 @@ public class NaviDrawerActivity extends ActionBarActivity{
         }
     }
 
-    public GamesDataSource getDataSource() {
-        return dataSource;
+    @Override
+    public void finish() {
+        SharedPreferences preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(LoginActivity.LOGIN_ACTIVITY_KEY, false);
+        editor.putBoolean(NAVI_ACTIVITY_KEY, true);
+        editor.apply();
+        super.finish();
     }
 
-    public Context getContext() {
-        return this;
+    private long lastClickTime = 0;
+
+    /**
+     * Override onBackPressed to let user quit the app by press back button by twice in 2 seconds.
+     */
+    @Override
+    public void onBackPressed() {
+        if(!NetworkStatus.isNetworkAvailable(this)) {
+            if (lastClickTime <= 0) {
+                Toast.makeText(this, getString(R.string.back_button_click_toast_text), Toast.LENGTH_SHORT).show();
+                lastClickTime = System.currentTimeMillis();
+            } else {
+                long currentClickTime = System.currentTimeMillis();
+                if (currentClickTime - lastClickTime < 2000) {
+                    finish();
+                    android.os.Process.killProcess(Process.myPid());
+                } else {
+                    Toast.makeText(this, getString(R.string.back_button_click_toast_text), Toast.LENGTH_SHORT).show();
+                    lastClickTime = System.currentTimeMillis();
+                }
+            }
+        }else {
+            finish();
+        }
+        //super.onBackPressed();
     }
 
     @Override
     protected void onDestroy() {
-        dataSource.close();
-        //Log.i(TAG, "onDestroy");
+        /*if(!NetworkStatus.isNetworkAvailable(this))
+            android.os.Process.killProcess(Process.myPid());*/
         super.onDestroy();
     }
 
-
-
     @Override
     protected void onResume() {
-        Log.i(TAG, "onResume");
-        /*username = sharedPreferences.getString("username", "");
-        PROFILE = sharedPreferences.getString("profileId", "");
-        mAdapter.update(username, PROFILE);*/
-        //updateDateSet();
+        if(!isOnCreate)
+            drawerListAdapter.updateNumberCalculate();
         super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        //Log.i(TAG, "onPause");
-        super.onPause();
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-        SharedPreferences preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(LoginActivity.LOGIN_ACTIVITY_KEY, false);
-        editor.apply();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.i(TAG, "onStop");
-
     }
 }

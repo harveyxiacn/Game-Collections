@@ -13,7 +13,7 @@ import com.itgarage.harvey.gamecollections.tabs.LendGameTab;
 import com.itgarage.harvey.gamecollections.tabs.WishGameTab;
 
 /**
- * Created by harvey on 2015-03-05.
+ * This class is used for fill the tabs in HomeFragment.
  */
 public class TabViewPagerAdapter extends FragmentStatePagerAdapter {
 

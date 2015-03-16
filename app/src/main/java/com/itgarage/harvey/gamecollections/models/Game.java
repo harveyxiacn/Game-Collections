@@ -2,6 +2,9 @@ package com.itgarage.harvey.gamecollections.models;
 
 import android.util.Log;
 
+/**
+ * This class is a model for game, format the attributes.
+ */
 public class Game {
     private int id;
     private String title;

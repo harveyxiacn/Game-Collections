@@ -24,10 +24,9 @@ import com.itgarage.harvey.gamecollections.utils.SortListener;
 import com.itgarage.harvey.gamecollections.utils.UpdateListListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Created by harvey on 2015-03-05.
+ * This class creates favourite game tab fragment.
  */
 public class FavouriteGameTab extends Fragment implements SortListener, UpdateListListener{
     RecyclerView gamesCardListView;
@@ -68,15 +67,15 @@ public class FavouriteGameTab extends Fragment implements SortListener, UpdateLi
 
             @Override
             public boolean onQueryTextChange(String s) {
-                List<Game> results;
                 dataSource.open();
                 if(s.isEmpty()){
-                    results = dataSource.getAllFavouriteGames();
+                    gamesList = dataSource.getAllFavouriteGames();
                 }else {
-                    results = dataSource.searchKeywordFavourite(s);
+                    gamesList = dataSource.searchKeywordFavourite(s);
                 }
                 dataSource.close();
-                gamesAdapter.updateList(results);
+                gamesAdapter.updateList(gamesList);
+                gamesCardListView.scrollToPosition(0);
                 return false;
             }
         });
@@ -147,6 +146,7 @@ public class FavouriteGameTab extends Fragment implements SortListener, UpdateLi
         if(gamesList!=null) {
             gameSorter.sortGamesByTitle(gamesList);
             gamesAdapter.updateList(gamesList);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 
@@ -155,6 +155,7 @@ public class FavouriteGameTab extends Fragment implements SortListener, UpdateLi
         if(gamesList!=null) {
             gameSorter.sortGamesByPlatform(gamesList);
             gamesAdapter.updateList(gamesList);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 
@@ -163,18 +164,7 @@ public class FavouriteGameTab extends Fragment implements SortListener, UpdateLi
         if(gamesList!=null) {
             gameSorter.sortGamesByRating(gamesList);
             gamesAdapter.updateList(gamesList);
-        }
-    }
-
-    @Override
-    public void updateAdapterList(GamesDataSource dataSource) {
-        gamesAdapter.updateList(dataSource.getAllFavouriteGames());
-        if(gamesAdapter.getItemCount()>0){
-            gamesCardListView.setVisibility(View.VISIBLE);
-            noResultLinearLayout.setVisibility(View.GONE);
-        }else {
-            gamesCardListView.setVisibility(View.GONE);
-            noResultLinearLayout.setVisibility(View.VISIBLE);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 

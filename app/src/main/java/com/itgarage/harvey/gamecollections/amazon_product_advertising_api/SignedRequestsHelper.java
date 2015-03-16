@@ -22,6 +22,9 @@ import java.util.TreeMap;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * This class is a helper helps to sign the URL prepare to use.
+ */
 public class SignedRequestsHelper {
     private static final String UTF8_CHARSET = "UTF-8";
     private static final String HMAC_SHA256_ALGORITHM = "HmacSHA256";
@@ -47,8 +50,11 @@ public class SignedRequestsHelper {
         mac.init(secretKeySpec);
     }
 
-    /*  sign the url and pass to Parser's getResponceNodeList function as a param
-    *   Pass a Map object with params from UrlParameterHandler's functions buildMapForItemSearch or buildMapForItemSearch*/
+    /**
+     * Sign the url and pass to Parser's getResponceNodeList function as a param.
+     * @param params Pass a Map object with params from UrlParameterHandler's functions buildMapForItemSearch or buildMapForItemSearch
+     * @return A signed URL that can get result from Amazon Product Advertising API.
+     */
     public String sign(Map<String, String> params) {
         params.put("AWSAccessKeyId", awsAccessKeyId);
         params.put("Timestamp", timestamp());
@@ -71,6 +77,12 @@ public class SignedRequestsHelper {
 
         return url;
     }
+
+    /**
+     * Encode to get signature.
+     * @param stringToSign String that is used for encode.
+     * @return Encoded signature.
+     */
     private String hmac(String stringToSign) {
         String signature = null;
         byte[] data;
@@ -87,6 +99,10 @@ public class SignedRequestsHelper {
         return signature;
     }
 
+    /**
+     * Get time stamp.
+     * @return Needed time stamp.
+     */
     private String timestamp() {
         String timestamp = null;
         Calendar cal = Calendar.getInstance();
@@ -96,6 +112,11 @@ public class SignedRequestsHelper {
         return timestamp;
     }
 
+    /**
+     * Order the parameters.
+     * @param sortedParamMap Unordered parameters.
+     * @return Ordered parameters.
+     */
     private String canonicalize(SortedMap<String, String> sortedParamMap)
     {
         if (sortedParamMap.isEmpty()) {
@@ -118,10 +139,14 @@ public class SignedRequestsHelper {
                 buffer.append("&");
             }
         }
-        String cannoical = buffer.toString();
-        return cannoical;
+        return buffer.toString();
     }
 
+    /**
+     * Encode URL.
+     * @param s Undone codes.
+     * @return Encoded codes.
+     */
     private String percentEncodeRfc3986(String s) {
         String out;
         try {

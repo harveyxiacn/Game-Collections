@@ -24,7 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 
 /**
- * Created by harvey on 2015-02-19.
+ * This class is used for parse the results back from Amazon Product Advertising API.
  */
 public class Parser {
     /**
@@ -54,8 +54,10 @@ public class Parser {
     private static final String VALUE_VALID_RESPONCE = "True";
 
 
-    /*  call in the app to get response list from Amazon
-    *   Pass a String url as a param which is returned by SignedRequestsHelper's Sign function*/
+    /**
+     * call in the app to get response list from Amazon
+     * Pass a String url as a param which is returned by SignedRequestsHelper's Sign function
+     */
     public NodeList getResponseNodeList(String service_url) {
         String searchResponse = this.getUrlContents(service_url);
         Log.i("url", "" + service_url);
@@ -67,7 +69,7 @@ public class Parser {
                 doc = this.getDomElement(searchResponse);
                 items = doc.getElementsByTagName(KEY_ROOT);//<Items>
                 Element element = (Element) items.item(0);// <Request>
-                if (isResponceValid(element)) {
+                if (isResponseValid(element)) {
                     //if(doc.getElementsByTagName(KEY_ITEM)!=null)
                     //Log.i("before get item","");
                     items = doc.getElementsByTagName(KEY_ITEM);//<Item>
@@ -82,9 +84,11 @@ public class Parser {
         return items;
     }
 
-    /*  Create a game object and set the attributes.
-    *   Call in the app to get a game object to show.
-    *   Pass a NodeList object as a param, which is returned by function getResponseNodeList*/
+    /**
+     * Create a game object and set the attributes.
+     * Call in the app to get a game object to show.
+     * Pass a NodeList object as a param, which is returned by function getResponseNodeList
+     */
     public Game getSearchObject(NodeList list, int position) {
         Game game = new Game();
         Element e = (Element) list.item(position);
@@ -112,7 +116,12 @@ public class Parser {
         return game;
     }
 
-    public boolean isResponceValid(Element element) {
+    /**
+     * Check if the response is valid.
+     * @param element Element contains request.
+     * @return true - response is valid, false - response is invalid.
+     */
+    public boolean isResponseValid(Element element) {
         NodeList nList = element.getElementsByTagName(KEY_REQUEST_ROOT);
         Element isValid = (Element) nList.item(0);//<IsValid>
         //Log.i("IsValid", ""+getValue(isValid, KEY_REQUEST_CONTAINER));
@@ -135,9 +144,10 @@ public class Parser {
     }
 
     /**
-     * In app reused functions
+     * Get contents from url.
+     * @param theUrl The url contains contents.
+     * @return Stringify contents.
      */
-
     private String getUrlContents(String theUrl) {
         StringBuilder content = new StringBuilder();
         try {
@@ -156,6 +166,11 @@ public class Parser {
         return content.toString();
     }
 
+    /**
+     * Get xml document element.
+     * @param xml Stringify response.
+     * @return Document format response.
+     */
     public Document getDomElement(String xml) {
         Document doc;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -181,6 +196,11 @@ public class Parser {
         return doc;
     }
 
+    /**
+     * Get element value from node list.
+     * @param elem Node list target element.
+     * @return Stringify element.
+     */
     public final String getElementValue(Node elem) {
         Node child;
         if (elem != null) {
@@ -197,6 +217,12 @@ public class Parser {
         return "";
     }
 
+    /**
+     * Get value by element and tag name.
+     * @param item xml element.
+     * @param str Tag name.
+     * @return Value of element.
+     */
     public String getValue(Element item, String str) {
         NodeList n = item.getElementsByTagName(str);
         return this.getElementValue(n.item(0));

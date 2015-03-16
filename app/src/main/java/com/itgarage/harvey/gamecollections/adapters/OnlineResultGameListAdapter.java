@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.itgarage.harvey.gamecollections.R;
-import com.itgarage.harvey.gamecollections.activities.BarcodeResultActivity;
+import com.itgarage.harvey.gamecollections.activities.OnlineGameResultActivity;
 import com.itgarage.harvey.gamecollections.activities.GameDetailActivity;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.models.Game;
@@ -102,7 +103,8 @@ public class OnlineResultGameListAdapter extends RecyclerView.Adapter<OnlineResu
                 dataSource.open();
                 Game gameFromDB = dataSource.getGameByUPC(game.getUpcCode());
                 if(gameFromDB==null) {
-                    Intent intent = new Intent(activity, BarcodeResultActivity.class);
+                    Log.i("adapter", "not existed game");
+                    Intent intent = new Intent(activity, OnlineGameResultActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString("operation", "Keyword Search");
                     bundle.putString("title", game.getTitle());

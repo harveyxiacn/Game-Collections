@@ -24,10 +24,9 @@ import com.itgarage.harvey.gamecollections.utils.SortListener;
 import com.itgarage.harvey.gamecollections.utils.UpdateListListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Created by harvey on 2015-03-05.
+ * This class create all game tab fragment.
  */
 public class AllGameTab extends Fragment implements SortListener, UpdateListListener{
     RecyclerView gamesCardListView;
@@ -43,12 +42,6 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
     SearchView searchView;
     GameSorter gameSorter;
     ArrayList<Game> gamesList;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //setHasOptionsMenu(true);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -68,15 +61,15 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
 
             @Override
             public boolean onQueryTextChange(String s) {
-                List<Game> results;
                 dataSource.open();
                 if(s.isEmpty()){
-                    results = dataSource.getAllGames();
+                    gamesList = dataSource.getAllGames();
                 }else {
-                    results = dataSource.searchKeyword(s);
+                    gamesList = dataSource.searchKeyword(s);
                 }
                 dataSource.close();
-                gamesAdapter.updateList(results);
+                gamesAdapter.updateList(gamesList);
+                gamesCardListView.scrollToPosition(0);
                 return false;
             }
         });
@@ -127,6 +120,9 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
         dataSource.close();
     }
 
+    /**
+     * Update data when resume.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -145,6 +141,7 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
         if(gamesList!=null) {
             gameSorter.sortGamesByTitle(gamesList);
             gamesAdapter.updateList(gamesList);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 
@@ -153,6 +150,7 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
         if(gamesList!=null) {
             gameSorter.sortGamesByPlatform(gamesList);
             gamesAdapter.updateList(gamesList);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 
@@ -161,18 +159,7 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
         if(gamesList!=null) {
             gameSorter.sortGamesByRating(gamesList);
             gamesAdapter.updateList(gamesList);
-        }
-    }
-
-    @Override
-    public void updateAdapterList(GamesDataSource dataSource) {
-        gamesAdapter.updateList(dataSource.getAllGames());
-        if(gamesAdapter.getItemCount()>0){
-            gamesCardListView.setVisibility(View.VISIBLE);
-            noResultLinearLayout.setVisibility(View.GONE);
-        }else {
-            gamesCardListView.setVisibility(View.GONE);
-            noResultLinearLayout.setVisibility(View.VISIBLE);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 

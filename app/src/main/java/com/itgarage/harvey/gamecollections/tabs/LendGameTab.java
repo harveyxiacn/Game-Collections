@@ -24,10 +24,9 @@ import com.itgarage.harvey.gamecollections.utils.SortListener;
 import com.itgarage.harvey.gamecollections.utils.UpdateListListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Created by harvey on 2015-03-05.
+ * This class creates lend game tab fragment.
  */
 public class LendGameTab extends Fragment implements SortListener, UpdateListListener{
 
@@ -68,15 +67,16 @@ public class LendGameTab extends Fragment implements SortListener, UpdateListLis
 
             @Override
             public boolean onQueryTextChange(String s) {
-                List<Game> results;
+                //List<Game> results;
                 dataSource.open();
                 if(s.isEmpty()){
-                    results = dataSource.getAllLendGames();
+                    gamesList = dataSource.getAllLendGames();
                 }else {
-                    results = dataSource.searchKeywordLend(s);
+                    gamesList = dataSource.searchKeywordLend(s);
                 }
                 dataSource.close();
-                gamesAdapter.updateList(results);
+                gamesAdapter.updateList(gamesList);
+                gamesCardListView.scrollToPosition(0);
                 return false;
             }
         });
@@ -147,6 +147,7 @@ public class LendGameTab extends Fragment implements SortListener, UpdateListLis
         if(gamesList!=null) {
             gameSorter.sortGamesByTitle(gamesList);
             gamesAdapter.updateList(gamesList);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 
@@ -155,6 +156,7 @@ public class LendGameTab extends Fragment implements SortListener, UpdateListLis
         if(gamesList!=null) {
             gameSorter.sortGamesByPlatform(gamesList);
             gamesAdapter.updateList(gamesList);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 
@@ -163,18 +165,7 @@ public class LendGameTab extends Fragment implements SortListener, UpdateListLis
         if(gamesList!=null) {
             gameSorter.sortGamesByRating(gamesList);
             gamesAdapter.updateList(gamesList);
-        }
-    }
-
-    @Override
-    public void updateAdapterList(GamesDataSource dataSource) {
-        gamesAdapter.updateList(dataSource.getAllLendGames());
-        if(gamesAdapter.getItemCount()>0){
-            gamesCardListView.setVisibility(View.VISIBLE);
-            noResultLinearLayout.setVisibility(View.GONE);
-        }else {
-            gamesCardListView.setVisibility(View.GONE);
-            noResultLinearLayout.setVisibility(View.VISIBLE);
+            gamesCardListView.scrollToPosition(0);
         }
     }
 

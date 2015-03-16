@@ -2,6 +2,9 @@ package com.itgarage.harvey.gamecollections.models;
 
 import com.itgarage.harvey.gamecollections.R;
 
+/**
+ * This class holds the names and icons for navigate drawer.
+ */
 public class DrawerListItems {
     public static final String[] ITEM_NAMES_ONLINE =
             {

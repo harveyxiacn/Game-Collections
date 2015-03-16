@@ -20,31 +20,52 @@ import java.util.List;
 import me.xiaopan.android.spear.DisplayOptions;
 import me.xiaopan.android.spear.SpearImageView;
 
+/**
+ * This recycler view adapter is used to fill game list for all/favourite/lend/wish
+ */
 public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameListViewHolder>{
 
-    List<Game> gamesList, origenalList;
+    List<Game> gamesList;
     String mediumImage;
     GameListViewHolder holder;
     Activity activity;
     GameListAdapter adapter;
     boolean isGridLayout;
 
+    /**
+     * Constructor for GameListAdapter.
+     * @param gamesList Games list that use for filling.
+     * @param activity Current activity.
+     * @param isGridLayout Current layout is Grid or List.
+     */
     public GameListAdapter(List<Game> gamesList, Activity activity, boolean isGridLayout) {
         this.gamesList = gamesList;
         this.activity = activity;
         this.isGridLayout = isGridLayout;
     }
 
+    /**
+     * Update games list.
+     * @param gamesList New list.
+     */
     public void updateList(List<Game> gamesList) {
         this.gamesList = gamesList;
         notifyDataSetChanged();
     }
 
+    /**
+     * Change layout.
+     * @param isGridLayout Indicates is grid or list layout.
+     */
     public void setGridLayout(boolean isGridLayout) {
         this.isGridLayout = isGridLayout;
         updateVisibilityByLayoutChange(isGridLayout);
     }
 
+    /**
+     * Update UIs when the layout switch between grid and list.
+     * @param isGridLayout Indicates is grid or list layout.
+     */
     public void updateVisibilityByLayoutChange(boolean isGridLayout){
         if(isGridLayout){
             holder.titleTextView.setVisibility(View.GONE);
@@ -103,6 +124,9 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameLi
         return new GameListViewHolder(view, activity);
     }
 
+    /**
+     * This view holder holds every games attributes.
+     */
     public static class GameListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         protected SpearImageView imageView;
         protected TextView titleTextView, platformTextView;

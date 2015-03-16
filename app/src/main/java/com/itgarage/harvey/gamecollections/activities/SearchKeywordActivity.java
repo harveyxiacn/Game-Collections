@@ -1,7 +1,6 @@
 package com.itgarage.harvey.gamecollections.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -38,7 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * This class use for display the interface for search keywords through Amazon Product Advertising API.
+ */
 public class SearchKeywordActivity extends ActionBarActivity {
     SearchView keywordInput;
     RecyclerView gamesCardListView;
@@ -74,15 +74,6 @@ public class SearchKeywordActivity extends ActionBarActivity {
                 return false;
             }
         });
-        /*btnScan = (ImageButton) findViewById(R.id.cameraScan);
-        btnScan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                IntentIntegrator integrator = new IntentIntegrator(SearchKeywordActivity.this);
-                integrator.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
-                integrator.initiateScan();
-            }
-        });*/
         gamesList = new ArrayList<>();
         gamesCardListView = new RecyclerView(SearchKeywordActivity.this);
         gamesCardListLayoutManager = new LinearLayoutManager(SearchKeywordActivity.this);
@@ -94,22 +85,19 @@ public class SearchKeywordActivity extends ActionBarActivity {
         container.addView(gamesCardListView);
     }
 
+    /**
+     * Do keyword search when the search view is submitted.
+     * @param s Keyword for search.
+     */
     private void doSearch(String s){
         Log.i("SearchKeyword", "onSearchKeyword");
         ItemSearchArgs.KEYWORDS = s;
         new SearchAmazonTask().execute();
-        //hideKeyboard();
     }
 
-    public void hideKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) SearchKeywordActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-        try {
-            inputManager.hideSoftInputFromWindow(SearchKeywordActivity.this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        }
-    }
-    /* Get games list from Amazon product advertising api*/
+    /**
+     * Get games list from Amazon product advertising api
+     */
     public void getGameList() {
         UrlParameterHandler urlParameterHandler = UrlParameterHandler.getInstance();
         Map<String, String> myparams = urlParameterHandler.buildMapForItemSearch();
@@ -139,6 +127,9 @@ public class SearchKeywordActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * This task for searching on Amazon Product Advertising API.
+     */
     private class SearchAmazonTask extends AsyncTask<Void, Void, Void> {
         ProgressDialog pd;
 
@@ -165,6 +156,7 @@ public class SearchKeywordActivity extends ActionBarActivity {
             super.onPostExecute(aVoid);
             if (gamesList!=null){
                 gamesAdapter.update(gamesList);
+                gamesCardListView.scrollToPosition(0);
                 gamesCardListView.setVisibility(View.VISIBLE);
                 noResultTextView.setVisibility(View.GONE);
             } else {
@@ -189,7 +181,7 @@ public class SearchKeywordActivity extends ActionBarActivity {
                 Game game = dataSource.getGameByUPC(resultStr);
                 dataSource.close();
                 if (game == null) {// not found in local DB, search on Amazon
-                    Intent intent = new Intent(this, BarcodeResultActivity.class);
+                    Intent intent = new Intent(this, OnlineGameResultActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString(NaviDrawerActivity.BARCODE_SCAN_RESULT, resultStr);
                     bundle.putString("operation", "Barcode Scan");

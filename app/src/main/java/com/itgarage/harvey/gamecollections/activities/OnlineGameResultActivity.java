@@ -44,18 +44,23 @@ import java.util.Map;
 
 import me.xiaopan.android.spear.SpearImageView;
 
-
-public class BarcodeResultActivity extends ActionBarActivity implements View.OnClickListener{
+/**
+ * This activity for display the result from search online game.
+ *
+ * Search UPC if it is passed in. Display the result
+ *
+ * Display teh result if passed in a game from keyword search result list.
+ */
+public class OnlineGameResultActivity extends ActionBarActivity implements View.OnClickListener{
 
     TextView resultTextView;
     String resultStr;
     public static String UPC_CODE = null;
-    public static final String BARCODE_SCAN_RESULT_SAVED_TAG = "BARCODE_SCAN_RESULT";
     Toolbar toolbar;
     CardView gamesCardListView;
 
     SpearImageView gameImage;
-    TextView titleTextView, platformTextview;
+    TextView titleTextView, platformTextView;
     TextView genreTextView, hardwarePlatformTextView, manufacturerTextView,
             editionTextView, publicationDateTextView, releaseDateTextView, ratingTextView;
     RatingBar gameRating;
@@ -78,7 +83,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
     String title;
 
     private static final int CONTACT_PICKER_RESULT = 1;
-    final String PHONE_TEXTVIEW_TAG = "delete contact";
+    final String PHONE_TEXT_VIEW_TAG = "delete contact";
     int contactId = -1;
     LinearLayout emailLinearLayout, phoneLinearLayout;
     static final String DEBUG_TAG = "DEBUG_TAG";
@@ -173,9 +178,9 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         titleTextView.setText(title);
         String platform = downloadGame.getPlatform();
         if (!platform.equals("")) {
-            platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
-            platformTextview.setText(downloadGame.getPlatform());
-            platformTextview.setText(platform);
+            platformTextView = (TextView) findViewById(R.id.textViewGamePlatform);
+            platformTextView.setText(downloadGame.getPlatform());
+            platformTextView.setText(platform);
         }
 
         String mediumImage = downloadGame.getMediumImage();
@@ -327,10 +332,11 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             GamesDataSource dataSource = new GamesDataSource(this);
             dataSource.open();
             //Log.i("DB operation", "DB opened.");
-            if(BarcodeResultActivity.UPC_CODE!=null){
-                downloadGame.setUpcCode(BarcodeResultActivity.UPC_CODE);
+            if(OnlineGameResultActivity.UPC_CODE!=null){
+                downloadGame.setUpcCode(OnlineGameResultActivity.UPC_CODE);
             }
             long insertId = dataSource.addGame(downloadGame);
+
             if(insertId != -1){
                 if(NetworkStatus.isNetworkAvailable(this)) {
                     CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
@@ -373,7 +379,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pd = new ProgressDialog(BarcodeResultActivity.this);
+            pd = new ProgressDialog(OnlineGameResultActivity.this);
             pd.setTitle("One Sec...");
             pd.setMessage("Loading...");
             pd.show();
@@ -401,7 +407,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
             } else {
                 gamesCardListView.setVisibility(View.GONE);
                 noResultTextView.setVisibility(View.VISIBLE);
-                Intent intent = new Intent(BarcodeResultActivity.this, SearchKeywordActivity.class);
+                Intent intent = new Intent(OnlineGameResultActivity.this, SearchKeywordActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -494,7 +500,7 @@ public class BarcodeResultActivity extends ActionBarActivity implements View.OnC
                     Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
                     TextView phoneNumberTextView = new TextView(this);
                     phoneNumberTextView.setText(phoneNumber);
-                    phoneNumberTextView.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
+                    phoneNumberTextView.setTag(PHONE_TEXT_VIEW_TAG + String.valueOf(phoneIndex));
                     phoneLinearLayout.addView(phoneNumberTextView);
                 }
                 phoneCursor.close();

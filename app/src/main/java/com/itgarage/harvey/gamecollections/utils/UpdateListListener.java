@@ -2,12 +2,14 @@ package com.itgarage.harvey.gamecollections.utils;
 
 import android.support.v7.widget.RecyclerView;
 
-import com.itgarage.harvey.gamecollections.db.GamesDataSource;
-
 /**
- * Created by harvey on 2015-03-10.
+ * This interface contains update list functions for tabs.
  */
 public interface UpdateListListener {
-    public void updateAdapterList(GamesDataSource dataSource);
+    /**
+     * Update adapter's layout manager.
+     * @param layoutManager Use for change layout manager.
+     * @param isGridLayout User for indicate the layout is grid or list.
+     */
     public void updateLayoutManager(RecyclerView.LayoutManager layoutManager, boolean isGridLayout);
 }

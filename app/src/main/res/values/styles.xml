@@ -10,15 +10,15 @@
         <item name="colorPrimaryDark">@color/ColorPrimaryDark</item>
         <item name="colorAccent">@color/ColorAccent</item>
         <item name="android:windowBackground">@color/ColorWindowBackground</item>
-        <item name="android:textColorPrimary">@color/ColorTextPrimary</item>
+        <!--<item name="textColorPrimary">@color/ColorTextPrimary</item>-->
     </style>
 
     <style name="CustomToolBarTheme" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:textColorPrimary">@color/ColorTextIcon</item>
-        <item name="android:textColorSecondary">@color/ColorTextIcon</item>
+        <!--<item name="textColorPrimary">@color/ColorTextIcon</item>
+        <item name="textColorSecondary">@color/ColorTextIcon</item>-->
     </style>
 
-    <style name="CustomPopupTheme" parent="ThemeOverlay.AppCompat.Dark">
+    <style name="CustomPopupTheme" parent="ThemeOverlay.AppCompat.Light">
         <item name="android:background">@color/ColorPrimary</item>
     </style>
 

@@ -1,7 +1,7 @@
 package com.itgarage.harvey.gamecollections.models;
 
 /**
- * Created by harvey on 2015-03-03.
+ * This class is a model to format logged in user.
  */
 public class User {
     private String username;

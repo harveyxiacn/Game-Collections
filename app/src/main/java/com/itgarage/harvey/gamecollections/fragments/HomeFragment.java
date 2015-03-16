@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import com.itgarage.harvey.gamecollections.R;
 import com.itgarage.harvey.gamecollections.activities.NaviDrawerActivity;
-import com.itgarage.harvey.gamecollections.adapters.ImageSlideAdapter;
 import com.itgarage.harvey.gamecollections.adapters.TabViewPagerAdapter;
 import com.itgarage.harvey.gamecollections.db.GamesDataSource;
 import com.itgarage.harvey.gamecollections.tabs.SlidingTabLayout;
@@ -31,10 +30,9 @@ import com.itgarage.harvey.gamecollections.utils.UpdateListListener;
 //import cn.trinea.android.view.autoscrollviewpager.AutoScrollViewPager;
 
 /**
- * Created by harvey on 2015/2/16.
+ * This class is used for create home fragment with slide tabs.
  */
 public class HomeFragment extends Fragment {
-    ImageSlideAdapter imageSlideAdapter;
     ViewPager viewPager;
     LinearLayout noResultLinearLayout;
     ViewPager tabViewPager;
@@ -114,20 +112,6 @@ public class HomeFragment extends Fragment {
         return rootView;
     }
 
-    /**
-     * Change the visibility of no result layout and view pager by the data set is empty or not.
-     * @param hasData Boolean variable describes has data in data set or not.
-     */
-    public void changeUIsWhenDataSetChange(boolean hasData){
-        if(hasData){
-            noResultLinearLayout.setVisibility(View.GONE);
-            viewPager.setVisibility(View.VISIBLE);
-        }else {
-            noResultLinearLayout.setVisibility(View.VISIBLE);
-            viewPager.setVisibility(View.GONE);
-        }
-    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -170,7 +154,8 @@ public class HomeFragment extends Fragment {
                 isGridLayout = !isGridLayout;
                 //gamesAdapter.setGridLayout(isGridLayout);
                 if(isGridLayout){
-                    ((UpdateListListener)fragment).updateLayoutManager(gamesCardGridLayoutManager, isGridLayout);
+                    RecyclerView.LayoutManager gamesCardGridLayoutManagerCurrent = new GridLayoutManager(getActivity(), 3);
+                    ((UpdateListListener)fragment).updateLayoutManager(gamesCardGridLayoutManagerCurrent, isGridLayout);
                     //gamesCardListView.setLayoutManager(gamesCardGridLayoutManager);
                     item.setIcon(R.drawable.listview);
                     if(fragmentL!=null){
@@ -184,7 +169,8 @@ public class HomeFragment extends Fragment {
                         ((UpdateListListener)fragmentR).updateLayoutManager(gamesCardGridLayoutManager, isGridLayout);
                     }
                 }else {
-                    ((UpdateListListener)fragment).updateLayoutManager(gamesCardListLayoutManager, isGridLayout);
+                    RecyclerView.LayoutManager gamesCardListLayoutManagerCurrent = new LinearLayoutManager(getActivity());
+                    ((UpdateListListener)fragment).updateLayoutManager(gamesCardListLayoutManagerCurrent, isGridLayout);
                     //gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
                     item.setIcon(R.drawable.gridview);
                     if(fragmentL!=null){
