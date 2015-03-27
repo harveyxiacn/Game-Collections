@@ -2,18 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/ColorContentCardLinear">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:orientation="horizontal">
-        <android.support.v7.widget.SearchView
+        android:orientation="horizontal"
+        android:background="@color/ColorPrimary">
+        <!--<ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/keyWordSearchView"/>
-        </LinearLayout>
+            android:src="@drawable/gridview"
+            android:id="@+id/switchGridList"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>-->
+
+        <android.support.v7.widget.SearchView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/keyWordSearchView"
+            android:background="@color/ColorPrimary"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+        </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/gameCardList"
@@ -24,7 +37,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:id="@+id/noGameInDataBaseLinearLayout">
+        android:id="@+id/noGameInDataBaseLinearLayout"
+        android:background="@color/ColorPrimary">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,7 +59,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_camera"
-                android:background="@color/ColorPrimaryDark"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"/>
             <TextView

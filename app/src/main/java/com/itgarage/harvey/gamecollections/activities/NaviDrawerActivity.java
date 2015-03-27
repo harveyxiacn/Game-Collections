@@ -79,7 +79,7 @@ public class NaviDrawerActivity extends ActionBarActivity{
             // set default fragment to home page
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.fragment_container, HomeFragment.newInstance()).commit();
-            mTitle = getString(R.string.home_page_text);
+            mTitle = getString(R.string.games_list_text);
             getSupportActionBar().setTitle(mTitle);
             CURRENT_FRAGMENT = "home";
             //Log.i("toolbar", "toolbar first in:"+mTitle);
@@ -256,7 +256,7 @@ public class NaviDrawerActivity extends ActionBarActivity{
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
-                mTitle = getString(R.string.home_page_text);
+                mTitle = getString(R.string.games_list_text);
                 break;
             case 4:
                 mTitle = getString(R.string.settings_page_text);
@@ -274,7 +274,7 @@ public class NaviDrawerActivity extends ActionBarActivity{
         } catch (Exception e) {
             Log.e("GAMES ERROR", "Error Creating Database");
         } finally {
-            Log.i("DB operation", "DB opened.");
+            //Log.i("DB operation", "DB opened.");
         }
     }
 

@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:layout_margin="5dp"
     android:elevation="5dp"
-    card_view:cardCornerRadius="4dp">
+    card_view:cardCornerRadius="4dp"
+    card_view:cardBackgroundColor="@color/ColorCardViewBG">
 
     <TextView
         android:layout_width="wrap_content"
@@ -15,11 +16,10 @@
         android:visibility="gone"/>
 
     <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:columnCount="2"
         android:rowCount="6">
-
 
         <me.xiaopan.android.spear.SpearImageView
             android:id="@+id/imageViewGameImage"
@@ -28,48 +28,71 @@
             android:layout_column="0"
             android:layout_row="0"
             android:layout_rowSpan="4"
+            android:background="@color/ColorTextPrimary"
             android:contentDescription="@string/game_thumbnail_desc" />
-
         <TextView
             android:id="@+id/textViewGameTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_row="0"
             android:maxLines="3"
-            android:paddingLeft="@dimen/button_margin_left"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginRight="8dp"
             android:text="@string/game_title_hint"
+            android:textColor="@color/ColorTextIcon"
             android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <TextView
-            android:id="@+id/textViewGamePlatform"
+        <ImageView
+            android:id="@+id/imageViewGamePlatform"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_row="1"
-            android:paddingLeft="@dimen/button_margin_left"
-            android:text="@string/game_platform_hint"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/ic_ps4"/>
+        <TextView
+            android:id="@+id/textViewGamePlatform"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_row="1"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="3dp"
+            android:text=""
+            android:textColor="@color/ColorTextIcon"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone"/>
 
         <RatingBar
             android:id="@+id/gameRatingBarSmall"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="35dp"
             android:numStars="5"
             android:rating="2.5"
             android:stepSize="1.0"
             android:layout_column="1"
             android:layout_row="2"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="3dp"
             android:isIndicator="true"
             style="@style/rating_bar_small"/>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_column="1"
             android:layout_row="3"
-            android:id="@+id/likeWishIconLayout">
+            android:id="@+id/likeWishIconLayout"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp">
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -86,100 +109,6 @@
                 android:button="@drawable/wish_checkbox"
                 android:layout_margin="8dp"/>
             </LinearLayout>
-
-        <!--<LinearLayout
-            android:id="@+id/gameAttributesLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_columnSpan="2"
-            android:layout_row="3"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/button_margin_left" />-->
-
-       <!-- <LinearLayout
-            android:id="@+id/gameRatingLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_columnSpan="2"
-            android:layout_row="4"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/button_margin_left"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/gameRatingText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/rating_bar_text"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textStyle="bold" />
-
-            <RatingBar
-                android:id="@+id/gameRatingBar"
-                android:layout_width="wrap_content"
-                android:layout_height="70dp"
-                android:numStars="5"
-                android:rating="2.5"
-                android:stepSize="1.0"
-                style="@style/rating_bar_large"/>
-        </LinearLayout>-->
-
-        <!--<LinearLayout
-            android:id="@+id/gameBorrowerInfoLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:layout_columnSpan="2"
-            android:layout_row="5"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/button_margin_left"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/borrower_information_text"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/borrowerNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="@string/borrower_name_hint"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-
-            <LinearLayout
-                android:id="@+id/emailLinearLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/borrowerEmailTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/email_tag_text"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/borrowerPhoneTag"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/phone_tag_text"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-            </LinearLayout>
-
-        </LinearLayout>-->
     </GridLayout>
 
 </android.support.v7.widget.CardView>

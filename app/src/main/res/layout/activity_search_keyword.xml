@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/rootContainer"
+    android:background="@color/ColorContentCardLinear"
     tools:context="com.itgarage.harvey.gamecollections.activities.SearchKeywordActivity">
 
     <include
@@ -16,18 +17,13 @@
         android:id="@+id/SearchInputLayout"
         android:padding="10dp"
         android:orientation="horizontal"
+        android:background="@color/ColorPrimary"
         android:gravity="end">
 
         <android.support.v7.widget.SearchView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/keyWordInput"/>
-        <!--<ImageButton
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_camera"
-            android:id="@+id/cameraScan"
-            android:contentDescription="Scan" />-->
         </LinearLayout>
 
     <TextView
@@ -48,9 +44,4 @@
         android:layout_below="@id/SearchInputLayout"
         android:padding="10dp"/>
 
-    <!--<android.support.v7.widget.RecyclerView
-        android:id="@+id/gameResultCardList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/noResultSearchTextView"/>-->
 </RelativeLayout>

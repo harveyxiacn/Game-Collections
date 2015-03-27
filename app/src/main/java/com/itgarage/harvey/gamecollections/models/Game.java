@@ -261,6 +261,96 @@ public class Game {
             } else
                 title = title.substring(0, title.toLowerCase().indexOf("mac"));
         }
+        if (title.toLowerCase().contains("nintendo 3ds")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("nintendo 3ds");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("nintendo 3ds"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("nintendo 3ds");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("nintendo 3ds"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("nintendo 3ds"));
+        }
+        if (title.toLowerCase().contains("nintendo ds")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("nintendo ds");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("nintendo ds"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("nintendo ds");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("nintendo ds"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("nintendo ds"));
+        }
+        if (title.toLowerCase().contains("sony psp")) {
+            if (title.contains("-")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='-'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("sony psp");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("sony psp"));
+                }
+            } else if (title.contains("|")) {
+                int hIndex = -1;
+                for(int i=0; i<title.length(); i++){
+                    if(title.charAt(i)=='|'){
+                        hIndex = i;
+                    }
+                }
+                int platformIndex = title.toLowerCase().indexOf("sony psp");
+                if (platformIndex - hIndex <= 2) {
+                    title = title.substring(0, hIndex);
+                }else {
+                    title = title.substring(0, title.toLowerCase().indexOf("sony psp"));
+                }
+            } else
+                title = title.substring(0, title.toLowerCase().indexOf("sony psp"));
+        }
         /*filter for title length*/
         if (!title.contains("\n")) {
             if (title.length() > 20) {

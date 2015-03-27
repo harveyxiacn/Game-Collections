@@ -46,6 +46,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
     Toolbar toolbar;
     SpearImageView gameImage;
     TextView titleTextView, platformTextview;
+    ImageView imageViewPlatform;
     TextView genreTextView, hardwarePlatformTextView, manufacturerTextView,
             editionTextView, publicationDateTextView, releaseDateTextView;
     RatingBar gameRatingSmall;
@@ -142,6 +143,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
         gameDetailCardView = (CardView) findViewById(R.id.card_view);
         titleTextView = (TextView) findViewById(R.id.textViewGameTitle);
         platformTextview = (TextView) findViewById(R.id.textViewGamePlatform);
+        imageViewPlatform = (ImageView) findViewById(R.id.imageViewGamePlatform);
         gameImage = (SpearImageView) findViewById(R.id.imageViewGameImage);
         gameAttributesLayout = (LinearLayout) findViewById(R.id.gameAttributesLayout);
         gameRatingSmall = (RatingBar) findViewById(R.id.gameRatingBarSmall);
@@ -159,8 +161,93 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             // set up the platform
             String platform = game.getPlatform();
             if (platform != null) {
-                platformTextview.setText(game.getPlatform());
-                platformTextview.setText(platform);
+                /*platformTextview.setText(game.getPlatform());
+                platformTextview.setText(platform);*/
+                platformTextview.setVisibility(View.GONE);
+                switch (platform.toLowerCase()){
+                    case "neogeo pocket":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0000_neo_geo_pocket);
+                        break;
+                    case "sega master system":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0001_sega_master_system);
+                        break;
+                    case "sega game gear":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0002_sega_game_gear);
+                        break;
+                    case "sega genesis":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0006_sega_genesis);
+                        break;
+                    case "sega dreamcast":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0007_dream_cast);
+                        break;
+                    case "xbox one":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0009_xbox_one);
+                        break;
+                    case "xbox 360":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0010_xbox_360);
+                        break;
+                    case "xbox":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0011_xbox);
+                        break;
+                    case "playstation vita":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0012_ps_vita);
+                        break;
+                    case "sony psp":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0013_psp);
+                        break;
+                    case "playstation":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0017_playstation);
+                        break;
+                    case "playstation 2":
+                    case "playstation2":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0016_playstation2);
+                        break;
+                    case "playstation 3":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0015_playstation3);
+                        break;
+                    case "playstation 4":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0014_playstation4);
+                        break;
+                    case "game boy":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0018_gameboy);
+                        break;
+                    case "game boy advance":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0019_gba);
+                        break;
+                    case "nintendo wii u":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0020_wiiu);
+                        break;
+                    case "nintendo wii":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0021_wii);
+                        break;
+                    case "gamecube":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0022_gamecube);
+                        break;
+                    case "nintendo 3ds":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0023_3ds);
+                        break;
+                    case "nintendo ds":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0024_ds);
+                        break;
+                    case "nintendo super nes":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0025_snes);
+                        break;
+                    case "nintendo nes":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0026_nes);
+                        break;
+                    case "nintendo 64":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0027_n64);
+                        break;
+                    case "game boy color":
+                        imageViewPlatform.setImageResource(R.drawable.systemlogos_0023_gbc);
+                        break;
+                    default:
+                        imageViewPlatform.setVisibility(View.GONE);
+                        platformTextview.setVisibility(View.VISIBLE);
+                        platformTextview.setText(platform);
+                }
+            }else {
+                imageViewPlatform.setVisibility(View.GONE);
             }
             // download the image
             String mediumImage = game.getMediumImage();
@@ -172,6 +259,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 genreTextView.setTextSize(20);
                 gameAttributesLayout.addView(genreTextView);
                 genreTextView.setText("Genre: " + genre);
+                genreTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 genreTextView.setVisibility(View.VISIBLE);
             }
             // set up the hardware platform
@@ -181,36 +269,40 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 hardwarePlatformTextView.setTextSize(20);
                 gameAttributesLayout.addView(hardwarePlatformTextView);
                 hardwarePlatformTextView.setText("Hardware Platform: " + hardwarePlatform);
+                hardwarePlatformTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 hardwarePlatformTextView.setVisibility(View.VISIBLE);
             }
             // set up the edition
             String edition = game.getEdition();
             if (edition != null) {
-                Log.i("Edition", edition);
+                //Log.i("Edition", edition);
                 editionTextView = new TextView(this);
                 editionTextView.setTextSize(20);
                 gameAttributesLayout.addView(editionTextView);
                 editionTextView.setText("Edition: " + edition);
+                editionTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 editionTextView.setVisibility(View.VISIBLE);
             }
             // set up the manufacturer
             String manufacturer = game.getManufacturer();
             if (manufacturer != null) {
-                Log.i("Manu", manufacturer);
+                //Log.i("Manu", manufacturer);
                 manufacturerTextView = new TextView(this);
                 manufacturerTextView.setTextSize(20);
                 gameAttributesLayout.addView(manufacturerTextView);
                 manufacturerTextView.setText("Manufacturer: " + manufacturer);
+                manufacturerTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 manufacturerTextView.setVisibility(View.VISIBLE);
             }
             // set up the publication date
             String publicationDate = game.getPublicationDate();
             if (publicationDate != null) {
-                Log.i("Public", publicationDate);
+                //Log.i("Public", publicationDate);
                 publicationDateTextView = new TextView(this);
                 publicationDateTextView.setTextSize(20);
                 gameAttributesLayout.addView(publicationDateTextView);
                 publicationDateTextView.setText("Publication Date: " + publicationDate);
+                publicationDateTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 publicationDateTextView.setVisibility(View.VISIBLE);
             }
             // set up the release date
@@ -220,6 +312,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 releaseDateTextView.setTextSize(20);
                 gameAttributesLayout.addView(releaseDateTextView);
                 releaseDateTextView.setText("Release Date: " + releaseDate);
+                releaseDateTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 releaseDateTextView.setVisibility(View.VISIBLE);
             }
             // set up the editable rating bar
@@ -443,9 +536,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     null);
             if (nameCursor.moveToFirst()) {
                 name = nameCursor.getString(nameCursor.getColumnIndex(DISPLAY_NAME));
-                Log.v(DEBUG_TAG, "Got name: " + name);
+                //Log.v(DEBUG_TAG, "Got name: " + name);
             } else {
-                Log.w(DEBUG_TAG, "No results");
+                //Log.w(DEBUG_TAG, "No results");
             }
             final String sendTo = name;
 
@@ -464,9 +557,9 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             // get the first email
             if (emailCursor.moveToFirst()) {
                 email = emailCursor.getString(emailIdx);
-                Log.v(DEBUG_TAG, "Got email: " + email);
+                //Log.v(DEBUG_TAG, "Got email: " + email);
             } else {
-                Log.w(DEBUG_TAG, "No results");
+                //Log.w(DEBUG_TAG, "No results");
             }
             final String sendToEmail = email;
             TextView emailTag = (TextView) findViewById(R.id.borrowerEmailTag);
@@ -482,6 +575,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 emailRowLayout.setLayoutParams(params);
                 final TextView emailAddress = new TextView(this);
                 emailAddress.setText(email);
+                emailAddress.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 ImageButton sendEmail = new ImageButton(this);
                 sendEmail.setImageResource(R.drawable.ic_mail_send);
                 sendEmail.setOnClickListener(new View.OnClickListener() {
@@ -516,9 +610,10 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                 int phoneIndex = 0;
                 while (phoneCursor.moveToNext()) {
                     phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(Phone.NUMBER));
-                    Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
+                    //Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
                     final TextView phoneNumberTextView = new TextView(this);
                     phoneNumberTextView.setText(phoneNumber);
+                    phoneNumberTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                     phoneNumberTextView.setTag(PHONE_TEXTVIEW_TAG + String.valueOf(phoneIndex));
                     ImageButton sendSms = new ImageButton(this);
                     sendSms.setImageResource(R.drawable.ic_sent_sms);
@@ -568,8 +663,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
                     // handle contact results
                     Cursor cursor = null;
                     Uri result = data.getData();
-                    Log.v(DEBUG_TAG, "Got a contact result: "
-                            + result.toString());
+                    //Log.v(DEBUG_TAG, "Got a contact result: "+ result.toString());
                     // get the contact id from the Uri
                     String id = result.getLastPathSegment();
                     contactId = Integer.parseInt(id);
@@ -586,7 +680,7 @@ public class GameDetailActivity extends ActionBarActivity implements View.OnClic
             }
         } else {
             // gracefully handle failure
-            Log.w(DEBUG_TAG, "Warning: activity result not ok");
+            // .w(DEBUG_TAG, "Warning: activity result not ok");
             switch (requestCode) {
                 case CONTACT_PICKER_RESULT:
                     borrowerInfoLayout.setVisibility(View.GONE);

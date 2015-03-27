@@ -61,8 +61,9 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
 
     SpearImageView gameImage;
     TextView titleTextView, platformTextView;
+    ImageView imageViewPlatform;
     TextView genreTextView, hardwarePlatformTextView, manufacturerTextView,
-            editionTextView, publicationDateTextView, releaseDateTextView, ratingTextView;
+            editionTextView, publicationDateTextView, releaseDateTextView;
     RatingBar gameRating;
     LinearLayout gameAttributesLayout, gameRatingLayout, borrowerInfoLayout;
 
@@ -177,10 +178,96 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
         title = downloadGame.getTitle();
         titleTextView.setText(title);
         String platform = downloadGame.getPlatform();
+        imageViewPlatform = (ImageView) findViewById(R.id.imageViewGamePlatform);
         if (!platform.equals("")) {
             platformTextView = (TextView) findViewById(R.id.textViewGamePlatform);
-            platformTextView.setText(downloadGame.getPlatform());
-            platformTextView.setText(platform);
+            platformTextView.setVisibility(View.GONE);
+            /*platformTextView.setText(downloadGame.getPlatform());
+            platformTextView.setText(platform);*/
+            switch (platform.toLowerCase()){
+                case "neogeo pocket":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0000_neo_geo_pocket);
+                    break;
+                case "sega master system":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0001_sega_master_system);
+                    break;
+                case "sega game gear":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0002_sega_game_gear);
+                    break;
+                case "sega genesis":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0006_sega_genesis);
+                    break;
+                case "sega dreamcast":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0007_dream_cast);
+                    break;
+                case "xbox one":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0009_xbox_one);
+                    break;
+                case "xbox 360":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0010_xbox_360);
+                    break;
+                case "xbox":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0011_xbox);
+                    break;
+                case "playstation vita":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0012_ps_vita);
+                    break;
+                case "sony psp":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0013_psp);
+                    break;
+                case "playstation":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0017_playstation);
+                    break;
+                case "playstation 2":
+                case "playstation2":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0016_playstation2);
+                    break;
+                case "playstation 3":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0015_playstation3);
+                    break;
+                case "playstation 4":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0014_playstation4);
+                    break;
+                case "game boy":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0018_gameboy);
+                    break;
+                case "game boy advance":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0019_gba);
+                    break;
+                case "nintendo wii u":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0020_wiiu);
+                    break;
+                case "nintendo wii":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0021_wii);
+                    break;
+                case "gamecube":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0022_gamecube);
+                    break;
+                case "nintendo 3ds":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0023_3ds);
+                    break;
+                case "nintendo ds":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0024_ds);
+                    break;
+                case "nintendo super nes":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0025_snes);
+                    break;
+                case "nintendo nes":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0026_nes);
+                    break;
+                case "nintendo 64":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0027_n64);
+                    break;
+                case "game boy color":
+                    imageViewPlatform.setImageResource(R.drawable.systemlogos_0023_gbc);
+                    break;
+                default:
+                    imageViewPlatform.setVisibility(View.GONE);
+                    platformTextView.setVisibility(View.VISIBLE);
+                    platformTextView.setText(platform);
+            }
+        }else {
+            imageViewPlatform.setVisibility(View.GONE);
         }
 
         String mediumImage = downloadGame.getMediumImage();
@@ -196,6 +283,7 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
             gameAttributesLayout.addView(genreTextView);
             genreTextView.setText("Genre: " + genre);
             genreTextView.setVisibility(View.VISIBLE);
+            genreTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
         }
 
         String hardwarePlatform = downloadGame.getHardwarePlatform();
@@ -205,6 +293,7 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
             gameAttributesLayout.addView(hardwarePlatformTextView);
             hardwarePlatformTextView.setText("Hardware Platform: " + hardwarePlatform);
             hardwarePlatformTextView.setVisibility(View.VISIBLE);
+            hardwarePlatformTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
         }
 
         String edition = downloadGame.getEdition();
@@ -214,6 +303,7 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
             gameAttributesLayout.addView(editionTextView);
             editionTextView.setText("Edition: " + edition);
             editionTextView.setVisibility(View.VISIBLE);
+            editionTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
         }
 
         String manufacturer = downloadGame.getManufacturer();
@@ -223,6 +313,7 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
             gameAttributesLayout.addView(manufacturerTextView);
             manufacturerTextView.setText("Manufacturer: " + manufacturer);
             manufacturerTextView.setVisibility(View.VISIBLE);
+            manufacturerTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
         }
 
         String publicationDate = downloadGame.getPublicationDate();
@@ -232,6 +323,7 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
             gameAttributesLayout.addView(publicationDateTextView);
             publicationDateTextView.setText("Publication Date: " + publicationDate);
             publicationDateTextView.setVisibility(View.VISIBLE);
+            publicationDateTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
         }
 
         String releaseDate = downloadGame.getReleaseDate();
@@ -241,17 +333,11 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
             gameAttributesLayout.addView(releaseDateTextView);
             releaseDateTextView.setText("Release Date: " + releaseDate);
             releaseDateTextView.setVisibility(View.VISIBLE);
+            releaseDateTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
         }
         gameRatingLayout = (LinearLayout) findViewById(R.id.gameRatingLayout);
 
         gameRating = (RatingBar) findViewById(R.id.gameRatingBar);
-        ratingTextView = (TextView) findViewById(R.id.gameRatingText);
-        gameRating.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            @Override
-            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                ratingTextView.setText("Rating: "+String.valueOf((int)ratingBar.getRating()));
-            }
-        });
 
         borrowerInfoLayout = (LinearLayout) findViewById(R.id.gameBorrowerInfoLayout);
         emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
@@ -325,10 +411,9 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
         /* Add game to database*/
         if (v.getTag().equals(TAG_ADD_TO_DB)) {
             Toast.makeText(this, "Add to DB", Toast.LENGTH_SHORT).show();
-            if (gameRatingLayout.getVisibility() == View.VISIBLE) {
-                RatingBar ratingBar = (RatingBar) findViewById(R.id.gameRatingBar);
-                downloadGame.setRating((int) ratingBar.getRating());
-            }
+            RatingBar ratingBar = (RatingBar) findViewById(R.id.gameRatingBar);
+            downloadGame.setRating((int) ratingBar.getRating());
+
             GamesDataSource dataSource = new GamesDataSource(this);
             dataSource.open();
             //Log.i("DB operation", "DB opened.");
@@ -336,7 +421,7 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
                 downloadGame.setUpcCode(OnlineGameResultActivity.UPC_CODE);
             }
             long insertId = dataSource.addGame(downloadGame);
-
+            Log.i(TAG_ADD_TO_DB, ""+insertId);
             if(insertId != -1){
                 if(NetworkStatus.isNetworkAvailable(this)) {
                     CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
@@ -448,9 +533,9 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
                     null);
             if(nameCursor.moveToFirst()) {
                 name = nameCursor.getString(nameCursor.getColumnIndex(DISPLAY_NAME));
-                Log.v(DEBUG_TAG, "Got name: " + name);
+                //Log.v(DEBUG_TAG, "Got name: " + name);
             }else {
-                Log.w(DEBUG_TAG, "No results");
+                //Log.w(DEBUG_TAG, "No results");
             }
 
             TextView nameTextView = (TextView) findViewById(R.id.borrowerNameTextView);
@@ -467,9 +552,9 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
             // get the first email
             if (emailCursor.moveToFirst()) {
                 email = emailCursor.getString(emailIdx);
-                Log.v(DEBUG_TAG, "Got email: " + email);
+                //Log.v(DEBUG_TAG, "Got email: " + email);
             } else {
-                Log.w(DEBUG_TAG, "No results");
+                //Log.w(DEBUG_TAG, "No results");
             }
             TextView emailTag = (TextView) findViewById(R.id.borrowerEmailTag);
             if(email.length()==0){
@@ -478,6 +563,7 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
                 emailTag.setVisibility(View.VISIBLE);
                 TextView emailAddress = new TextView(this);
                 emailAddress.setText(email);
+                emailAddress.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                 emailLinearLayout = (LinearLayout) findViewById(R.id.emailLinearLayout);
                 emailLinearLayout.addView(emailAddress);
             }
@@ -497,9 +583,10 @@ public class OnlineGameResultActivity extends ActionBarActivity implements View.
                 int phoneIndex = 0;
                 while (phoneCursor.moveToNext()) {
                     phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
+                    //Log.v(DEBUG_TAG, "Got phone: " + phoneNumber);
                     TextView phoneNumberTextView = new TextView(this);
                     phoneNumberTextView.setText(phoneNumber);
+                    phoneNumberTextView.setTextColor(getResources().getColor(R.color.ColorTextIcon));
                     phoneNumberTextView.setTag(PHONE_TEXT_VIEW_TAG + String.valueOf(phoneIndex));
                     phoneLinearLayout.addView(phoneNumberTextView);
                 }

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
-    android:background="#ffffff">
+    android:layout_margin="4dp"
+    android:background="@color/ColorContentCardLinear">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -21,6 +22,7 @@
         android:paddingTop="4dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/drawer_list_item_text"
+        android:textColor="@color/ColorTextIcon"
         android:id="@+id/drawer_listItem_text"/>
 
 </LinearLayout>

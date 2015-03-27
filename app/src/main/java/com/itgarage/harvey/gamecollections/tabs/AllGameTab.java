@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.itgarage.harvey.gamecollections.R;
@@ -43,6 +44,8 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
     GameSorter gameSorter;
     ArrayList<Game> gamesList;
 
+    ImageButton switchGridList;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab_all_games, container, false);
@@ -51,6 +54,7 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
         gamesList = new ArrayList<Game>();
         getGameList();
         gamesCardListView = (RecyclerView) rootView.findViewById(R.id.gameCardList);
+        //switchGridList = (ImageButton) rootView.findViewById(R.id.switchGridList);
         searchView = (SearchView) rootView.findViewById(R.id.keyWordSearchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -91,7 +95,20 @@ public class AllGameTab extends Fragment implements SortListener, UpdateListList
         }else {
             changeUIsWhenDataSetChange(true);
         }
-
+        /*switchGridList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor editor = preferences.edit();
+                isGridLayout = !isGridLayout;
+                if(isGridLayout) {
+                    updateLayoutManager(gamesCardGridLayoutManager, true);
+                }else {
+                    updateLayoutManager(gamesCardListLayoutManager, false);
+                }
+                editor.putBoolean("isGameListLayout", isGridLayout);
+                editor.apply();
+            }
+        });*/
         return rootView;
     }
     /**

@@ -9,7 +9,6 @@ import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -147,11 +146,11 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
 
         if (!NetworkStatus.isNetworkAvailable(this)) {
             // If the phone is offline from Internet, start the offline mode
-            Log.i(TAG, "offline start navi");
+            //Log.i(TAG, "offline start navi");
             startActivity(new Intent(this, NaviDrawerActivity.class));
             finish();
         }
-        Log.i(TAG, "onCreate");
+        //Log.i(TAG, "onCreate");
         editor.putBoolean(LOGIN_ACTIVITY_KEY, true);
         editor.putBoolean(NaviDrawerActivity.NAVI_ACTIVITY_KEY, false);
         editor.putBoolean(IS_SIGN_OUT_GOOGLE_ON_FINISH, false);
@@ -172,7 +171,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
         if(NetworkStatus.isNetworkAvailable(this)) {
             // AWS client
             CognitoSyncClientManager.init(this);
-            Log.i(TAG, "CognitoSyncClientManager init");
+            //Log.i(TAG, "CognitoSyncClientManager init");
         }
         // Google stuffs
         mGoogleApiClient = buildGoogleApiClient();
@@ -332,11 +331,11 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
     public void onResume() {
         super.onResume();
         uiHelper.onResume();
-        Log.i(TAG, "onResume " + preferences.getString(IS_FB_OR_GOOGLE, ""));
+        //Log.i(TAG, "onResume " + preferences.getString(IS_FB_OR_GOOGLE, ""));
         isOnCreate = false;
         updateButtonsVisibilityOnCreateOrResume(preferences.getString(IS_FB_OR_GOOGLE, ""));
         if(preferences.getBoolean(NaviDrawerActivity.NAVI_ACTIVITY_KEY, false)){
-            Log.i(TAG, "Sync Local game");
+            //Log.i(TAG, "Sync Local game");
             // sync local games
             CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
             cognitoSyncGames.openDataset();
@@ -400,7 +399,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
     @Override
     public void onConnected(Bundle bundle) {
         // Indicate that the sign in process is complete.
-        Log.i(TAG, "onConnected");
+        //Log.i(TAG, "onConnected");
         mSignInClicked = false;
         Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
         String imageUrl = currentUser.getImage().getUrl();
@@ -480,7 +479,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
      * @param user User should be saved to shared preferences.
      */
     private void signedInUIsUpdate(User user) {
-        Log.i(TAG, "signedInUIsUpdate");
+        //Log.i(TAG, "signedInUIsUpdate");
         preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         switch (user.getFb_or_google()) {
@@ -517,8 +516,8 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
                 break;
         }
         if (preferences.getBoolean(LOGIN_ACTIVITY_KEY, false)) {
-            Log.i(TAG, "navi "+String.valueOf(preferences.getBoolean(NaviDrawerActivity.NAVI_ACTIVITY_KEY, false)));
-            Log.i(TAG, "login "+String.valueOf(preferences.getBoolean(LOGIN_ACTIVITY_KEY, false)));
+            //Log.i(TAG, "navi "+String.valueOf(preferences.getBoolean(NaviDrawerActivity.NAVI_ACTIVITY_KEY, false)));
+            //Log.i(TAG, "login "+String.valueOf(preferences.getBoolean(LOGIN_ACTIVITY_KEY, false)));
             CognitoSyncGames cognitoSyncGames = new CognitoSyncGames(this);
             cognitoSyncGames.refreshDatasetMetadata();
             editor.putBoolean(LOGIN_ACTIVITY_KEY, true);
@@ -610,7 +609,7 @@ public class LoginActivity extends Activity implements Session.StatusCallback, C
      */
     private void signOutFromGplus() {
         if (mGoogleApiClient.isConnected()) {
-            Log.i(TAG, "signout google");
+            //Log.i(TAG, "signout google");
             Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             mGoogleApiClient.disconnect();
             //mGoogleApiClient.connect();

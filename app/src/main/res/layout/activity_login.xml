@@ -28,11 +28,9 @@
         android:id="@+id/btn_facebook_login"
         facebook:confirm_logout="false"
         facebook:fetch_user_info="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="16dp"
-        android:layout_alignLeft="@+id/btn_google_login"
-        android:layout_alignStart="@+id/btn_google_login" />
+        android:layout_marginBottom="170dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/btn_google_login"
@@ -40,10 +38,9 @@
         android:layout_height="wrap_content"
         android:text="Log In with Google+"
         android:layout_gravity="center_horizontal"
-        android:layout_below="@+id/btn_facebook_login"
-        android:layout_alignLeft="@+id/btn_app_start"
-        android:layout_alignStart="@+id/btn_app_start"
-        android:layout_marginTop="41dp" />
+        android:layout_marginBottom="110dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
 
     <Button
         android:layout_width="300dp"
@@ -54,8 +51,8 @@
         android:background="@color/ColorGp"
         android:textColor="@color/ColorTextIcon"
         android:visibility="gone"
-        android:layout_marginTop="16dp"
-        android:layout_alignTop="@+id/btn_google_login"
+        android:layout_marginBottom="8dp"
+        android:layout_above="@+id/btn_app_start"
         android:layout_centerHorizontal="true" />
 
     <Button
@@ -67,6 +64,7 @@
         android:textColor="@color/ColorTextIcon"
         android:background="@color/ColorPrimaryDark"
         android:elevation="5dp"
+        android:layout_marginBottom="110dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 </RelativeLayout>

@@ -7,7 +7,7 @@
         android:id="@+id/action_switch_layout"
         android:orderInCategory="100"
         android:title="Switch List and Grid"
-        android:icon="@drawable/gridview"
+        android:icon="@drawable/ic_switch_grid"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_sort_title"

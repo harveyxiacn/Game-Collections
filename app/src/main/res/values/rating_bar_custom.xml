@@ -3,11 +3,8 @@
     <style name="rating_bar_small" parent="@android:style/Widget.RatingBar">
         <item name="android:progressDrawable">@drawable/rating_bar_small</item>
         <item name="android:minHeight">48px</item>
-        <item name="android:maxHeight">48px</item>
     </style>
     <style name="rating_bar_large" parent="@android:style/Widget.RatingBar">
         <item name="android:progressDrawable">@drawable/rating_bar_large</item>
-        <item name="android:minHeight">64px</item>
-        <item name="android:maxHeight">64px</item>
     </style>
 </resources>

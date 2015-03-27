@@ -5,15 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
+    android:background="@color/ColorCardViewBG"
     android:elevation="5dp"
+    card_view:cardBackgroundColor="@color/ColorCardViewBG"
     card_view:cardCornerRadius="4dp">
 
     <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="2"
         android:rowCount="5">
-
 
         <me.xiaopan.android.spear.SpearImageView
             android:id="@+id/imageViewGameImage"
@@ -22,28 +23,47 @@
             android:layout_column="0"
             android:layout_row="0"
             android:layout_rowSpan="3"
+            android:background="@color/ColorTextPrimary"
             android:contentDescription="@string/game_thumbnail_desc" />
 
         <TextView
             android:id="@+id/textViewGameTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="3dp"
+            android:background="@color/ColorContentCardLinear"
+            android:maxLines="3"
+            android:text="@string/game_title_hint"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/ColorTextIcon" />
+
+        <ImageView
+            android:id="@+id/imageViewGamePlatform"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="1"
-            android:layout_row="0"
-            android:maxLines="3"
-            android:paddingLeft="@dimen/button_margin_left"
-            android:text="@string/game_title_hint"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="3dp"
+            android:layout_row="1"
+            android:src="@drawable/ic_ps4" />
 
         <TextView
             android:id="@+id/textViewGamePlatform"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_column="1"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="3dp"
             android:layout_row="1"
-            android:paddingLeft="@dimen/button_margin_left"
+            android:background="@color/ColorContentCardLinear"
             android:text="@string/game_platform_hint"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/ColorTextIcon"
+            android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/gameAttributesLayout"
@@ -51,9 +71,12 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:layout_columnSpan="2"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="3dp"
             android:layout_row="3"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/button_margin_left" />
+            android:background="@color/ColorContentCardLinear"
+            android:orientation="vertical" />
 
         <LinearLayout
             android:id="@+id/gameRatingLayout"
@@ -61,10 +84,12 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:layout_columnSpan="2"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="3dp"
             android:layout_row="4"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/button_margin_left">
-        </LinearLayout>
+            android:background="@color/ColorContentCardLinear"
+            android:orientation="vertical" />
     </GridLayout>
 
 </android.support.v7.widget.CardView>

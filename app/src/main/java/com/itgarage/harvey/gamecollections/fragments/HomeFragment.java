@@ -9,7 +9,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -73,22 +72,6 @@ public class HomeFragment extends Fragment {
         // Assigning ViewPager View and setting the adapter
         tabViewPager = (ViewPager) rootView.findViewById(R.id.tabPager);
         tabViewPager.setAdapter(tabViewPagerAdapter);
-        tabViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
         // Assiging the Sliding Tab Layout View
         tabs = (SlidingTabLayout) rootView.findViewById(R.id.tabs);
         tabs.setDistributeEvenly(true);// To make the Tabs Fixed set this true, This makes the tabs Space Evenly in Available width
@@ -128,9 +111,9 @@ public class HomeFragment extends Fragment {
         inflater.inflate(R.menu.menu_game_list, menu);
         MenuItem switchLayout = menu.findItem(R.id.action_switch_layout);
         if(isGridLayout){
-            switchLayout.setIcon(R.drawable.listview);
+            switchLayout.setIcon(R.drawable.ic_switch_list);
         }else {
-            switchLayout.setIcon(R.drawable.gridview);
+            switchLayout.setIcon(R.drawable.ic_switch_grid);
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -157,14 +140,14 @@ public class HomeFragment extends Fragment {
                     RecyclerView.LayoutManager gamesCardGridLayoutManagerCurrent = new GridLayoutManager(getActivity(), 3);
                     ((UpdateListListener)fragment).updateLayoutManager(gamesCardGridLayoutManagerCurrent, isGridLayout);
                     //gamesCardListView.setLayoutManager(gamesCardGridLayoutManager);
-                    item.setIcon(R.drawable.listview);
+                    item.setIcon(R.drawable.ic_switch_list);
                     if(fragmentL!=null){
-                        Log.i(TAG, "Left is not null, update layout");
+                        //Log.i(TAG, "Left is not null, update layout");
                         RecyclerView.LayoutManager gamesCardGridLayoutManager = new GridLayoutManager(getActivity(), 3);
                         ((UpdateListListener)fragmentL).updateLayoutManager(gamesCardGridLayoutManager, isGridLayout);
                     }
                     if(fragmentR!=null){
-                        Log.i(TAG, "Right is not null, update layout");
+                        //Log.i(TAG, "Right is not null, update layout");
                         RecyclerView.LayoutManager gamesCardGridLayoutManager = new GridLayoutManager(getActivity(), 3);
                         ((UpdateListListener)fragmentR).updateLayoutManager(gamesCardGridLayoutManager, isGridLayout);
                     }
@@ -172,7 +155,7 @@ public class HomeFragment extends Fragment {
                     RecyclerView.LayoutManager gamesCardListLayoutManagerCurrent = new LinearLayoutManager(getActivity());
                     ((UpdateListListener)fragment).updateLayoutManager(gamesCardListLayoutManagerCurrent, isGridLayout);
                     //gamesCardListView.setLayoutManager(gamesCardListLayoutManager);
-                    item.setIcon(R.drawable.gridview);
+                    item.setIcon(R.drawable.ic_switch_grid);
                     if(fragmentL!=null){
                         RecyclerView.LayoutManager gamesCardListLayoutManager = new LinearLayoutManager(getActivity());
                         ((UpdateListListener)fragmentL).updateLayoutManager(gamesCardListLayoutManager, isGridLayout);
